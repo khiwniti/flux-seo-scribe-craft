@@ -61,9 +61,9 @@ const ContentAnalyzer = () => {
   };
 
   const getScoreBadge = (score) => {
-    if (score >= 80) return { variant: 'default', className: 'bg-green-100 text-green-700', text: 'Excellent' };
-    if (score >= 60) return { variant: 'secondary', className: 'bg-yellow-100 text-yellow-700', text: 'Good' };
-    return { variant: 'destructive', className: 'bg-red-100 text-red-700', text: 'Needs Work' };
+    if (score >= 80) return { variant: 'default' as const, className: 'bg-green-100 text-green-700', text: 'Excellent' };
+    if (score >= 60) return { variant: 'secondary' as const, className: 'bg-yellow-100 text-yellow-700', text: 'Good' };
+    return { variant: 'destructive' as const, className: 'bg-red-100 text-red-700', text: 'Needs Work' };
   };
 
   return (
@@ -152,7 +152,10 @@ const ContentAnalyzer = () => {
                   {analysis.seoScore}%
                 </div>
                 <div className="mt-2">
-                  <Badge {...getScoreBadge(analysis.seoScore)}>
+                  <Badge 
+                    variant={getScoreBadge(analysis.seoScore).variant}
+                    className={getScoreBadge(analysis.seoScore).className}
+                  >
                     {getScoreBadge(analysis.seoScore).text}
                   </Badge>
                 </div>
