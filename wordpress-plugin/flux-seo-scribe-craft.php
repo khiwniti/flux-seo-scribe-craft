@@ -64,10 +64,10 @@ class FluxSEOScribeCraft {
             FLUX_SEO_PLUGIN_VERSION
         );
         
-        // Enqueue main React application JavaScript
+        // Enqueue WordPress-compatible React application
         wp_enqueue_script(
-            'flux-seo-scribe-craft-js',
-            FLUX_SEO_PLUGIN_URL . 'flux-seo-scribe-craft.js',
+            'flux-seo-wordpress-app',
+            FLUX_SEO_PLUGIN_URL . 'flux-seo-wordpress-app.js',
             array(),
             FLUX_SEO_PLUGIN_VERSION,
             true
@@ -77,7 +77,7 @@ class FluxSEOScribeCraft {
         wp_enqueue_script(
             'flux-seo-wordpress-integration',
             FLUX_SEO_PLUGIN_URL . 'flux-seo-wordpress-integration.js',
-            array('flux-seo-scribe-craft-js'),
+            array('flux-seo-wordpress-app'),
             FLUX_SEO_PLUGIN_VERSION,
             true
         );
@@ -140,16 +140,86 @@ class FluxSEOScribeCraft {
         ob_start();
         ?>
         <div id="flux-seo-root" class="flux-seo-container">
-            <div id="root"></div>
+            <div id="root">
+                <div class="flux-seo-loading">
+                    <div class="loading-content">
+                        <h3>🔄 Loading Flux SEO Scribe Craft...</h3>
+                        <p>Initializing SEO optimization suite...</p>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <script type="text/javascript">
+        // WordPress-specific React app initialization
         document.addEventListener('DOMContentLoaded', function() {
-            // Ensure the React app mounts properly
-            if (typeof window.React !== 'undefined') {
-                // The React app should automatically mount to #root
-                console.log('Flux SEO Scribe Craft loaded successfully');
+            // Disable service workers in WordPress environment
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for(let registration of registrations) {
+                        registration.unregister();
+                    }
+                });
             }
+            
+            // Override console.error for messaging.ts warnings
+            const originalError = console.error;
+            console.error = function(...args) {
+                const message = args[0];
+                if (typeof message === 'string' && message.includes('Event handler of') && message.includes('event must be added')) {
+                    // Suppress service worker event handler warnings
+                    return;
+                }
+                originalError.apply(console, args);
+            };
+            
+            // Initialize React app with error handling
+            setTimeout(function() {
+                try {
+                    // The React app should mount automatically
+                    const rootElement = document.getElementById('root');
+                    if (rootElement && rootElement.children.length === 1 && rootElement.children[0].classList.contains('flux-seo-loading')) {
+                        // If still showing loading, try to trigger React mount
+                        console.log('Flux SEO Scribe Craft: Attempting to initialize React app...');
+                        
+                        // Create a custom event to trigger React initialization
+                        const initEvent = new CustomEvent('fluxSeoInit', {
+                            detail: { 
+                                container: rootElement,
+                                wordpress: true,
+                                ajaxUrl: fluxSeoAjax.ajaxurl,
+                                nonce: fluxSeoAjax.nonce
+                            }
+                        });
+                        window.dispatchEvent(initEvent);
+                    }
+                } catch (error) {
+                    console.log('Flux SEO Scribe Craft: React app initialization in progress...');
+                }
+            }, 1000);
+            
+            // Fallback error display after 10 seconds
+            setTimeout(function() {
+                const rootElement = document.getElementById('root');
+                if (rootElement && rootElement.children.length === 1 && rootElement.children[0].classList.contains('flux-seo-loading')) {
+                    rootElement.innerHTML = `
+                        <div class="flux-seo-error">
+                            <h3>⚠️ Loading Issue</h3>
+                            <p>The SEO application is taking longer than expected to load.</p>
+                            <p><strong>Troubleshooting:</strong></p>
+                            <ul>
+                                <li>Refresh the page</li>
+                                <li>Check browser console for errors</li>
+                                <li>Ensure JavaScript is enabled</li>
+                                <li>Try a different browser</li>
+                            </ul>
+                            <button onclick="location.reload()" style="margin-top: 10px; padding: 8px 16px; background: #0073aa; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                Refresh Page
+                            </button>
+                        </div>
+                    `;
+                }
+            }, 10000);
         });
         </script>
         
