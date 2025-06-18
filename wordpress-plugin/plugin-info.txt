@@ -1,0 +1,87 @@
+Plugin Name: Flux SEO Scribe Craft
+Version: 1.0.0
+Description: Professional SEO optimization suite with integrated content generation and advanced analytics
+Author: Flux SEO Team
+Plugin URI: https://github.com/khiwniti/flux-seo-scribe-craft
+License: GPL v2 or later
+
+=== INSTALLATION INSTRUCTIONS ===
+
+1. Upload the entire 'flux-seo-scribe-craft' folder to your WordPress plugins directory:
+   /wp-content/plugins/flux-seo-scribe-craft/
+
+2. Activate the plugin through the WordPress admin:
+   - Go to Plugins > Installed Plugins
+   - Find "Flux SEO Scribe Craft"
+   - Click "Activate"
+
+3. Access the plugin:
+   - Admin Dashboard: Go to "SEO Scribe Craft" in the WordPress admin menu
+   - Shortcode: Use [flux_seo_scribe_craft] on any page or post
+
+=== FILES INCLUDED ===
+
+Required Files:
+- flux-seo-scribe-craft.php (Main plugin file)
+- flux-seo-scribe-craft.css (Application styles)
+- flux-seo-scribe-craft.js (React application)
+- wordpress-overrides.css (WordPress-specific styles)
+- flux-seo-wordpress-integration.js (WordPress integration)
+- install.php (Installation script)
+- uninstall.php (Uninstallation script)
+
+Optional Files:
+- favicon.ico (Plugin icon)
+- placeholder.svg (Placeholder image)
+- README.md (Documentation)
+
+=== FEATURES ===
+
+✓ Complete SEO analysis suite
+✓ Content generation with AI
+✓ Image generation capabilities
+✓ Advanced analytics dashboard
+✓ WordPress admin integration
+✓ Shortcode support
+✓ AJAX-powered interface
+✓ Responsive design
+✓ Multi-user support
+✓ Database optimization
+
+=== USAGE ===
+
+Admin Dashboard:
+1. Navigate to "SEO Scribe Craft" in WordPress admin
+2. Use the three main tabs:
+   - Content Analyzer: Analyze existing content for SEO
+   - Blog & Image Generator: Create new SEO-optimized content
+   - Advanced Analytics: View performance metrics
+
+Shortcode Usage:
+- Basic: [flux_seo_scribe_craft]
+- With custom dimensions: [flux_seo_scribe_craft height="600px" width="90%"]
+
+=== REQUIREMENTS ===
+
+- WordPress 5.0+
+- PHP 7.4+
+- Modern web browser with JavaScript enabled
+- Sufficient server resources for React application
+
+=== SUPPORT ===
+
+For support, documentation, and updates:
+- GitHub Repository: https://github.com/khiwniti/flux-seo-scribe-craft
+- Plugin Documentation: See README.md file
+
+=== CHANGELOG ===
+
+Version 1.0.0 (Initial Release):
+- Complete SEO optimization suite
+- WordPress integration
+- Admin dashboard
+- Shortcode support
+- Database integration
+- AJAX functionality
+- Responsive design
+- Multi-user capabilities
