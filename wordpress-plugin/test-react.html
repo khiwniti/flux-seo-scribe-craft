@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test React App</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        #root {
+            min-height: 600px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Testing WordPress React App</h1>
+    <div id="root">
+        <div class="flux-seo-loading">
+            <div class="loading-content">
+                <h3>🔄 Loading Flux SEO Scribe Craft...</h3>
+                <p>Initializing SEO optimization suite...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mock WordPress AJAX object -->
+    <script>
+        window.fluxSeoAjax = {
+            ajaxurl: '/wp-admin/admin-ajax.php',
+            nonce: 'test-nonce',
+            pluginUrl: './',
+            adminUrl: '/wp-admin/',
+            siteUrl: 'https://example.com',
+            currentUser: 1,
+            isAdmin: true
+        };
+    </script>
+
+    <!-- Load React from CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Load our React app -->
+    <script src="flux-seo-wordpress-app.js"></script>
+    
+    <script>
+        // Debug logging
+        console.log('React loaded:', typeof React !== 'undefined');
+        console.log('ReactDOM loaded:', typeof ReactDOM !== 'undefined');
+        
+        // Force initialization after 2 seconds if not loaded
+        setTimeout(() => {
+            const rootElement = document.getElementById('root');
+            if (rootElement && rootElement.innerHTML.includes('Loading Flux SEO')) {
+                console.log('Forcing React app initialization...');
+                const event = new CustomEvent('fluxSeoInit', {
+                    detail: { container: rootElement, wordpress: true }
+                });
+                window.dispatchEvent(event);
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
