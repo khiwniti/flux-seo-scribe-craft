@@ -1,3 +1,4 @@
+console.log('Flux SEO: flux-seo-wordpress-app.js script started execution.');
 /**
  * Flux SEO Scribe Craft - WordPress Compatible React Application
  * This is a simplified version that works within WordPress environment
@@ -5,6 +6,9 @@
 
 // WordPress-compatible React app initialization
 (function() {
+    console.log('Flux SEO: IIFE entered.');
+    console.log('Flux SEO: Checking React availability (before CDN check):', typeof React);
+    console.log('Flux SEO: Checking ReactDOM availability (before CDN check):', typeof ReactDOM);
     'use strict';
     
     // Check if React is available
