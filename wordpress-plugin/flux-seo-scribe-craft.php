@@ -48,6 +48,23 @@ class FluxSEOScribeCraft {
     }
     
     private function enqueue_app_assets() {
+        // Enqueue React and ReactDOM from CDN first
+        wp_enqueue_script(
+            'react',
+            'https://unpkg.com/react@18/umd/react.production.min.js',
+            array(),
+            '18.3.1',
+            false
+        );
+        
+        wp_enqueue_script(
+            'react-dom',
+            'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',
+            array('react'),
+            '18.3.1',
+            false
+        );
+        
         // Enqueue main CSS
         wp_enqueue_style(
             'flux-seo-scribe-craft-css',
@@ -68,7 +85,7 @@ class FluxSEOScribeCraft {
         wp_enqueue_script(
             'flux-seo-wordpress-app',
             FLUX_SEO_PLUGIN_URL . 'flux-seo-wordpress-app.js',
-            array(),
+            array('react', 'react-dom'),
             FLUX_SEO_PLUGIN_VERSION,
             true
         );
@@ -153,6 +170,8 @@ class FluxSEOScribeCraft {
         <script type="text/javascript">
         // WordPress-specific React app initialization
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Flux SEO: DOM loaded, checking for FluxSEOApp...');
+            
             // Disable service workers in WordPress environment
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.getRegistrations().then(function(registrations) {
@@ -174,34 +193,24 @@ class FluxSEOScribeCraft {
             };
             
             // Initialize React app with error handling
-            setTimeout(function() {
+            function initializeApp() {
                 try {
-                    // The React app should mount automatically
-                    const rootElement = document.getElementById('root');
-                    if (rootElement && rootElement.children.length === 1 && rootElement.children[0].classList.contains('flux-seo-loading')) {
-                        // If still showing loading, try to trigger React mount
-                        console.log('Flux SEO Scribe Craft: Attempting to initialize React app...');
-                        
-                        // Create a custom event to trigger React initialization
-                        const initEvent = new CustomEvent('fluxSeoInit', {
-                            detail: { 
-                                container: rootElement,
-                                wordpress: true,
-                                ajaxUrl: fluxSeoAjax.ajaxurl,
-                                nonce: fluxSeoAjax.nonce
-                            }
-                        });
-                        window.dispatchEvent(initEvent);
+                    if (typeof window.FluxSEOApp !== 'undefined' && window.FluxSEOApp.init) {
+                        console.log('Flux SEO: FluxSEOApp found, initializing...');
+                        window.FluxSEOApp.init('root');
+                    } else {
+                        console.log('Flux SEO: FluxSEOApp not yet available, retrying...');
+                        setTimeout(initializeApp, 500);
                     }
                 } catch (error) {
-                    console.log('Flux SEO Scribe Craft: React app initialization in progress...');
+                    console.error('Flux SEO: Error during initialization:', error);
+                    showErrorState();
                 }
-            }, 1000);
+            }
             
-            // Fallback error display after 10 seconds
-            setTimeout(function() {
+            function showErrorState() {
                 const rootElement = document.getElementById('root');
-                if (rootElement && rootElement.children.length === 1 && rootElement.children[0].classList.contains('flux-seo-loading')) {
+                if (rootElement) {
                     rootElement.innerHTML = `
                         <div class="flux-seo-error">
                             <h3>⚠️ Loading Issue</h3>
@@ -219,7 +228,13 @@ class FluxSEOScribeCraft {
                         </div>
                     `;
                 }
-            }, 10000);
+            }
+            
+            // Start initialization
+            setTimeout(initializeApp, 1000);
+            
+            // Fallback error display after 15 seconds
+            setTimeout(showErrorState, 15000);
         });
         </script>
         
@@ -244,6 +259,33 @@ class FluxSEOScribeCraft {
         .flux-seo-container .button,
         .flux-seo-container button {
             font-family: inherit !important;
+        }
+        
+        .flux-seo-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            text-align: center;
+        }
+        
+        .loading-content h3 {
+            color: #0073aa;
+            margin-bottom: 10px;
+        }
+        
+        .flux-seo-error {
+            padding: 20px;
+            border: 2px solid #dc3545;
+            border-radius: 8px;
+            background: #f8d7da;
+            color: #721c24;
+            margin: 20px;
+        }
+        
+        .flux-seo-error ul {
+            text-align: left;
+            margin: 10px 0;
         }
         </style>
         <?php
