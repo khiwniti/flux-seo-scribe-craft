@@ -7,7 +7,36 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import SEODashboard from './components/SEODashboard';
 import './index.css';
 
-const queryClient = new QueryClient();
+// Disable service workers in WordPress environment
+console.log('🔧 FluxSEO: Checking for service workers to disable...');
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(function(registrations) {
+    if (registrations.length > 0) {
+      console.log('🚫 FluxSEO: Found', registrations.length, 'service worker(s), unregistering...');
+      for(let registration of registrations) {
+        console.log('🚫 Unregistering service worker:', registration.scope);
+        registration.unregister();
+      }
+    } else {
+      console.log('✅ FluxSEO: No service workers found to unregister');
+    }
+  });
+} else {
+  console.log('ℹ️ FluxSEO: Service workers not supported in this browser');
+}
+
+// Configure QueryClient with better defaults for WordPress
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+      retryDelay: 1000,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      cacheTime: 10 * 60 * 1000, // 10 minutes
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 // WordPress-compatible App component (no BrowserRouter)
 const WordPressApp = () => (

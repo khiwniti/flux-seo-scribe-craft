@@ -35533,7 +35533,35 @@ Remember: Success in ${primaryKeyword} isn't about quick fixes—it's about buil
       ] })
     ] }) });
   };
-  const queryClient = new QueryClient();
+  console.log("🔧 FluxSEO: Checking for service workers to disable...");
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+      if (registrations.length > 0) {
+        console.log("🚫 FluxSEO: Found", registrations.length, "service worker(s), unregistering...");
+        for (let registration of registrations) {
+          console.log("🚫 Unregistering service worker:", registration.scope);
+          registration.unregister();
+        }
+      } else {
+        console.log("✅ FluxSEO: No service workers found to unregister");
+      }
+    });
+  } else {
+    console.log("ℹ️ FluxSEO: Service workers not supported in this browser");
+  }
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: 2,
+        retryDelay: 1e3,
+        staleTime: 5 * 60 * 1e3,
+        // 5 minutes
+        cacheTime: 10 * 60 * 1e3,
+        // 10 minutes
+        refetchOnWindowFocus: false
+      }
+    }
+  });
   const WordPressApp = () => /* @__PURE__ */ jsxRuntimeExports.jsx(QueryClientProvider, { client: queryClient, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(TooltipProvider, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(Toaster$1, {}),
     /* @__PURE__ */ jsxRuntimeExports.jsx(Toaster, {}),
