@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,6 +12,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FileText, Image, Copy, Download, Wand2, Lightbulb, Calendar, Clock, Play, Pause, Settings, Brain, TrendingUp, Target, Award, Zap, Eye, Users, Globe, CheckCircle, AlertCircle, Star, BarChart3 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
+
+interface ContentInsights {
+  estimatedReadTime?: number;
+  targetKeywordDensity?: string;
+  recommendedHeadings?: number;
+  suggestedImages?: number;
+  seoComplexity?: string;
+  competitiveLevel?: string;
+}
 
 const IntegratedContentGenerator = () => {
   const [topic, setTopic] = useState('');
@@ -46,7 +54,7 @@ const IntegratedContentGenerator = () => {
   const [competitorAnalysis, setCompetitorAnalysis] = useState([]);
   const [contentTemplate, setContentTemplate] = useState('standard');
   const [smartKeywords, setSmartKeywords] = useState([]);
-  const [contentInsights, setContentInsights] = useState({});
+  const [contentInsights, setContentInsights] = useState<ContentInsights>({});
   
   const { toast } = useToast();
 
