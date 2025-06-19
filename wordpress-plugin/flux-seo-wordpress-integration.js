@@ -82,6 +82,7 @@
         
         // Handle API calls through WordPress AJAX
         wordpressAjaxCall: function(url, options) {
+            console.log('FluxSEOWordPress.wordpressAjaxCall: URL:', url, 'Options:', options);
             return new Promise((resolve, reject) => {
                 const formData = new FormData();
                 formData.append('action', 'flux_seo_proxy');
@@ -116,7 +117,12 @@
                     body: formData,
                     credentials: 'same-origin'
                 })
-                .then(response => response.json())
+                .then(response => {
+                    return response.text().then(text => {
+                        console.log('FluxSEOWordPress.wordpressAjaxCall: Raw response text:', text);
+                        return JSON.parse(text);
+                    });
+                })
                 .then(data => {
                     if (data.success) {
                         // Create a mock Response object
@@ -128,10 +134,12 @@
                         };
                         resolve(mockResponse);
                     } else {
+                        console.error('FluxSEOWordPress.wordpressAjaxCall: Request failed, data:', data);
                         reject(new Error(data.data || 'Request failed'));
                     }
                 })
                 .catch(error => {
+                    console.error('FluxSEOWordPress.wordpressAjaxCall: Caught error:', error);
                     reject(error);
                 });
             });
