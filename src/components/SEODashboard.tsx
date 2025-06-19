@@ -78,9 +78,7 @@ const SEODashboard = () => {
               <Settings className="h-4 w-4" />
               <span className="hidden sm:inline">Technical</span>
               <span className="sm:hidden">Tech</span>
-            </Tab
-
-sTrigger>
+            </TabsTrigger>
           </div>
 
           <TabsContent value="analyzer" className="space-y-6">
