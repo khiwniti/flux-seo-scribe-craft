@@ -43,39 +43,60 @@ const SEODashboard = () => {
 
         {/* Main Dashboard */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="mb-8 bg-white/50 backdrop-blur-sm p-2 rounded-lg">
-            <TabsList className="grid grid-cols-2 lg:grid-cols-7 w-full gap-1">
-              <TabsTrigger value="analyzer" className="flex items-center gap-2 text-sm">
+          <div className="mb-8 bg-white/70 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-white/20">
+            <TabsList className="grid w-full h-auto bg-transparent p-1 gap-1" style={{ gridTemplateColumns: 'repeat(7, 1fr)' }}>
+              <TabsTrigger 
+                value="analyzer" 
+                className="flex items-center justify-center gap-2 text-sm px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-md transition-all duration-200"
+              >
                 <Search className="h-4 w-4" />
                 <span className="hidden sm:inline">Content Analyzer</span>
                 <span className="sm:hidden">Analyzer</span>
               </TabsTrigger>
-              <TabsTrigger value="generator" className="flex items-center gap-2 text-sm">
+              <TabsTrigger 
+                value="generator" 
+                className="flex items-center justify-center gap-2 text-sm px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-md transition-all duration-200"
+              >
                 <FileText className="h-4 w-4" />
                 <span className="hidden sm:inline">AI Generator</span>
                 <span className="sm:hidden">Generator</span>
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="flex items-center gap-2 text-sm">
+              <TabsTrigger 
+                value="analytics" 
+                className="flex items-center justify-center gap-2 text-sm px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-md transition-all duration-200"
+              >
                 <BarChart3 className="h-4 w-4" />
                 <span className="hidden sm:inline">Analytics</span>
                 <span className="sm:hidden">Analytics</span>
               </TabsTrigger>
-              <TabsTrigger value="keywords" className="flex items-center gap-2 text-sm">
+              <TabsTrigger 
+                value="keywords" 
+                className="flex items-center justify-center gap-2 text-sm px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-md transition-all duration-200"
+              >
                 <Target className="h-4 w-4" />
                 <span className="hidden sm:inline">Keywords</span>
                 <span className="sm:hidden">Keywords</span>
               </TabsTrigger>
-              <TabsTrigger value="meta" className="flex items-center gap-2 text-sm">
+              <TabsTrigger 
+                value="meta" 
+                className="flex items-center justify-center gap-2 text-sm px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-md transition-all duration-200"
+              >
                 <Globe className="h-4 w-4" />
                 <span className="hidden sm:inline">Meta Tags</span>
                 <span className="sm:hidden">Meta</span>
               </TabsTrigger>
-              <TabsTrigger value="schema" className="flex items-center gap-2 text-sm">
+              <TabsTrigger 
+                value="schema" 
+                className="flex items-center justify-center gap-2 text-sm px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-md transition-all duration-200"
+              >
                 <Code className="h-4 w-4" />
                 <span className="hidden sm:inline">Schema</span>
                 <span className="sm:hidden">Schema</span>
               </TabsTrigger>
-              <TabsTrigger value="technical" className="flex items-center gap-2 text-sm">
+              <TabsTrigger 
+                value="technical" 
+                className="flex items-center justify-center gap-2 text-sm px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-md transition-all duration-200"
+              >
                 <Settings className="h-4 w-4" />
                 <span className="hidden sm:inline">Technical</span>
                 <span className="sm:hidden">Tech</span>
@@ -83,33 +104,35 @@ const SEODashboard = () => {
             </TabsList>
           </div>
 
-          <TabsContent value="analyzer" className="space-y-6">
-            <ContentAnalyzer />
-          </TabsContent>
+          <div className="space-y-6">
+            <TabsContent value="analyzer" className="mt-0">
+              <ContentAnalyzer />
+            </TabsContent>
 
-          <TabsContent value="generator" className="space-y-6">
-            <IntegratedContentGenerator />
-          </TabsContent>
+            <TabsContent value="generator" className="mt-0">
+              <IntegratedContentGenerator />
+            </TabsContent>
 
-          <TabsContent value="analytics" className="space-y-6">
-            <AdvancedSEOAnalytics />
-          </TabsContent>
+            <TabsContent value="analytics" className="mt-0">
+              <AdvancedSEOAnalytics />
+            </TabsContent>
 
-          <TabsContent value="keywords" className="space-y-6">
-            <SmartKeywordResearch />
-          </TabsContent>
+            <TabsContent value="keywords" className="mt-0">
+              <SmartKeywordResearch />
+            </TabsContent>
 
-          <TabsContent value="meta" className="space-y-6">
-            <MetaTagsManager />
-          </TabsContent>
+            <TabsContent value="meta" className="mt-0">
+              <MetaTagsManager />
+            </TabsContent>
 
-          <TabsContent value="schema" className="space-y-6">
-            <SchemaMarkupGenerator />
-          </TabsContent>
+            <TabsContent value="schema" className="mt-0">
+              <SchemaMarkupGenerator />
+            </TabsContent>
 
-          <TabsContent value="technical" className="space-y-6">
-            <TechnicalSEOAudit />
-          </TabsContent>
+            <TabsContent value="technical" className="mt-0">
+              <TechnicalSEOAudit />
+            </TabsContent>
+          </div>
         </Tabs>
       </div>
     </div>
