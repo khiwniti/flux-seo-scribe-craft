@@ -27,7 +27,6 @@ export default defineConfig({
           return 'assets/[name].[ext]';
         },
         format: 'iife',
-        name: 'FluxSEOApp',
         globals: {
           'react': 'React',
           'react-dom': 'ReactDOM'

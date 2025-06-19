@@ -81,10 +81,10 @@ class FluxSEOScribeCraft {
             FLUX_SEO_PLUGIN_VERSION
         );
         
-        // Enqueue WordPress-compatible React application
+        // Enqueue React loader (handles loading the main app)
         wp_enqueue_script(
-            'flux-seo-wordpress-app',
-            FLUX_SEO_PLUGIN_URL . 'flux-seo-wordpress-app.js',
+            'flux-seo-react-loader',
+            FLUX_SEO_PLUGIN_URL . 'flux-seo-react-loader.js',
             array('react', 'react-dom'),
             FLUX_SEO_PLUGIN_VERSION,
             true
@@ -94,13 +94,13 @@ class FluxSEOScribeCraft {
         wp_enqueue_script(
             'flux-seo-wordpress-integration',
             FLUX_SEO_PLUGIN_URL . 'flux-seo-wordpress-integration.js',
-            array('flux-seo-wordpress-app'),
+            array('flux-seo-react-loader'),
             FLUX_SEO_PLUGIN_VERSION,
             true
         );
         
         // Localize script for AJAX
-        wp_localize_script('flux-seo-wordpress-integration', 'fluxSeoAjax', array(
+        wp_localize_script('flux-seo-react-loader', 'fluxSeoAjax', array(
             'ajaxurl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('flux_seo_nonce'),
             'pluginUrl' => FLUX_SEO_PLUGIN_URL,
@@ -170,7 +170,7 @@ class FluxSEOScribeCraft {
         <script type="text/javascript">
         // WordPress-specific React app initialization
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Flux SEO: DOM loaded, checking for FluxSEOApp...');
+            console.log('🎯 Flux SEO Admin Page: DOM loaded, React loader will handle initialization...');
             
             // Disable service workers in WordPress environment
             if ('serviceWorker' in navigator) {
@@ -192,49 +192,28 @@ class FluxSEOScribeCraft {
                 originalError.apply(console, args);
             };
             
-            // Initialize React app with error handling
-            function initializeApp() {
-                try {
-                    if (typeof window.FluxSEOApp !== 'undefined' && window.FluxSEOApp.init) {
-                        console.log('Flux SEO: FluxSEOApp found, initializing...');
-                        window.FluxSEOApp.init('root');
-                    } else {
-                        console.log('Flux SEO: FluxSEOApp not yet available, retrying...');
-                        setTimeout(initializeApp, 500);
-                    }
-                } catch (error) {
-                    console.error('Flux SEO: Error during initialization:', error);
-                    showErrorState();
-                }
-            }
-            
-            function showErrorState() {
-                const rootElement = document.getElementById('root');
-                if (rootElement) {
-                    rootElement.innerHTML = `
-                        <div class="flux-seo-error">
-                            <h3>⚠️ Loading Issue</h3>
-                            <p>The SEO application is taking longer than expected to load.</p>
-                            <p><strong>Troubleshooting:</strong></p>
-                            <ul>
-                                <li>Refresh the page</li>
-                                <li>Check browser console for errors</li>
-                                <li>Ensure JavaScript is enabled</li>
-                                <li>Try a different browser</li>
-                            </ul>
-                            <button onclick="location.reload()" style="margin-top: 10px; padding: 8px 16px; background: #0073aa; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                                Refresh Page
-                            </button>
+            // Show loading message
+            const rootElement = document.getElementById('root');
+            if (rootElement) {
+                rootElement.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; min-height: 400px; text-align: center;">
+                        <div>
+                            <div style="font-size: 24px; margin-bottom: 10px;">🚀</div>
+                            <h3 style="color: #0073aa; margin-bottom: 10px;">Loading Flux SEO Scribe Craft</h3>
+                            <p style="color: #666;">Initializing React application...</p>
+                            <div style="margin-top: 20px;">
+                                <div style="display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #0073aa; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                            </div>
                         </div>
-                    `;
-                }
+                    </div>
+                    <style>
+                        @keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
+                    </style>
+                `;
             }
-            
-            // Start initialization
-            setTimeout(initializeApp, 1000);
-            
-            // Fallback error display after 15 seconds
-            setTimeout(showErrorState, 15000);
         });
         </script>
         
