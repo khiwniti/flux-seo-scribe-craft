@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flux SEO Debug Console</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f1f1f1;
+        }
+        .debug-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .section {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .section:last-child {
+            border-bottom: none;
+        }
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .status-card {
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #ccc;
+        }
+        .status-success {
+            background: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+        .status-error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+        .status-warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+            color: #856404;
+        }
+        .status-info {
+            background: #d1ecf1;
+            border-left-color: #17a2b8;
+            color: #0c5460;
+        }
+        .console-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .btn {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #005a87;
+        }
+        .btn-danger {
+            background: #dc3545;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        .test-results {
+            margin: 20px 0;
+        }
+        .timestamp {
+            color: #666;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <div class="header">
+            <h1>🔧 Flux SEO Debug Console</h1>
+            <p>Real-time WordPress plugin diagnostics</p>
+        </div>
+
+        <div class="section">
+            <h2>📊 System Status</h2>
+            <div id="system-status" class="status-grid">
+                <div class="status-card status-info">
+                    <strong>🔄 Initializing...</strong><br>
+                    <small>Loading diagnostic tools</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🧪 Quick Tests</h2>
+            <button class="btn" onclick="runDiagnostics()">🔍 Run Full Diagnostics</button>
+            <button class="btn" onclick="testReactLoading()">⚛️ Test React Loading</button>
+            <button class="btn" onclick="testAppInitialization()">🚀 Test App Init</button>
+            <button class="btn btn-danger" onclick="clearConsole()">🗑️ Clear Console</button>
+            
+            <div id="test-results" class="test-results"></div>
+        </div>
+
+        <div class="section">
+            <h2>📝 Console Output</h2>
+            <div id="console-output" class="console-output">
+                <span class="timestamp">[Loading...]</span> Debug console initializing...\n
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 WordPress Integration Test</h2>
+            <div id="wordpress-test-area">
+                <p>This section simulates the WordPress environment:</p>
+                <div id="root" style="min-height: 200px; border: 2px dashed #ccc; padding: 20px; background: #f9f9f9; border-radius: 6px;">
+                    <div style="text-align: center; color: #666; padding: 40px;">
+                        ⏳ Waiting for React app to load...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Console capture and display
+        const consoleOutput = document.getElementById('console-output');
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function addToConsole(type, message, timestamp = new Date()) {
+            const timeStr = timestamp.toLocaleTimeString();
+            const typeColor = {
+                'log': '#4CAF50',
+                'error': '#f44336',
+                'warn': '#ff9800',
+                'info': '#2196F3'
+            }[type] || '#666';
+            
+            consoleOutput.innerHTML += `<span class="timestamp">[${timeStr}]</span> <span style="color: ${typeColor}">${type.toUpperCase()}:</span> ${message}\n`;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToConsole('log', args.join(' '));
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToConsole('error', args.join(' '));
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToConsole('warn', args.join(' '));
+        };
+        
+        // System status updates
+        function updateSystemStatus() {
+            const statusContainer = document.getElementById('system-status');
+            const checks = [
+                {
+                    name: 'React Library',
+                    check: () => typeof React !== 'undefined',
+                    success: '✅ React loaded',
+                    error: '❌ React not found'
+                },
+                {
+                    name: 'ReactDOM Library', 
+                    check: () => typeof ReactDOM !== 'undefined',
+                    success: '✅ ReactDOM loaded',
+                    error: '❌ ReactDOM not found'
+                },
+                {
+                    name: 'FluxSEOApp',
+                    check: () => typeof window.FluxSEOApp !== 'undefined',
+                    success: '✅ FluxSEOApp available',
+                    error: '❌ FluxSEOApp not found'
+                },
+                {
+                    name: 'FluxSEOWordPress',
+                    check: () => typeof window.FluxSEOWordPress !== 'undefined',
+                    success: '✅ WordPress integration loaded',
+                    error: '❌ WordPress integration missing'
+                }
+            ];
+            
+            const statusCards = checks.map(check => {
+                const isSuccess = check.check();
+                const statusClass = isSuccess ? 'status-success' : 'status-error';
+                const message = isSuccess ? check.success : check.error;
+                
+                return `
+                    <div class="status-card ${statusClass}">
+                        <strong>${message}</strong><br>
+                        <small>${check.name}</small>
+                    </div>
+                `;
+            }).join('');
+            
+            statusContainer.innerHTML = statusCards;
+        }
+        
+        // Diagnostic functions
+        function runDiagnostics() {
+            console.log('🔍 Running full diagnostics...');
+            
+            // Check global objects
+            console.log('Global objects check:');
+            console.log('- window.React:', typeof window.React);
+            console.log('- window.ReactDOM:', typeof window.ReactDOM);
+            console.log('- window.FluxSEOApp:', typeof window.FluxSEOApp);
+            console.log('- window.FluxSEOWordPress:', typeof window.FluxSEOWordPress);
+            
+            // Check DOM elements
+            console.log('DOM elements check:');
+            console.log('- #root element:', !!document.getElementById('root'));
+            
+            // Check script loading
+            const scripts = Array.from(document.scripts).map(s => s.src).filter(s => s.includes('flux-seo'));
+            console.log('Flux SEO scripts loaded:', scripts);
+            
+            updateSystemStatus();
+            
+            console.log('✅ Diagnostics complete');
+        }
+        
+        function testReactLoading() {
+            console.log('⚛️ Testing React loading...');
+            
+            if (typeof React === 'undefined') {
+                console.error('❌ React is not available');
+                return;
+            }
+            
+            if (typeof ReactDOM === 'undefined') {
+                console.error('❌ ReactDOM is not available');
+                return;
+            }
+            
+            console.log('✅ React and ReactDOM are available');
+            console.log('React version:', React.version);
+            
+            // Test basic React functionality
+            try {
+                const testElement = React.createElement('div', null, 'Test React Element');
+                console.log('✅ React.createElement works');
+            } catch (error) {
+                console.error('❌ React.createElement failed:', error);
+            }
+        }
+        
+        function testAppInitialization() {
+            console.log('🚀 Testing app initialization...');
+            
+            if (typeof window.FluxSEOApp === 'undefined') {
+                console.error('❌ FluxSEOApp not available');
+                return;
+            }
+            
+            if (typeof window.FluxSEOApp.init !== 'function') {
+                console.error('❌ FluxSEOApp.init is not a function');
+                return;
+            }
+            
+            try {
+                console.log('🎯 Attempting to initialize FluxSEOApp...');
+                window.FluxSEOApp.init('root');
+                console.log('✅ FluxSEOApp.init called successfully');
+            } catch (error) {
+                console.error('❌ FluxSEOApp initialization failed:', error);
+            }
+        }
+        
+        function clearConsole() {
+            consoleOutput.innerHTML = '<span class="timestamp">[' + new Date().toLocaleTimeString() + ']</span> Console cleared\n';
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎯 Debug console loaded');
+            updateSystemStatus();
+            
+            // Auto-update status every 2 seconds
+            setInterval(updateSystemStatus, 2000);
+            
+            // Auto-run diagnostics after 3 seconds
+            setTimeout(runDiagnostics, 3000);
+        });
+        
+        // Listen for FluxSEO events
+        window.addEventListener('fluxSeoAppReady', function(event) {
+            console.log('🎉 FluxSEOApp ready event received:', event.detail);
+            updateSystemStatus();
+        });
+    </script>
+</body>
+</html>

@@ -5,6 +5,14 @@
 
 (function() {
     'use strict';
+    
+    console.log('⏭️ FluxSEO WordPress Integration: Script loaded');
+    console.log('🔍 Integration environment check:', {
+        FluxSEOApp: typeof window.FluxSEOApp,
+        React: typeof window.React,
+        ReactDOM: typeof window.ReactDOM,
+        fluxSeoAjax: typeof window.fluxSeoAjax
+    });
 
     // WordPress integration object
     window.FluxSEOWordPress = {

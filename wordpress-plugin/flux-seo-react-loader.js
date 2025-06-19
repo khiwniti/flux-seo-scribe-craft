@@ -7,6 +7,12 @@
     'use strict';
     
     console.log('🔧 FluxSEO React Loader: Starting...');
+    console.log('🔍 Current environment check:', {
+        React: typeof window.React,
+        ReactDOM: typeof window.ReactDOM,
+        fluxSeoAjax: typeof window.fluxSeoAjax,
+        location: window.location.href
+    });
     
     // Check if React and ReactDOM are available
     function checkReactAvailability() {
@@ -77,7 +83,11 @@
         
         // Load the main app script
         const script = document.createElement('script');
-        script.src = fluxSeoAjax.pluginUrl + 'flux-seo-wordpress-app.js';
+        const pluginUrl = (typeof fluxSeoAjax !== 'undefined' && fluxSeoAjax.pluginUrl) 
+            ? fluxSeoAjax.pluginUrl 
+            : './';
+        script.src = pluginUrl + 'flux-seo-wordpress-app.js';
+        console.log('📦 Loading main app script from:', script.src);
         script.onload = function() {
             console.log('✅ FluxSEO App script loaded successfully');
             
