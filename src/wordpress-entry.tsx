@@ -27,6 +27,7 @@ declare global {
   interface Window {
     FluxSEOApp: {
       init: (containerId?: string) => void;
+      render: (containerId?: string) => void;
       component: React.ComponentType;
     };
   }
@@ -35,6 +36,9 @@ declare global {
 // WordPress integration object
 window.FluxSEOApp = {
   component: WordPressApp,
+  render: (containerId = 'root') => {
+    window.FluxSEOApp.init(containerId);
+  },
   init: (containerId = 'root') => {
     console.log('FluxSEOApp.init called with containerId:', containerId);
     

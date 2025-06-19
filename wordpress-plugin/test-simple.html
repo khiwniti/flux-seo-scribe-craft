@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Test</title>
+    <link rel="stylesheet" href="flux-seo-scribe-craft.css">
+</head>
+<body>
+    <h1>Testing React App Loading</h1>
+    <div id="flux-seo-app">Loading...</div>
+
+    <!-- React Dependencies -->
+    <script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+    
+    <!-- Test if React is loaded -->
+    <script>
+        console.log('React loaded:', typeof React !== 'undefined');
+        console.log('ReactDOM loaded:', typeof ReactDOM !== 'undefined');
+    </script>
+    
+    <!-- Flux SEO App -->
+    <script src="flux-seo-wordpress-app.js"></script>
+    
+    <script>
+        console.log('FluxSEOApp available:', typeof window.FluxSEOApp !== 'undefined');
+        
+        if (window.FluxSEOApp) {
+            try {
+                window.FluxSEOApp.render('flux-seo-app');
+                console.log('✅ App rendered successfully');
+            } catch (error) {
+                console.error('❌ Error rendering app:', error);
+            }
+        } else {
+            console.error('❌ FluxSEOApp not found');
+        }
+    </script>
+</body>
+</html>

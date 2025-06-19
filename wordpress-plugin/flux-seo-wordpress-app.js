@@ -716,7 +716,7 @@ var __privateWrapper = (obj, member, setter, getter) => ({
       target.dispatchEvent(event);
     }
   }
-  var Root$6 = DismissableLayer;
+  var Root$7 = DismissableLayer;
   var Branch = DismissableLayerBranch;
   var useLayoutEffect2 = Boolean(globalThis == null ? void 0 : globalThis.document) ? React__namespace.useLayoutEffect : () => {
   };
@@ -920,7 +920,7 @@ var __privateWrapper = (obj, member, setter, getter) => ({
     }
   );
   VisuallyHidden.displayName = NAME$3;
-  var Root$5 = VisuallyHidden;
+  var Root$6 = VisuallyHidden;
   var PROVIDER_NAME$1 = "ToastProvider";
   var [Collection$2, useCollection$2, createCollectionScope$2] = createCollection("Toast");
   var [createToastContext, createToastScope] = createContextScope$3("Toast", [createCollectionScope$2]);
@@ -1283,7 +1283,7 @@ var __privateWrapper = (obj, member, setter, getter) => ({
         ),
         /* @__PURE__ */ jsxRuntimeExports.jsx(ToastInteractiveProvider, { scope: __scopeToast, onClose: handleClose, children: ReactDOM__namespace.createPortal(
           /* @__PURE__ */ jsxRuntimeExports.jsx(Collection$2.ItemSlot, { scope: __scopeToast, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-            Root$6,
+            Root$7,
             {
               asChild: true,
               onEscapeKeyDown: composeEventHandlers(onEscapeKeyDown, () => {
@@ -1678,6 +1678,63 @@ var __privateWrapper = (obj, member, setter, getter) => ({
    * This source code is licensed under the ISC license.
    * See the LICENSE file in the root directory of this source tree.
    */
+  const Award = createLucideIcon("Award", [
+    [
+      "path",
+      {
+        d: "m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526",
+        key: "1yiouv"
+      }
+    ],
+    ["circle", { cx: "12", cy: "8", r: "6", key: "1vp47v" }]
+  ]);
+  /**
+   * @license lucide-react v0.462.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   */
+  const Brain = createLucideIcon("Brain", [
+    [
+      "path",
+      {
+        d: "M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z",
+        key: "l5xja"
+      }
+    ],
+    [
+      "path",
+      {
+        d: "M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z",
+        key: "ep3f8r"
+      }
+    ],
+    ["path", { d: "M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4", key: "1p4c4q" }],
+    ["path", { d: "M17.599 6.5a3 3 0 0 0 .399-1.375", key: "tmeiqw" }],
+    ["path", { d: "M6.003 5.125A3 3 0 0 0 6.401 6.5", key: "105sqy" }],
+    ["path", { d: "M3.477 10.896a4 4 0 0 1 .585-.396", key: "ql3yin" }],
+    ["path", { d: "M19.938 10.5a4 4 0 0 1 .585.396", key: "1qfode" }],
+    ["path", { d: "M6 18a4 4 0 0 1-1.967-.516", key: "2e4loj" }],
+    ["path", { d: "M19.967 17.484A4 4 0 0 1 18 18", key: "159ez6" }]
+  ]);
+  /**
+   * @license lucide-react v0.462.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   */
+  const Calendar = createLucideIcon("Calendar", [
+    ["path", { d: "M8 2v4", key: "1cmpym" }],
+    ["path", { d: "M16 2v4", key: "4m81vk" }],
+    ["rect", { width: "18", height: "18", x: "3", y: "4", rx: "2", key: "1hopcy" }],
+    ["path", { d: "M3 10h18", key: "8toen8" }]
+  ]);
+  /**
+   * @license lucide-react v0.462.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   */
   const ChartColumn = createLucideIcon("ChartColumn", [
     ["path", { d: "M3 3v16a2 2 0 0 0 2 2h16", key: "c24i48" }],
     ["path", { d: "M18 17V9", key: "2bz60n" }],
@@ -1734,6 +1791,16 @@ var __privateWrapper = (obj, member, setter, getter) => ({
    * This source code is licensed under the ISC license.
    * See the LICENSE file in the root directory of this source tree.
    */
+  const Clock = createLucideIcon("Clock", [
+    ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
+    ["polyline", { points: "12 6 12 12 16 14", key: "68esgv" }]
+  ]);
+  /**
+   * @license lucide-react v0.462.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   */
   const Copy = createLucideIcon("Copy", [
     ["rect", { width: "14", height: "14", x: "8", y: "8", rx: "2", ry: "2", key: "17jyea" }],
     ["path", { d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2", key: "zix9uf" }]
@@ -1748,6 +1815,22 @@ var __privateWrapper = (obj, member, setter, getter) => ({
     ["path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", key: "ih7n3h" }],
     ["polyline", { points: "7 10 12 15 17 10", key: "2ggqvy" }],
     ["line", { x1: "12", x2: "12", y1: "15", y2: "3", key: "1vk2je" }]
+  ]);
+  /**
+   * @license lucide-react v0.462.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   */
+  const Eye = createLucideIcon("Eye", [
+    [
+      "path",
+      {
+        d: "M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0",
+        key: "1nclc0"
+      }
+    ],
+    ["circle", { cx: "12", cy: "12", r: "3", key: "1v7zrd" }]
   ]);
   /**
    * @license lucide-react v0.462.0 - ISC
@@ -1807,9 +1890,44 @@ var __privateWrapper = (obj, member, setter, getter) => ({
    * This source code is licensed under the ISC license.
    * See the LICENSE file in the root directory of this source tree.
    */
+  const Pause = createLucideIcon("Pause", [
+    ["rect", { x: "14", y: "4", width: "4", height: "16", rx: "1", key: "zuxfzm" }],
+    ["rect", { x: "6", y: "4", width: "4", height: "16", rx: "1", key: "1okwgv" }]
+  ]);
+  /**
+   * @license lucide-react v0.462.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   */
+  const Play = createLucideIcon("Play", [
+    ["polygon", { points: "6 3 20 12 6 21 6 3", key: "1oa8hb" }]
+  ]);
+  /**
+   * @license lucide-react v0.462.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   */
   const Search = createLucideIcon("Search", [
     ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }],
     ["path", { d: "m21 21-4.3-4.3", key: "1qie3q" }]
+  ]);
+  /**
+   * @license lucide-react v0.462.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   */
+  const Settings = createLucideIcon("Settings", [
+    [
+      "path",
+      {
+        d: "M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z",
+        key: "1qme2f"
+      }
+    ],
+    ["circle", { cx: "12", cy: "12", r: "3", key: "1v7zrd" }]
   ]);
   /**
    * @license lucide-react v0.462.0 - ISC
@@ -6577,7 +6695,7 @@ var __privateWrapper = (obj, member, setter, getter) => ({
     );
   });
   Arrow$1.displayName = NAME$2;
-  var Root$4 = Arrow$1;
+  var Root$5 = Arrow$1;
   function createContextScope$2(scopeName, createContextScopeDeps = []) {
     let defaultContexts = [];
     function createContext3(rootComponentName, defaultContext) {
@@ -6876,7 +6994,7 @@ var __privateWrapper = (obj, member, setter, getter) => ({
             visibility: contentContext.shouldHideArrow ? "hidden" : void 0
           },
           children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-            Root$4,
+            Root$5,
             {
               ...arrowProps,
               ref: forwardedRef,
@@ -7165,7 +7283,7 @@ var __privateWrapper = (obj, member, setter, getter) => ({
               },
               children: [
                 /* @__PURE__ */ jsxRuntimeExports.jsx(Slottable, { children }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(VisuallyHiddenContentContextProvider, { scope: __scopeTooltip, isInside: true, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Root$5, { id: context.contentId, role: "tooltip", children: ariaLabel || children }) })
+                /* @__PURE__ */ jsxRuntimeExports.jsx(VisuallyHiddenContentContextProvider, { scope: __scopeTooltip, isInside: true, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Root$6, { id: context.contentId, role: "tooltip", children: ariaLabel || children }) })
               ]
             }
           )
@@ -9349,7 +9467,7 @@ var __privateWrapper = (obj, member, setter, getter) => ({
   function wrapArray$1(array2, startIndex) {
     return array2.map((_, index2) => array2[(startIndex + index2) % array2.length]);
   }
-  var Root$3 = RovingFocusGroup;
+  var Root$4 = RovingFocusGroup;
   var Item$1 = RovingFocusGroupItem;
   var TABS_NAME = "Tabs";
   var [createTabsContext, createTabsScope] = createContextScope$3(TABS_NAME, [
@@ -9406,7 +9524,7 @@ var __privateWrapper = (obj, member, setter, getter) => ({
       const context = useTabsContext(TAB_LIST_NAME, __scopeTabs);
       const rovingFocusGroupScope = useRovingFocusGroupScope(__scopeTabs);
       return /* @__PURE__ */ jsxRuntimeExports.jsx(
-        Root$3,
+        Root$4,
         {
           asChild: true,
           ...rovingFocusGroupScope,
@@ -9723,19 +9841,19 @@ var __privateWrapper = (obj, member, setter, getter) => ({
     );
   });
   Label$3.displayName = NAME$1;
-  var Root$2 = Label$3;
+  var Root$3 = Label$3;
   const labelVariants = cva(
     "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
   );
   const Label$2 = React__namespace.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-    Root$2,
+    Root$3,
     {
       ref,
       className: cn(labelVariants(), className),
       ...props
     }
   ));
-  Label$2.displayName = Root$2.displayName;
+  Label$2.displayName = Root$3.displayName;
   function createContextScope(scopeName, createContextScopeDeps = []) {
     let defaultContexts = [];
     function createContext3(rootComponentName, defaultContext) {
@@ -9877,10 +9995,10 @@ var __privateWrapper = (obj, member, setter, getter) => ({
 
 Defaulting to \`null\`.`;
   }
-  var Root$1 = Progress$1;
+  var Root$2 = Progress$1;
   var Indicator = ProgressIndicator;
   const Progress = React__namespace.forwardRef(({ className, value, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-    Root$1,
+    Root$2,
     {
       ref,
       className: cn(
@@ -9897,7 +10015,7 @@ Defaulting to \`null\`.`;
       )
     }
   ));
-  Progress.displayName = Root$1.displayName;
+  Progress.displayName = Root$2.displayName;
   const ContentAnalyzer = () => {
     const [content, setContent] = React2.useState("");
     const [keywords, setKeywords] = React2.useState("");
@@ -12339,10 +12457,10 @@ Defaulting to \`null\`.`;
   function isValidOrientation(orientation) {
     return ORIENTATIONS.includes(orientation);
   }
-  var Root = Separator$1;
+  var Root$1 = Separator$1;
   const Separator = React__namespace.forwardRef(
     ({ className, orientation = "horizontal", decorative = true, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-      Root,
+      Root$1,
       {
         ref,
         decorative,
@@ -12356,7 +12474,152 @@ Defaulting to \`null\`.`;
       }
     )
   );
-  Separator.displayName = Root.displayName;
+  Separator.displayName = Root$1.displayName;
+  var SWITCH_NAME = "Switch";
+  var [createSwitchContext, createSwitchScope] = createContextScope$3(SWITCH_NAME);
+  var [SwitchProvider, useSwitchContext] = createSwitchContext(SWITCH_NAME);
+  var Switch$1 = React__namespace.forwardRef(
+    (props, forwardedRef) => {
+      const {
+        __scopeSwitch,
+        name,
+        checked: checkedProp,
+        defaultChecked,
+        required,
+        disabled,
+        value = "on",
+        onCheckedChange,
+        form,
+        ...switchProps
+      } = props;
+      const [button, setButton] = React__namespace.useState(null);
+      const composedRefs = useComposedRefs(forwardedRef, (node) => setButton(node));
+      const hasConsumerStoppedPropagationRef = React__namespace.useRef(false);
+      const isFormControl = button ? form || !!button.closest("form") : true;
+      const [checked = false, setChecked] = useControllableState({
+        prop: checkedProp,
+        defaultProp: defaultChecked,
+        onChange: onCheckedChange
+      });
+      return /* @__PURE__ */ jsxRuntimeExports.jsxs(SwitchProvider, { scope: __scopeSwitch, checked, disabled, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          Primitive.button,
+          {
+            type: "button",
+            role: "switch",
+            "aria-checked": checked,
+            "aria-required": required,
+            "data-state": getState(checked),
+            "data-disabled": disabled ? "" : void 0,
+            disabled,
+            value,
+            ...switchProps,
+            ref: composedRefs,
+            onClick: composeEventHandlers(props.onClick, (event) => {
+              setChecked((prevChecked) => !prevChecked);
+              if (isFormControl) {
+                hasConsumerStoppedPropagationRef.current = event.isPropagationStopped();
+                if (!hasConsumerStoppedPropagationRef.current) event.stopPropagation();
+              }
+            })
+          }
+        ),
+        isFormControl && /* @__PURE__ */ jsxRuntimeExports.jsx(
+          BubbleInput,
+          {
+            control: button,
+            bubbles: !hasConsumerStoppedPropagationRef.current,
+            name,
+            value,
+            checked,
+            required,
+            disabled,
+            form,
+            style: { transform: "translateX(-100%)" }
+          }
+        )
+      ] });
+    }
+  );
+  Switch$1.displayName = SWITCH_NAME;
+  var THUMB_NAME = "SwitchThumb";
+  var SwitchThumb = React__namespace.forwardRef(
+    (props, forwardedRef) => {
+      const { __scopeSwitch, ...thumbProps } = props;
+      const context = useSwitchContext(THUMB_NAME, __scopeSwitch);
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(
+        Primitive.span,
+        {
+          "data-state": getState(context.checked),
+          "data-disabled": context.disabled ? "" : void 0,
+          ...thumbProps,
+          ref: forwardedRef
+        }
+      );
+    }
+  );
+  SwitchThumb.displayName = THUMB_NAME;
+  var BubbleInput = (props) => {
+    const { control, checked, bubbles = true, ...inputProps } = props;
+    const ref = React__namespace.useRef(null);
+    const prevChecked = usePrevious(checked);
+    const controlSize = useSize(control);
+    React__namespace.useEffect(() => {
+      const input = ref.current;
+      const inputProto = window.HTMLInputElement.prototype;
+      const descriptor = Object.getOwnPropertyDescriptor(inputProto, "checked");
+      const setChecked = descriptor.set;
+      if (prevChecked !== checked && setChecked) {
+        const event = new Event("click", { bubbles });
+        setChecked.call(input, checked);
+        input.dispatchEvent(event);
+      }
+    }, [prevChecked, checked, bubbles]);
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "input",
+      {
+        type: "checkbox",
+        "aria-hidden": true,
+        defaultChecked: checked,
+        ...inputProps,
+        tabIndex: -1,
+        ref,
+        style: {
+          ...props.style,
+          ...controlSize,
+          position: "absolute",
+          pointerEvents: "none",
+          opacity: 0,
+          margin: 0
+        }
+      }
+    );
+  };
+  function getState(checked) {
+    return checked ? "checked" : "unchecked";
+  }
+  var Root = Switch$1;
+  var Thumb = SwitchThumb;
+  const Switch = React__namespace.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+    Root,
+    {
+      className: cn(
+        "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input",
+        className
+      ),
+      ...props,
+      ref,
+      children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+        Thumb,
+        {
+          className: cn(
+            "pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0"
+          )
+        }
+      )
+    }
+  ));
+  Switch.displayName = Root.displayName;
   const IntegratedContentGenerator = () => {
     const [topic, setTopic] = React2.useState("");
     const [keywords, setKeywords] = React2.useState("");
@@ -12365,6 +12628,27 @@ Defaulting to \`null\`.`;
     const [generatedContent, setGeneratedContent] = React2.useState("");
     const [generatedImages, setGeneratedImages] = React2.useState([]);
     const [isGenerating, setIsGenerating] = React2.useState(false);
+    const [autoGenEnabled, setAutoGenEnabled] = React2.useState(false);
+    const [autoGenFrequency, setAutoGenFrequency] = React2.useState("weekly");
+    const [autoGenTime, setAutoGenTime] = React2.useState("09:00");
+    const [autoGenDay, setAutoGenDay] = React2.useState("monday");
+    const [autoGenTopics, setAutoGenTopics] = React2.useState("");
+    const [autoGenKeywords, setAutoGenKeywords] = React2.useState("");
+    const [autoGenHistory, setAutoGenHistory] = React2.useState([]);
+    const [nextScheduledRun, setNextScheduledRun] = React2.useState(null);
+    const [contentQuality, setContentQuality] = React2.useState(0);
+    const [seoScore, setSeoScore] = React2.useState(0);
+    const [readabilityScore, setReadabilityScore] = React2.useState(0);
+    const [trendingTopics, setTrendingTopics] = React2.useState([]);
+    const [contentSuggestions, setContentSuggestions] = React2.useState([]);
+    const [targetAudience, setTargetAudience] = React2.useState("general");
+    const [contentType, setContentType] = React2.useState("blog");
+    const [writingStyle, setWritingStyle] = React2.useState("professional");
+    const [industryFocus, setIndustryFocus] = React2.useState("general");
+    React2.useState([]);
+    const [contentTemplate, setContentTemplate] = React2.useState("standard");
+    const [smartKeywords, setSmartKeywords] = React2.useState([]);
+    const [contentInsights, setContentInsights] = React2.useState({});
     const { toast: toast2 } = useToast();
     const generateContent = async () => {
       if (!topic.trim()) {
@@ -12376,85 +12660,343 @@ Defaulting to \`null\`.`;
         return;
       }
       setIsGenerating(true);
-      const imagePrompts = [
-        `Professional ${topic.toLowerCase()} concept, modern office setting, high quality photography`,
-        `${topic.toLowerCase()} infographic style, clean design, professional presentation`,
-        `People working on ${topic.toLowerCase()}, collaborative environment, business photography`,
-        `${topic.toLowerCase()} dashboard or interface, modern UI design, clean aesthetic`
-      ];
+      const analyzeContentRequirements = () => {
+        const topicWords = topic.toLowerCase().split(" ");
+        const suggestedKeywords = [
+          ...topicWords,
+          `${topic.toLowerCase()} strategy`,
+          `${topic.toLowerCase()} best practices`,
+          `${topic.toLowerCase()} guide`,
+          `${topic.toLowerCase()} tips`,
+          `${topic.toLowerCase()} 2024`
+        ];
+        setSmartKeywords(suggestedKeywords);
+        setContentInsights({
+          estimatedReadTime: Math.ceil(wordCount ? parseInt(wordCount) / 200 : 5),
+          targetKeywordDensity: "1-2%",
+          recommendedHeadings: 6,
+          suggestedImages: 4,
+          seoComplexity: "Medium",
+          competitiveLevel: "High"
+        });
+      };
+      analyzeContentRequirements();
+      const getContentTemplate = () => {
+        const templates = {
+          "how-to": {
+            structure: ["Introduction", "Prerequisites", "Step-by-Step Guide", "Tips & Best Practices", "Common Mistakes", "Conclusion"],
+            tone: "instructional"
+          },
+          "listicle": {
+            structure: ["Introduction", "List Items (5-10)", "Detailed Explanations", "Key Takeaways", "Conclusion"],
+            tone: "engaging"
+          },
+          "standard": {
+            structure: ["Introduction", "Main Content Sections", "Examples & Case Studies", "Actionable Tips", "Conclusion"],
+            tone: writingStyle
+          },
+          "comparison": {
+            structure: ["Introduction", "Comparison Criteria", "Detailed Analysis", "Pros & Cons", "Recommendation", "Conclusion"],
+            tone: "analytical"
+          }
+        };
+        return templates[contentTemplate] || templates["standard"];
+      };
+      const template = getContentTemplate();
+      const generateSmartImagePrompts = () => {
+        const industryContext = industryFocus !== "general" ? `${industryFocus} industry` : "business";
+        const audienceContext = targetAudience !== "general" ? `for ${targetAudience}` : "";
+        return [
+          `Professional ${topic.toLowerCase()} concept in ${industryContext}, modern workspace, high-quality photography ${audienceContext}`,
+          `${topic.toLowerCase()} infographic design, clean minimalist style, data visualization, professional presentation`,
+          `Team collaboration on ${topic.toLowerCase()}, diverse professionals, ${industryContext} environment, business photography`,
+          `${topic.toLowerCase()} dashboard interface, modern UI/UX design, analytics visualization, clean aesthetic`,
+          `${topic.toLowerCase()} success metrics, charts and graphs, business intelligence, professional design`
+        ];
+      };
+      const imagePrompts = generateSmartImagePrompts();
       setTimeout(() => {
-        const sampleContent = `# ${topic}
+        const calculateQualityScores = () => {
+          const baseQuality = 75 + Math.random() * 20;
+          const seoBonus = keywords.length > 0 ? 10 : 0;
+          const structureBonus = template.structure.length > 4 ? 5 : 0;
+          const quality = Math.min(95, baseQuality + seoBonus + structureBonus);
+          const seo = Math.min(95, quality - 5 + keywords.split(",").length * 2);
+          const readability = Math.min(95, quality - 10 + (writingStyle === "conversational" ? 10 : 0));
+          setContentQuality(Math.round(quality));
+          setSeoScore(Math.round(seo));
+          setReadabilityScore(Math.round(readability));
+        };
+        calculateQualityScores();
+        const generateIntelligentContent = () => {
+          const keywordList = keywords ? keywords.split(",").map((k2) => k2.trim()) : smartKeywords.slice(0, 5);
+          const primaryKeyword = keywordList[0] || topic.toLowerCase();
+          return `# ${topic}: Complete ${(/* @__PURE__ */ new Date()).getFullYear()} Guide
 
 ## Introduction
 
-Understanding ${topic.toLowerCase()} is crucial for modern businesses looking to stay competitive. This comprehensive guide provides actionable insights and proven strategies that have helped thousands of companies achieve remarkable results.
+${topic} has become increasingly important in today's digital landscape. This comprehensive guide provides data-driven insights, proven strategies, and actionable tips that industry leaders use to achieve exceptional results.
 
-## Why ${topic} Matters in 2024
+**Key Takeaways:**
+- Master the fundamentals of ${topic.toLowerCase()}
+- Implement advanced ${primaryKeyword} strategies
+- Avoid common pitfalls and mistakes
+- Measure and optimize your results
 
-- **Market Impact**: Companies implementing effective ${topic.toLowerCase()} strategies see 40% better performance
-- **Competitive Edge**: Stay ahead with cutting-edge ${topic.toLowerCase()} techniques
-- **ROI Enhancement**: Maximize your investment with data-driven ${topic.toLowerCase()} approaches
+## Why ${topic} Matters in ${(/* @__PURE__ */ new Date()).getFullYear()}
 
-## Advanced Strategies
+Recent studies show that businesses implementing effective ${topic.toLowerCase()} strategies experience:
 
-### 1. Data-Driven Approach
-Leverage analytics to optimize your ${topic.toLowerCase()} implementation:
-- Track key performance indicators
-- Monitor user engagement metrics
-- Analyze conversion patterns
+- **📈 40% increase** in overall performance metrics
+- **🎯 60% better** audience engagement rates  
+- **💰 35% higher** return on investment
+- **🚀 50% faster** goal achievement
 
-### 2. Content Optimization
-Create compelling content that resonates with your audience:
-- Use semantic keywords naturally
-- Structure content for readability
-- Include multimedia elements
+## ${template.structure[2] || "Core Strategies"}
 
-### 3. Technical Excellence
-Ensure your ${topic.toLowerCase()} foundation is solid:
-- Optimize page loading speeds
-- Implement proper schema markup
-- Mobile-first responsive design
+### 1. Data-Driven Foundation
+Build your ${topic.toLowerCase()} strategy on solid analytics:
+- **Performance Tracking**: Monitor key metrics and KPIs
+- **Audience Analysis**: Understand your target demographic
+- **Competitive Intelligence**: Analyze market positioning
+- **Trend Identification**: Stay ahead of industry changes
 
-## Implementation Checklist
+### 2. Content Excellence Framework
+Create compelling, high-quality content that converts:
+- **Keyword Integration**: Natural use of ${primaryKeyword} and related terms
+- **User Intent Matching**: Address specific audience needs
+- **Multimedia Enhancement**: Include visuals, videos, and interactive elements
+- **Mobile Optimization**: Ensure seamless cross-device experience
 
-✅ Keyword research and mapping
-✅ Content calendar development
-✅ Technical SEO audit
-✅ Performance monitoring setup
-✅ Competitor analysis
-✅ Link building strategy
+### 3. Technical Implementation
+Ensure robust technical foundation:
+- **Performance Optimization**: Fast loading speeds and smooth functionality
+- **SEO Best Practices**: Proper meta tags, schema markup, and structure
+- **Security Measures**: Implement latest security protocols
+- **Accessibility Standards**: Ensure inclusive user experience
 
-## Measuring Success
+## Advanced ${topic} Techniques
 
-Track these essential metrics:
-- Organic traffic growth
-- Keyword ranking improvements
-- User engagement rates
-- Conversion optimization
+### Smart Automation
+Leverage technology to scale your efforts:
+- AI-powered content optimization
+- Automated performance monitoring
+- Intelligent audience segmentation
+- Predictive analytics implementation
+
+### Personalization Strategies
+Deliver tailored experiences:
+- Dynamic content adaptation
+- Behavioral trigger campaigns
+- Custom user journey mapping
+- Real-time optimization
+
+## Implementation Roadmap
+
+**Phase 1: Foundation (Weeks 1-2)**
+✅ Audit current ${topic.toLowerCase()} setup
+✅ Define clear objectives and KPIs
+✅ Research target audience and competitors
+✅ Establish baseline measurements
+
+**Phase 2: Strategy Development (Weeks 3-4)**
+✅ Create comprehensive ${primaryKeyword} strategy
+✅ Develop content calendar and workflows
+✅ Set up tracking and analytics systems
+✅ Design testing and optimization protocols
+
+**Phase 3: Execution (Weeks 5-8)**
+✅ Launch optimized ${topic.toLowerCase()} campaigns
+✅ Monitor performance and gather data
+✅ Conduct A/B tests and iterations
+✅ Scale successful initiatives
+
+**Phase 4: Optimization (Ongoing)**
+✅ Analyze results and identify improvements
+✅ Refine strategies based on data insights
+✅ Expand successful tactics
+✅ Stay updated with industry trends
+
+## Measuring Success: Key Metrics
+
+Track these essential performance indicators:
+
+**Primary Metrics:**
+- ${primaryKeyword} ranking positions
+- Organic traffic growth rate
+- Conversion rate improvements
+- User engagement metrics
+
+**Secondary Metrics:**
+- Brand awareness indicators
+- Social media engagement
+- Email marketing performance
+- Customer lifetime value
+
+**Advanced Analytics:**
+- Attribution modeling
+- Cohort analysis
+- Predictive performance indicators
+- ROI optimization metrics
+
+## Common Mistakes to Avoid
+
+❌ **Neglecting mobile optimization**
+❌ **Ignoring user experience factors**
+❌ **Overlooking technical SEO elements**
+❌ **Focusing only on short-term gains**
+❌ **Not tracking the right metrics**
+
+## Expert Tips for ${topic} Success
+
+💡 **Pro Tip 1**: Always prioritize user value over search engine manipulation
+💡 **Pro Tip 2**: Invest in long-term sustainable strategies
+💡 **Pro Tip 3**: Regularly audit and update your approach
+💡 **Pro Tip 4**: Stay informed about industry algorithm changes
+💡 **Pro Tip 5**: Test everything and let data guide decisions
+
+## Future Trends and Predictions
+
+Stay ahead of the curve with these emerging trends:
+- AI and machine learning integration
+- Voice search optimization
+- Visual and video content dominance
+- Privacy-first marketing approaches
+- Sustainable and ethical business practices
 
 ## Conclusion
 
-Mastering ${topic.toLowerCase()} requires a strategic approach, continuous learning, and data-driven decision making. Implement these strategies consistently to achieve sustainable growth.
+Mastering ${topic.toLowerCase()} requires a strategic, data-driven approach combined with consistent execution and continuous optimization. By implementing the strategies outlined in this guide, you'll be well-positioned to achieve sustainable growth and competitive advantage.
+
+Remember: Success in ${primaryKeyword} isn't about quick fixes—it's about building a solid foundation, delivering genuine value, and adapting to evolving market conditions.
 
 ---
 
-*This content includes SEO-optimized structure, relevant keywords, and actionable insights for maximum search engine visibility.*`;
+**About This Content:**
+- ✅ SEO-optimized with natural keyword integration
+- ✅ Structured for maximum readability and engagement
+- ✅ Based on current industry best practices and data
+- ✅ Designed for ${targetAudience} audience
+- ✅ Optimized for ${writingStyle} tone and style
+
+*Generated with AI-powered content intelligence for maximum impact and search visibility.*`;
+        };
+        const enhancedContent = generateIntelligentContent();
         const newImages = imagePrompts.map((prompt, index2) => ({
           id: index2 + 1,
-          url: `https://images.unsplash.com/photo-${1558655146 + index2}?w=600&h=400&fit=crop&crop=entropy&cs=tinysrgb`,
-          alt: `${topic} - ${prompt}`,
+          url: `https://images.unsplash.com/photo-${1558655146 + index2}?w=800&h=500&fit=crop&crop=entropy&cs=tinysrgb`,
+          alt: `${topic} - Professional ${index2 + 1}`,
           prompt,
-          enhanced: true
+          enhanced: true,
+          quality: "high",
+          seoOptimized: true
         }));
-        setGeneratedContent(sampleContent);
+        setGeneratedContent(enhancedContent);
         setGeneratedImages(newImages);
         setIsGenerating(false);
+        setTrendingTopics([
+          `${topic} automation trends`,
+          `AI-powered ${topic.toLowerCase()}`,
+          `${topic} ROI optimization`,
+          `Future of ${topic.toLowerCase()}`,
+          `${topic} case studies 2024`
+        ]);
+        setContentSuggestions([
+          `Create a follow-up post about advanced ${topic.toLowerCase()} techniques`,
+          `Develop a case study showcasing ${topic.toLowerCase()} success stories`,
+          `Write a comparison guide for ${topic.toLowerCase()} tools and platforms`,
+          `Create an infographic summarizing key ${topic.toLowerCase()} statistics`,
+          `Develop a video series explaining ${topic.toLowerCase()} step-by-step`
+        ]);
         toast2({
-          title: "Content & Images Generated!",
-          description: "Your SEO-optimized blog post with matching images is ready."
+          title: "🚀 Intelligent Content Generated!",
+          description: `High-quality ${topic.toLowerCase()} content with ${Math.round(contentQuality)}% quality score and SEO optimization.`
         });
-      }, 4e3);
+      }, 5e3);
     };
+    const calculateNextRun = () => {
+      const now2 = /* @__PURE__ */ new Date();
+      const [hours, minutes] = autoGenTime.split(":").map(Number);
+      let nextRun = /* @__PURE__ */ new Date();
+      nextRun.setHours(hours, minutes, 0, 0);
+      if (autoGenFrequency === "daily") {
+        if (nextRun <= now2) {
+          nextRun.setDate(nextRun.getDate() + 1);
+        }
+      } else if (autoGenFrequency === "weekly") {
+        const dayMap = {
+          "monday": 1,
+          "tuesday": 2,
+          "wednesday": 3,
+          "thursday": 4,
+          "friday": 5,
+          "saturday": 6,
+          "sunday": 0
+        };
+        const targetDay = dayMap[autoGenDay];
+        const currentDay = nextRun.getDay();
+        let daysUntilTarget = targetDay - currentDay;
+        if (daysUntilTarget <= 0 || daysUntilTarget === 0 && nextRun <= now2) {
+          daysUntilTarget += 7;
+        }
+        nextRun.setDate(nextRun.getDate() + daysUntilTarget);
+      }
+      return nextRun;
+    };
+    const generateAutoContent = async () => {
+      const topics = autoGenTopics.split(",").map((t2) => t2.trim()).filter((t2) => t2);
+      const randomTopic = topics[Math.floor(Math.random() * topics.length)] || "Digital Marketing Trends";
+      setTopic(randomTopic);
+      setKeywords(autoGenKeywords);
+      const newEntry = {
+        id: Date.now(),
+        topic: randomTopic,
+        keywords: autoGenKeywords,
+        generatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+        status: "generated"
+      };
+      setAutoGenHistory((prev) => [newEntry, ...prev.slice(0, 9)]);
+      await generateContent();
+      toast2({
+        title: "Auto-Generated Content Ready!",
+        description: `Blog post about "${randomTopic}" has been automatically generated.`
+      });
+    };
+    const toggleAutoGeneration = () => {
+      setAutoGenEnabled(!autoGenEnabled);
+      if (!autoGenEnabled) {
+        const nextRun = calculateNextRun();
+        setNextScheduledRun(nextRun);
+        toast2({
+          title: "Auto-Generation Enabled",
+          description: `Next blog post will be generated on ${nextRun.toLocaleDateString()} at ${nextRun.toLocaleTimeString()}`
+        });
+      } else {
+        setNextScheduledRun(null);
+        toast2({
+          title: "Auto-Generation Disabled",
+          description: "Automatic blog generation has been stopped."
+        });
+      }
+    };
+    React2.useEffect(() => {
+      if (autoGenEnabled) {
+        const nextRun = calculateNextRun();
+        setNextScheduledRun(nextRun);
+      }
+    }, [autoGenFrequency, autoGenTime, autoGenDay, autoGenEnabled]);
+    React2.useEffect(() => {
+      if (!autoGenEnabled || !nextScheduledRun) return;
+      const checkInterval = setInterval(() => {
+        const now2 = /* @__PURE__ */ new Date();
+        if (now2 >= nextScheduledRun) {
+          generateAutoContent();
+          const nextRun = calculateNextRun();
+          setNextScheduledRun(nextRun);
+        }
+      }, 6e4);
+      return () => clearInterval(checkInterval);
+    }, [autoGenEnabled, nextScheduledRun, autoGenTopics, autoGenKeywords]);
     const copyToClipboard = () => {
       navigator.clipboard.writeText(generatedContent);
       toast2({
@@ -12486,161 +13028,615 @@ Mastering ${topic.toLowerCase()} requires a strategic approach, continuous learn
         });
       }
     };
-    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-6", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs(Card, { className: "bg-white/70 backdrop-blur-sm border-0 shadow-lg", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(CardHeader, { children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs(CardTitle, { className: "flex items-center gap-2", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(WandSparkles, { className: "h-5 w-5 text-purple-600" }),
-            "Integrated Content & Image Generator"
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(CardDescription, { children: "Generate SEO-optimized blog posts with contextual images automatically" })
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-6", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(Tabs, { defaultValue: "manual", className: "w-full", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(TabsList, { className: "grid w-full grid-cols-3 mb-6", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(TabsTrigger, { value: "manual", className: "flex items-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(WandSparkles, { className: "h-4 w-4" }),
+          "Manual Generation"
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(CardContent, { className: "space-y-4", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { htmlFor: "topic", children: "Blog Topic *" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              Input,
-              {
-                id: "topic",
-                placeholder: "e.g., Digital Marketing Strategies for 2024",
-                value: topic,
-                onChange: (e3) => setTopic(e3.target.value)
-              }
-            )
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(TabsTrigger, { value: "auto", className: "flex items-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Calendar, { className: "h-4 w-4" }),
+          "Auto Generation"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(TabsTrigger, { value: "history", className: "flex items-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Clock, { className: "h-4 w-4" }),
+          "Generation History"
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(TabsContent, { value: "manual", className: "space-y-6", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(Card, { className: "bg-white/70 backdrop-blur-sm border-0 shadow-lg", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(CardHeader, { children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(CardTitle, { className: "flex items-center gap-2", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(WandSparkles, { className: "h-5 w-5 text-purple-600" }),
+              "Integrated Content & Image Generator"
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(CardDescription, { children: "Generate SEO-optimized blog posts with contextual images automatically" })
           ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { htmlFor: "keywords", children: "Target Keywords" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              Input,
-              {
-                id: "keywords",
-                placeholder: "SEO, digital marketing, content strategy...",
-                value: keywords,
-                onChange: (e3) => setKeywords(e3.target.value)
-              }
-            )
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-2 gap-4", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(CardContent, { className: "space-y-4", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { children: "Writing Tone" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs(Select, { value: tone, onValueChange: setTone, children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(SelectTrigger, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(SelectValue, { placeholder: "Select tone" }) }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs(SelectContent, { children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "professional", children: "Professional" }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "casual", children: "Casual" }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "authoritative", children: "Authoritative" }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "conversational", children: "Conversational" })
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { htmlFor: "topic", children: "Blog Topic *" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                Input,
+                {
+                  id: "topic",
+                  placeholder: "e.g., Digital Marketing Strategies for 2024",
+                  value: topic,
+                  onChange: (e3) => setTopic(e3.target.value)
+                }
+              )
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { htmlFor: "keywords", children: "Target Keywords" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                Input,
+                {
+                  id: "keywords",
+                  placeholder: "SEO, digital marketing, content strategy...",
+                  value: keywords,
+                  onChange: (e3) => setKeywords(e3.target.value)
+                }
+              )
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-2 gap-4", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { children: "Writing Tone" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(Select, { value: tone, onValueChange: setTone, children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(SelectTrigger, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(SelectValue, { placeholder: "Select tone" }) }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs(SelectContent, { children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "professional", children: "Professional" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "casual", children: "Casual" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "authoritative", children: "Authoritative" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "conversational", children: "Conversational" })
+                  ] })
+                ] })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { children: "Word Count" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(Select, { value: wordCount, onValueChange: setWordCount, children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(SelectTrigger, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(SelectValue, { placeholder: "Select length" }) }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs(SelectContent, { children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "short", children: "Short (500-800 words)" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "medium", children: "Medium (800-1200 words)" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "long", children: "Long (1200-2000 words)" })
+                  ] })
+                ] })
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Separator, {}),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 mb-3", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(Brain, { className: "h-5 w-5 text-blue-600" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { className: "text-base font-semibold", children: "AI Intelligence Settings" })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-2 gap-4", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { children: "Content Type" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs(Select, { value: contentType, onValueChange: setContentType, children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectTrigger, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(SelectValue, { placeholder: "Select type" }) }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs(SelectContent, { children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "blog", children: "Blog Post" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "how-to", children: "How-To Guide" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "listicle", children: "Listicle" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "comparison", children: "Comparison" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "case-study", children: "Case Study" })
+                    ] })
+                  ] })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { children: "Writing Style" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs(Select, { value: writingStyle, onValueChange: setWritingStyle, children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectTrigger, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(SelectValue, { placeholder: "Select style" }) }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs(SelectContent, { children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "professional", children: "Professional" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "conversational", children: "Conversational" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "authoritative", children: "Authoritative" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "casual", children: "Casual" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "technical", children: "Technical" })
+                    ] })
+                  ] })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { children: "Target Audience" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs(Select, { value: targetAudience, onValueChange: setTargetAudience, children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectTrigger, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(SelectValue, { placeholder: "Select audience" }) }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs(SelectContent, { children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "general", children: "General Public" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "beginners", children: "Beginners" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "professionals", children: "Professionals" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "experts", children: "Industry Experts" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "executives", children: "Business Executives" })
+                    ] })
+                  ] })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { children: "Industry Focus" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs(Select, { value: industryFocus, onValueChange: setIndustryFocus, children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectTrigger, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(SelectValue, { placeholder: "Select industry" }) }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs(SelectContent, { children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "general", children: "General Business" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "technology", children: "Technology" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "marketing", children: "Marketing" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "finance", children: "Finance" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "healthcare", children: "Healthcare" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "education", children: "Education" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "ecommerce", children: "E-commerce" })
+                    ] })
+                  ] })
+                ] })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { children: "Content Template" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(Select, { value: contentTemplate, onValueChange: setContentTemplate, children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(SelectTrigger, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(SelectValue, { placeholder: "Select template" }) }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs(SelectContent, { children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "standard", children: "Standard Article" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "how-to", children: "How-To Guide" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "listicle", children: "List Article" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "comparison", children: "Comparison Guide" })
+                  ] })
                 ] })
               ] })
             ] }),
             /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { children: "Word Count" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs(Select, { value: wordCount, onValueChange: setWordCount, children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(SelectTrigger, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(SelectValue, { placeholder: "Select length" }) }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs(SelectContent, { children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "short", children: "Short (500-800 words)" }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "medium", children: "Medium (800-1200 words)" }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "long", children: "Long (1200-2000 words)" })
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { children: "AI-Powered Features" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap gap-2", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(Badge, { variant: "secondary", className: "bg-green-100 text-green-700", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(CircleCheckBig, { className: "h-3 w-3 mr-1" }),
+                  "SEO-Optimized Content"
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(Badge, { variant: "secondary", className: "bg-blue-100 text-blue-700", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Eye, { className: "h-3 w-3 mr-1" }),
+                  "Contextual Images"
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(Badge, { variant: "secondary", className: "bg-purple-100 text-purple-700", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Brain, { className: "h-3 w-3 mr-1" }),
+                  "Smart Keywords"
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(Badge, { variant: "secondary", className: "bg-orange-100 text-orange-700", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Target, { className: "h-3 w-3 mr-1" }),
+                  "Quality Analysis"
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(Badge, { variant: "secondary", className: "bg-pink-100 text-pink-700", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(TrendingUp, { className: "h-3 w-3 mr-1" }),
+                  "Trend Integration"
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(Badge, { variant: "secondary", className: "bg-indigo-100 text-indigo-700", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Zap, { className: "h-3 w-3 mr-1" }),
+                  "Ready to Publish"
                 ] })
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              Button,
+              {
+                onClick: generateContent,
+                className: "w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3",
+                disabled: isGenerating,
+                children: isGenerating ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "animate-spin rounded-full h-4 w-4 border-b-2 border-white" }),
+                  "Generating Intelligent Content..."
+                ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Brain, { className: "h-4 w-4" }),
+                  "Generate AI-Powered Blog Post"
+                ] })
+              }
+            )
+          ] })
+        ] }),
+        generatedContent && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid gap-6 md:grid-cols-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(Card, { className: "bg-white/70 backdrop-blur-sm border-0 shadow-lg", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(CardHeader, { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs(CardTitle, { className: "flex items-center gap-2", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(FileText, { className: "h-5 w-5 text-green-600" }),
+                "Generated Content"
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(CardDescription, { children: "SEO-optimized blog post ready for publication" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex gap-2 mt-2", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                Button,
+                {
+                  variant: "outline",
+                  size: "sm",
+                  onClick: copyToClipboard,
+                  className: "flex items-center gap-1",
+                  children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(Copy, { className: "h-3 w-3" }),
+                    "Copy"
+                  ]
+                }
+              ) })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(CardContent, { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "max-h-96 overflow-y-auto p-4 bg-gray-50 rounded-lg", children: /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { className: "whitespace-pre-wrap text-sm text-gray-800", children: generatedContent }) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-3 gap-4 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg mt-4", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-lg font-bold text-green-600", children: generatedContent.split(" ").length }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-sm text-gray-600", children: "Words" })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-lg font-bold text-blue-600", children: generatedContent.split("\n").filter((line) => line.trim().startsWith("#")).length }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-sm text-gray-600", children: "Headers" })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-lg font-bold text-purple-600", children: Math.ceil(generatedContent.split(" ").length / 200) }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-sm text-gray-600", children: "Min Read" })
+                ] })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg mt-4 border", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 mb-3", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Award, { className: "h-5 w-5 text-purple-600" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { className: "text-base font-semibold", children: "AI Quality Analysis" })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-3 gap-4", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-medium", children: "Content Quality" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-sm font-bold text-green-600", children: [
+                        contentQuality,
+                        "%"
+                      ] })
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(Progress, { value: contentQuality, className: "h-2" })
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-medium", children: "SEO Score" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-sm font-bold text-blue-600", children: [
+                        seoScore,
+                        "%"
+                      ] })
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(Progress, { value: seoScore, className: "h-2" })
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-medium", children: "Readability" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-sm font-bold text-purple-600", children: [
+                        readabilityScore,
+                        "%"
+                      ] })
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(Progress, { value: readabilityScore, className: "h-2" })
+                  ] })
+                ] }),
+                smartKeywords.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { className: "text-sm font-medium", children: "AI-Generated Keywords" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-1", children: smartKeywords.slice(0, 8).map((keyword, index2) => /* @__PURE__ */ jsxRuntimeExports.jsx(Badge, { variant: "outline", className: "text-xs bg-white", children: keyword }, index2)) })
+                ] }),
+                Object.keys(contentInsights).length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-2 gap-4 text-xs", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-between", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Read Time:" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "font-medium", children: [
+                        contentInsights.estimatedReadTime,
+                        " min"
+                      ] })
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-between", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Keyword Density:" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-medium", children: contentInsights.targetKeywordDensity })
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-between", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Headings:" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-medium", children: contentInsights.recommendedHeadings })
+                    ] })
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-between", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Images:" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-medium", children: contentInsights.suggestedImages })
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-between", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "SEO Complexity:" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-medium", children: contentInsights.seoComplexity })
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-between", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Competition:" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-medium", children: contentInsights.competitiveLevel })
+                    ] })
+                  ] })
+                ] })
+              ] })
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(Card, { className: "bg-white/70 backdrop-blur-sm border-0 shadow-lg", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(CardHeader, { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs(CardTitle, { className: "flex items-center gap-2", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(Image, { className: "h-5 w-5 text-pink-600" }),
+                "Contextual Images"
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(CardDescription, { children: "AI-generated images optimized for your content" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(CardContent, { children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-2 gap-4", children: generatedImages.map((image) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "group relative", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "aspect-video overflow-hidden rounded-lg bg-gray-100", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "img",
+                {
+                  src: image.url,
+                  alt: image.alt,
+                  className: "w-full h-full object-cover transition-transform group-hover:scale-105"
+                }
+              ) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                Button,
+                {
+                  variant: "secondary",
+                  size: "sm",
+                  onClick: () => downloadImage(image.url, `blog-image-${image.id}.jpg`),
+                  className: "bg-white/90 hover:bg-white",
+                  children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(Download, { className: "h-4 w-4 mr-1" }),
+                    "Download"
+                  ]
+                }
+              ) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-gray-500 mt-2 line-clamp-2", children: image.prompt })
+            ] }, image.id)) }) })
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(TabsContent, { value: "auto", className: "space-y-6", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(Card, { className: "bg-white/70 backdrop-blur-sm border-0 shadow-lg", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(CardHeader, { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(CardTitle, { className: "flex items-center gap-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Calendar, { className: "h-5 w-5 text-blue-600" }),
+            "Auto Blog Generation"
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(CardDescription, { children: "Set up automatic blog post generation with customizable frequency and topics" })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(CardContent, { className: "space-y-6", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+                autoGenEnabled ? /* @__PURE__ */ jsxRuntimeExports.jsx(Play, { className: "h-4 w-4 text-green-600" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Pause, { className: "h-4 w-4 text-gray-400" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(Label$2, { className: "text-base font-medium", children: [
+                  "Auto-Generation ",
+                  autoGenEnabled ? "Active" : "Inactive"
+                ] })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-gray-600", children: autoGenEnabled ? `Next generation: ${nextScheduledRun == null ? void 0 : nextScheduledRun.toLocaleDateString()} at ${nextScheduledRun == null ? void 0 : nextScheduledRun.toLocaleTimeString()}` : "Enable to start automatic blog generation" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              Switch,
+              {
+                checked: autoGenEnabled,
+                onCheckedChange: toggleAutoGeneration
+              }
+            )
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { children: "Generation Frequency" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs(Select, { value: autoGenFrequency, onValueChange: setAutoGenFrequency, children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(SelectTrigger, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(SelectValue, {}) }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(SelectContent, { children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "daily", children: "Daily" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "weekly", children: "Weekly" })
+                ] })
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { children: "Generation Time" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                Input,
+                {
+                  type: "time",
+                  value: autoGenTime,
+                  onChange: (e3) => setAutoGenTime(e3.target.value)
+                }
+              )
+            ] })
+          ] }),
+          autoGenFrequency === "weekly" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { children: "Day of Week" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(Select, { value: autoGenDay, onValueChange: setAutoGenDay, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(SelectTrigger, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(SelectValue, {}) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs(SelectContent, { children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "monday", children: "Monday" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "tuesday", children: "Tuesday" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "wednesday", children: "Wednesday" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "thursday", children: "Thursday" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "friday", children: "Friday" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "saturday", children: "Saturday" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "sunday", children: "Sunday" })
               ] })
             ] })
           ] }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(Separator, {}),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { children: "Integrated Features" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap gap-2", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Badge, { variant: "secondary", className: "bg-green-100 text-green-700", children: "SEO-Optimized Content" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Badge, { variant: "secondary", className: "bg-blue-100 text-blue-700", children: "Contextual Images" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Badge, { variant: "secondary", className: "bg-purple-100 text-purple-700", children: "Enhanced Prompts" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Badge, { variant: "secondary", className: "bg-orange-100 text-orange-700", children: "Ready to Publish" })
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { htmlFor: "autoTopics", children: "Topic Pool (comma-separated)" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                Textarea,
+                {
+                  id: "autoTopics",
+                  placeholder: "Digital Marketing, SEO Strategies, Content Creation, Social Media Marketing, Email Marketing...",
+                  value: autoGenTopics,
+                  onChange: (e3) => setAutoGenTopics(e3.target.value),
+                  rows: 3
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-gray-500", children: "Random topics will be selected from this list for auto-generation" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { htmlFor: "autoKeywords", children: "Default Keywords" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                Input,
+                {
+                  id: "autoKeywords",
+                  placeholder: "SEO, marketing, business, digital...",
+                  value: autoGenKeywords,
+                  onChange: (e3) => setAutoGenKeywords(e3.target.value)
+                }
+              )
             ] })
           ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            Button,
-            {
-              onClick: generateContent,
-              className: "w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700",
-              disabled: isGenerating,
-              children: isGenerating ? "Generating Content & Images..." : "Generate Complete Blog Post"
-            }
-          )
-        ] })
-      ] }),
-      generatedContent && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid gap-6 md:grid-cols-2", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(Card, { className: "bg-white/70 backdrop-blur-sm border-0 shadow-lg", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs(CardHeader, { children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs(CardTitle, { className: "flex items-center gap-2", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(FileText, { className: "h-5 w-5 text-green-600" }),
-              "Generated Content"
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Separator, {}),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 mb-3", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Brain, { className: "h-5 w-5 text-indigo-600" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { className: "text-base font-semibold", children: "Smart Auto-Generation" })
             ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(CardDescription, { children: "SEO-optimized blog post ready for publication" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex gap-2 mt-2", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
-              Button,
-              {
-                variant: "outline",
-                size: "sm",
-                onClick: copyToClipboard,
-                className: "flex items-center gap-1",
-                children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(Copy, { className: "h-3 w-3" }),
-                  "Copy"
-                ]
-              }
-            ) })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs(CardContent, { children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "max-h-96 overflow-y-auto p-4 bg-gray-50 rounded-lg", children: /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { className: "whitespace-pre-wrap text-sm text-gray-800", children: generatedContent }) }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-3 gap-4 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg mt-4", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-lg font-bold text-green-600", children: generatedContent.split(" ").length }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-sm text-gray-600", children: "Words" })
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-2 gap-4", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { children: "Auto Content Type" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(Select, { value: contentType, onValueChange: setContentType, children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(SelectTrigger, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(SelectValue, { placeholder: "Select type" }) }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs(SelectContent, { children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "blog", children: "Blog Posts" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "how-to", children: "How-To Guides" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "listicle", children: "List Articles" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "comparison", children: "Comparisons" })
+                  ] })
+                ] })
               ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-lg font-bold text-blue-600", children: generatedContent.split("\n").filter((line) => line.trim().startsWith("#")).length }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-sm text-gray-600", children: "Headers" })
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { children: "Auto Writing Style" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(Select, { value: writingStyle, onValueChange: setWritingStyle, children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(SelectTrigger, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(SelectValue, { placeholder: "Select style" }) }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs(SelectContent, { children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "professional", children: "Professional" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "conversational", children: "Conversational" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "authoritative", children: "Authoritative" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "casual", children: "Casual" })
+                  ] })
+                ] })
               ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-lg font-bold text-purple-600", children: Math.ceil(generatedContent.split(" ").length / 200) }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-sm text-gray-600", children: "Min Read" })
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { children: "Target Audience" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(Select, { value: targetAudience, onValueChange: setTargetAudience, children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(SelectTrigger, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(SelectValue, { placeholder: "Select audience" }) }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs(SelectContent, { children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "general", children: "General Public" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "beginners", children: "Beginners" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "professionals", children: "Professionals" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "experts", children: "Industry Experts" })
+                  ] })
+                ] })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { children: "Industry Focus" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(Select, { value: industryFocus, onValueChange: setIndustryFocus, children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(SelectTrigger, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(SelectValue, { placeholder: "Select industry" }) }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs(SelectContent, { children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "general", children: "General Business" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "technology", children: "Technology" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "marketing", children: "Marketing" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "finance", children: "Finance" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "healthcare", children: "Healthcare" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "education", children: "Education" })
+                  ] })
+                ] })
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { children: "Smart Features" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap gap-2", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(Badge, { variant: "secondary", className: "bg-green-100 text-green-700", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(TrendingUp, { className: "h-3 w-3 mr-1" }),
+                  "Trend Analysis"
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(Badge, { variant: "secondary", className: "bg-blue-100 text-blue-700", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Target, { className: "h-3 w-3 mr-1" }),
+                  "SEO Optimization"
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(Badge, { variant: "secondary", className: "bg-purple-100 text-purple-700", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Brain, { className: "h-3 w-3 mr-1" }),
+                  "Smart Keywords"
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(Badge, { variant: "secondary", className: "bg-orange-100 text-orange-700", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Award, { className: "h-3 w-3 mr-1" }),
+                  "Quality Scoring"
+                ] })
               ] })
             ] })
-          ] })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(Card, { className: "bg-white/70 backdrop-blur-sm border-0 shadow-lg", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs(CardHeader, { children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs(CardTitle, { className: "flex items-center gap-2", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Image, { className: "h-5 w-5 text-pink-600" }),
-              "Contextual Images"
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(CardDescription, { children: "AI-generated images optimized for your content" })
           ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(CardContent, { children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-2 gap-4", children: generatedImages.map((image) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "group relative", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "aspect-video overflow-hidden rounded-lg bg-gray-100", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "img",
+          trendingTopics.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(TrendingUp, { className: "h-4 w-4 text-orange-600" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { className: "text-sm font-semibold", children: "Trending Topic Suggestions" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-2", children: trendingTopics.map((topic2, index2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              Badge,
               {
-                src: image.url,
-                alt: image.alt,
-                className: "w-full h-full object-cover transition-transform group-hover:scale-105"
-              }
-            ) }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
-              Button,
-              {
-                variant: "secondary",
-                size: "sm",
-                onClick: () => downloadImage(image.url, `blog-image-${image.id}.jpg`),
-                className: "bg-white/90 hover:bg-white",
+                variant: "outline",
+                className: "cursor-pointer hover:bg-orange-100 text-xs",
+                onClick: () => {
+                  const currentTopics = autoGenTopics ? autoGenTopics + ", " + topic2 : topic2;
+                  setAutoGenTopics(currentTopics);
+                },
                 children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(Download, { className: "h-4 w-4 mr-1" }),
-                  "Download"
+                  "+ ",
+                  topic2
                 ]
-              }
-            ) }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-gray-500 mt-2 line-clamp-2", children: image.prompt })
-          ] }, image.id)) }) })
+              },
+              index2
+            )) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-gray-500", children: "Click to add trending topics to your pool" })
+          ] }),
+          contentSuggestions.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3 p-4 bg-gradient-to-r from-green-50 to-teal-50 rounded-lg border", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Lightbulb, { className: "h-4 w-4 text-green-600" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { className: "text-sm font-semibold", children: "AI Content Suggestions" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-2", children: contentSuggestions.slice(0, 3).map((suggestion, index2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-xs text-gray-600 p-2 bg-white rounded border-l-2 border-green-300", children: [
+              "💡 ",
+              suggestion
+            ] }, index2)) })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "pt-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            Button,
+            {
+              onClick: generateAutoContent,
+              variant: "outline",
+              className: "w-full bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 border-indigo-200",
+              disabled: !autoGenTopics.trim(),
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(Settings, { className: "h-4 w-4 mr-2" }),
+                "Test Smart Auto-Generation Now"
+              ]
+            }
+          ) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap gap-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Badge, { variant: autoGenEnabled ? "default" : "secondary", className: "bg-blue-100 text-blue-700", children: autoGenEnabled ? "Active" : "Inactive" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(Badge, { variant: "secondary", className: "bg-green-100 text-green-700", children: [
+              autoGenFrequency === "daily" ? "Daily" : "Weekly",
+              " Schedule"
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(Badge, { variant: "secondary", className: "bg-purple-100 text-purple-700", children: [
+              autoGenTopics.split(",").filter((t2) => t2.trim()).length,
+              " Topics"
+            ] })
+          ] })
         ] })
-      ] })
-    ] });
+      ] }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(TabsContent, { value: "history", className: "space-y-6", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(Card, { className: "bg-white/70 backdrop-blur-sm border-0 shadow-lg", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(CardHeader, { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(CardTitle, { className: "flex items-center gap-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Clock, { className: "h-5 w-5 text-green-600" }),
+            "Generation History"
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(CardDescription, { children: "View your recent auto-generated blog posts" })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(CardContent, { children: autoGenHistory.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center py-8", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Clock, { className: "h-12 w-12 text-gray-300 mx-auto mb-4" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-500", children: "No auto-generated content yet" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-gray-400 mt-2", children: "Enable auto-generation to start building your content history" })
+        ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-4", children: autoGenHistory.map((entry) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 border rounded-lg bg-gradient-to-r from-gray-50 to-blue-50", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start justify-between", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "font-medium text-gray-900", children: entry.topic }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-gray-600", children: [
+              "Keywords: ",
+              entry.keywords
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-gray-500", children: [
+              "Generated: ",
+              new Date(entry.generatedAt).toLocaleDateString(),
+              " at ",
+              new Date(entry.generatedAt).toLocaleTimeString()
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Badge, { variant: "secondary", className: "bg-green-100 text-green-700", children: entry.status })
+        ] }) }, entry.id)) }) })
+      ] }) })
+    ] }) });
   };
   var isArray$f = Array.isArray;
   var isArray_1 = isArray$f;
@@ -34545,6 +35541,9 @@ Mastering ${topic.toLowerCase()} requires a strategic approach, continuous learn
   ] }) });
   window.FluxSEOApp = {
     component: WordPressApp,
+    render: (containerId = "root") => {
+      window.FluxSEOApp.init(containerId);
+    },
     init: (containerId = "root") => {
       console.log("FluxSEOApp.init called with containerId:", containerId);
       const container = document.getElementById(containerId);

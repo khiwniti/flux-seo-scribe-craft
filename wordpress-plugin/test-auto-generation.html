@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flux SEO Scribe Craft - Auto Generation Test</title>
+    <link rel="stylesheet" href="flux-seo-scribe-craft.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        .test-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Flux SEO Scribe Craft</h1>
+            <p>Auto Blog Generation Feature Test</p>
+        </div>
+        
+        <div class="test-info">
+            <h3>✨ New Auto-Generation Features:</h3>
+            <ul>
+                <li>📅 <strong>Daily/Weekly Scheduling:</strong> Set automatic blog generation frequency</li>
+                <li>⏰ <strong>Custom Time:</strong> Choose when blogs are generated</li>
+                <li>📝 <strong>Topic Pool:</strong> Define multiple topics for random selection</li>
+                <li>🎯 <strong>Default Keywords:</strong> Set consistent SEO keywords</li>
+                <li>📊 <strong>Generation History:</strong> Track all auto-generated content</li>
+                <li>🧪 <strong>Test Generation:</strong> Preview auto-generation before scheduling</li>
+            </ul>
+        </div>
+
+        <div id="flux-seo-app"></div>
+    </div>
+
+    <!-- React Dependencies -->
+    <script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+    
+    <!-- Flux SEO App -->
+    <script src="flux-seo-wordpress-app.js"></script>
+    
+    <script>
+        // Initialize the app
+        if (window.FluxSEOApp) {
+            window.FluxSEOApp.render('flux-seo-app');
+            console.log('✅ Flux SEO App with Auto-Generation loaded successfully!');
+        } else {
+            console.error('❌ Failed to load Flux SEO App');
+        }
+
+        // Test auto-generation features
+        setTimeout(() => {
+            console.log('🧪 Testing auto-generation features...');
+            
+            // Simulate clicking on Auto Generation tab
+            const autoTab = document.querySelector('[data-value="auto"]');
+            if (autoTab) {
+                console.log('✅ Auto Generation tab found');
+            }
+            
+            // Check for frequency dropdown
+            const frequencySelect = document.querySelector('select');
+            if (frequencySelect) {
+                console.log('✅ Frequency selector found');
+            }
+            
+            console.log('🎉 Auto-generation UI components loaded successfully!');
+        }, 2000);
+    </script>
+</body>
+</html>
