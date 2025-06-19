@@ -28,11 +28,15 @@
         
         // Initialize the React application
         initApp: function() {
+            console.log('🔧 FluxSEOWordPress.initApp: Starting initialization...');
+            
             // Find all root elements where the app should mount
             const rootElements = document.querySelectorAll('#root, #flux-seo-root, #flux-seo-admin-app, #flux-seo-shortcode-app');
+            console.log('🔍 Found root elements:', rootElements.length, Array.from(rootElements).map(el => el.id));
             
             if (rootElements.length === 0) {
-                console.warn('Flux SEO: No root element found for mounting the application');
+                console.warn('⚠️ Flux SEO: No root element found for mounting the application');
+                console.log('📋 Available elements:', Array.from(document.querySelectorAll('[id]')).map(el => el.id));
                 return;
             }
             
@@ -44,8 +48,10 @@
             
             // Initialize each root element
             rootElements.forEach((element, index) => {
+                console.log(`🎯 Processing root element ${index + 1}:`, element.id);
+                
                 if (element.querySelector('#root')) {
-                    // Already has a root element, skip
+                    console.log('⏭️ Element already has a root child, skipping');
                     return;
                 }
                 
@@ -54,10 +60,82 @@
                     const rootDiv = document.createElement('div');
                     rootDiv.id = 'root';
                     element.appendChild(rootDiv);
+                    console.log('✅ Created root div inside:', element.id);
                 }
             });
             
-            console.log('Flux SEO: Application initialized successfully');
+            // Check if FluxSEOApp is available and try to initialize
+            this.checkAndInitializeFluxSEOApp();
+            
+            console.log('✅ Flux SEO: WordPress integration initialized successfully');
+        },
+        
+        // Check for FluxSEOApp and initialize it
+        checkAndInitializeFluxSEOApp: function() {
+            console.log('🔍 Checking for window.FluxSEOApp...');
+            
+            if (typeof window.FluxSEOApp !== 'undefined' && window.FluxSEOApp.init) {
+                console.log('✅ FluxSEOApp found, initializing...');
+                try {
+                    window.FluxSEOApp.init('root');
+                    console.log('🎉 FluxSEOApp initialized successfully');
+                } catch (error) {
+                    console.error('💥 Error initializing FluxSEOApp:', error);
+                }
+            } else {
+                console.log('⏳ FluxSEOApp not yet available, will retry...');
+                // Listen for when the app becomes available
+                this.waitForFluxSEOApp();
+            }
+        },
+        
+        // Wait for FluxSEOApp to become available
+        waitForFluxSEOApp: function() {
+            let attempts = 0;
+            const maxAttempts = 30; // 15 seconds with 500ms intervals
+            
+            const checkInterval = setInterval(() => {
+                attempts++;
+                console.log(`🔄 Attempt ${attempts}/${maxAttempts}: Checking for FluxSEOApp...`);
+                
+                if (typeof window.FluxSEOApp !== 'undefined' && window.FluxSEOApp.init) {
+                    console.log('✅ FluxSEOApp found after waiting, initializing...');
+                    clearInterval(checkInterval);
+                    try {
+                        window.FluxSEOApp.init('root');
+                        console.log('🎉 FluxSEOApp initialized successfully');
+                    } catch (error) {
+                        console.error('💥 Error initializing FluxSEOApp:', error);
+                    }
+                } else if (attempts >= maxAttempts) {
+                    console.error('❌ FluxSEOApp not found after maximum attempts');
+                    clearInterval(checkInterval);
+                    this.showLoadingError();
+                }
+            }, 500);
+        },
+        
+        // Show loading error
+        showLoadingError: function() {
+            const rootElement = document.getElementById('root');
+            if (rootElement) {
+                rootElement.innerHTML = `
+                    <div style="padding: 20px; border: 2px solid #dc3545; border-radius: 8px; background: #f8d7da; color: #721c24; margin: 20px;">
+                        <h3>⚠️ WordPress Integration Error</h3>
+                        <p>The FluxSEOApp could not be loaded properly.</p>
+                        <p><strong>Possible causes:</strong></p>
+                        <ul>
+                            <li>JavaScript files not loading correctly</li>
+                            <li>React dependencies missing</li>
+                            <li>Plugin file conflicts</li>
+                            <li>Browser compatibility issues</li>
+                        </ul>
+                        <button onclick="location.reload()" style="margin-top: 10px; padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            Refresh Page
+                        </button>
+                    </div>
+                `;
+            }
         },
         
         // Setup AJAX integration with WordPress
