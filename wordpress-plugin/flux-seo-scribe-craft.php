@@ -257,8 +257,11 @@ class FluxSEOScribeCraft {
         }
         
         // Handle AJAX requests from the React app
-        $action = sanitize_text_field($_POST['flux_action']);
-        $data = $_POST['data'];
+        $action = isset($_POST['flux_action']) ? sanitize_text_field($_POST['flux_action']) : null;
+        $data = isset($_POST['data']) ? stripslashes_deep($_POST['data']) : null; // Data is expected to be JSON string
+
+        error_log('[Flux SEO] AJAX Proxy Handler: Received action: ' . print_r($action, true));
+        error_log('[Flux SEO] AJAX Proxy Handler: Received data: ' . print_r($data, true));
         
         switch ($action) {
             case 'analyze_content':
@@ -268,12 +271,30 @@ class FluxSEOScribeCraft {
                 $this->handle_content_generation($data);
                 break;
             default:
-                wp_send_json_error('Invalid action');
+                error_log('[Flux SEO] AJAX Proxy Handler: Invalid action: ' . print_r($action, true));
+                wp_send_json_error('Invalid action: ' . $action);
         }
     }
     
-    private function handle_content_analysis($data) {
+    private function handle_content_analysis($data_json) {
+        $data = json_decode($data_json, true);
+        error_log('[Flux SEO] Handling content analysis for data: ' . print_r($data, true));
+
         // Mock content analysis - in a real implementation, this would connect to SEO APIs
+        // Example of logging for an external API call:
+        // $api_url = 'https://api.example.com/analyze';
+        // $api_args = array('body' => $data, 'timeout' => 30);
+        // error_log('[Flux SEO] External API Call: URL: ' . $api_url . ', Args: ' . print_r($api_args, true));
+        // $response = wp_remote_post($api_url, $api_args);
+        // if (is_wp_error($response)) {
+        //     error_log('[Flux SEO] External API Error: ' . $response->get_error_message());
+        //     wp_send_json_error('Failed to connect to analysis service: ' . $response->get_error_message());
+        //     return;
+        // }
+        // $raw_response_body = wp_remote_retrieve_body($response);
+        // error_log('[Flux SEO] External API Raw Response: ' . print_r($raw_response_body, true));
+        // $analysis = json_decode($raw_response_body, true);
+
         $analysis = array(
             'seo_score' => rand(60, 95),
             'readability' => rand(70, 90),
@@ -286,18 +307,37 @@ class FluxSEOScribeCraft {
             )
         );
         
+        error_log('[Flux SEO] Sending success response for content_analysis: ' . print_r($analysis, true));
         wp_send_json_success($analysis);
     }
     
-    private function handle_content_generation($data) {
+    private function handle_content_generation($data_json) {
+        $data = json_decode($data_json, true);
+        error_log('[Flux SEO] Handling content generation for data: ' . print_r($data, true));
+
         // Mock content generation - in a real implementation, this would connect to AI APIs
+        // Example of logging for an external API call:
+        // $api_url = 'https://api.example.com/generate';
+        // $api_args = array('body' => $data, 'timeout' => 60);
+        // error_log('[Flux SEO] External API Call: URL: ' . $api_url . ', Args: ' . print_r($api_args, true));
+        // $response = wp_remote_post($api_url, $api_args);
+        // if (is_wp_error($response)) {
+        //     error_log('[Flux SEO] External API Error: ' . $response->get_error_message());
+        //     wp_send_json_error('Failed to connect to generation service: ' . $response->get_error_message());
+        //     return;
+        // }
+        // $raw_response_body = wp_remote_retrieve_body($response);
+        // error_log('[Flux SEO] External API Raw Response: ' . print_r($raw_response_body, true));
+        // $generated_content = json_decode($raw_response_body, true);
+
         $generated_content = array(
-            'title' => 'SEO Optimized Article: ' . sanitize_text_field($data['topic']),
-            'content' => 'This is a generated article about ' . sanitize_text_field($data['topic']) . '. Lorem ipsum dolor sit amet, consectetur adipiscing elit...',
-            'meta_description' => 'Learn about ' . sanitize_text_field($data['topic']) . ' with our comprehensive guide.',
-            'keywords' => array('seo', 'optimization', sanitize_text_field($data['topic']))
+            'title' => 'SEO Optimized Article: ' . (isset($data['topic']) ? sanitize_text_field($data['topic']) : 'N/A'),
+            'content' => 'This is a generated article about ' . (isset($data['topic']) ? sanitize_text_field($data['topic']) : 'N/A') . '. Lorem ipsum dolor sit amet, consectetur adipiscing elit...',
+            'meta_description' => 'Learn about ' . (isset($data['topic']) ? sanitize_text_field($data['topic']) : 'N/A') . ' with our comprehensive guide.',
+            'keywords' => array('seo', 'optimization', (isset($data['topic']) ? sanitize_text_field($data['topic']) : 'N/A'))
         );
         
+        error_log('[Flux SEO] Sending success response for content_generation: ' . print_r($generated_content, true));
         wp_send_json_success($generated_content);
     }
 }
