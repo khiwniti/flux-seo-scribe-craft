@@ -43,42 +43,44 @@ const SEODashboard = () => {
 
         {/* Main Dashboard */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-8 bg-white/50 backdrop-blur-sm p-2 rounded-lg">
-            <TabsTrigger value="analyzer" className="flex items-center gap-2 text-sm">
-              <Search className="h-4 w-4" />
-              <span className="hidden sm:inline">Content Analyzer</span>
-              <span className="sm:hidden">Analyzer</span>
-            </TabsTrigger>
-            <TabsTrigger value="generator" className="flex items-center gap-2 text-sm">
-              <FileText className="h-4 w-4" />
-              <span className="hidden sm:inline">AI Generator</span>
-              <span className="sm:hidden">Generator</span>
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2 text-sm">
-              <BarChart3 className="h-4 w-4" />
-              <span className="hidden sm:inline">Analytics</span>
-              <span className="sm:hidden">Analytics</span>
-            </TabsTrigger>
-            <TabsTrigger value="keywords" className="flex items-center gap-2 text-sm">
-              <Target className="h-4 w-4" />
-              <span className="hidden sm:inline">Keywords</span>
-              <span className="sm:hidden">Keywords</span>
-            </TabsTrigger>
-            <TabsTrigger value="meta" className="flex items-center gap-2 text-sm">
-              <Globe className="h-4 w-4" />
-              <span className="hidden sm:inline">Meta Tags</span>
-              <span className="sm:hidden">Meta</span>
-            </TabsTrigger>
-            <TabsTrigger value="schema" className="flex items-center gap-2 text-sm">
-              <Code className="h-4 w-4" />
-              <span className="hidden sm:inline">Schema</span>
-              <span className="sm:hidden">Schema</span>
-            </TabsTrigger>
-            <TabsTrigger value="technical" className="flex items-center gap-2 text-sm">
-              <Settings className="h-4 w-4" />
-              <span className="hidden sm:inline">Technical</span>
-              <span className="sm:hidden">Tech</span>
-            </TabsTrigger>
+          <div className="mb-8 bg-white/50 backdrop-blur-sm p-2 rounded-lg">
+            <TabsList className="grid grid-cols-2 lg:grid-cols-7 w-full gap-1">
+              <TabsTrigger value="analyzer" className="flex items-center gap-2 text-sm">
+                <Search className="h-4 w-4" />
+                <span className="hidden sm:inline">Content Analyzer</span>
+                <span className="sm:hidden">Analyzer</span>
+              </TabsTrigger>
+              <TabsTrigger value="generator" className="flex items-center gap-2 text-sm">
+                <FileText className="h-4 w-4" />
+                <span className="hidden sm:inline">AI Generator</span>
+                <span className="sm:hidden">Generator</span>
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="flex items-center gap-2 text-sm">
+                <BarChart3 className="h-4 w-4" />
+                <span className="hidden sm:inline">Analytics</span>
+                <span className="sm:hidden">Analytics</span>
+              </TabsTrigger>
+              <TabsTrigger value="keywords" className="flex items-center gap-2 text-sm">
+                <Target className="h-4 w-4" />
+                <span className="hidden sm:inline">Keywords</span>
+                <span className="sm:hidden">Keywords</span>
+              </TabsTrigger>
+              <TabsTrigger value="meta" className="flex items-center gap-2 text-sm">
+                <Globe className="h-4 w-4" />
+                <span className="hidden sm:inline">Meta Tags</span>
+                <span className="sm:hidden">Meta</span>
+              </TabsTrigger>
+              <TabsTrigger value="schema" className="flex items-center gap-2 text-sm">
+                <Code className="h-4 w-4" />
+                <span className="hidden sm:inline">Schema</span>
+                <span className="sm:hidden">Schema</span>
+              </TabsTrigger>
+              <TabsTrigger value="technical" className="flex items-center gap-2 text-sm">
+                <Settings className="h-4 w-4" />
+                <span className="hidden sm:inline">Technical</span>
+                <span className="sm:hidden">Tech</span>
+              </TabsTrigger>
+            </TabsList>
           </div>
 
           <TabsContent value="analyzer" className="space-y-6">
