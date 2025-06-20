@@ -2,9 +2,11 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import ContentAnalyzer from './ContentAnalyzer'; // Adjust path as necessary
+import ContentAnalyzer from './ContentAnalyzer';
 import { useToast } from '@/hooks/use-toast';
 import * as geminiService from '@/lib/geminiService';
+import { LanguageProvider, Language } from '@/contexts/LanguageContext'; // Import LanguageProvider
+import React from 'react'; // Ensure React is in scope for JSX
 
 // Mock lucide-react icons
 jest.mock('lucide-react', () => ({
@@ -26,7 +28,15 @@ jest.mock('@/lib/geminiService');
 
 describe('ContentAnalyzer Component', () => {
   const mockToastFn = jest.fn();
-  const mockCallGeminiApi = geminiService.generateBlogContent as jest.Mock; // Using generateBlogContent as the generic caller
+  const mockCallGeminiApi = geminiService.generateBlogContent as jest.Mock;
+
+  const renderWithLanguageProvider = (ui: React.ReactElement, language: Language = 'en') => {
+    return render(
+      <LanguageProvider defaultLanguage={language}>
+        {ui}
+      </LanguageProvider>
+    );
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -34,7 +44,7 @@ describe('ContentAnalyzer Component', () => {
   });
 
   test('renders initial form elements correctly', () => {
-    render(<ContentAnalyzer />);
+    renderWithLanguageProvider(<ContentAnalyzer />);
     expect(screen.getByLabelText(/Page Title/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Meta Description/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Target Keywords/i)).toBeInTheDocument();
@@ -44,7 +54,7 @@ describe('ContentAnalyzer Component', () => {
   });
 
   test('shows error if content is empty when analyze is clicked', async () => {
-    render(<ContentAnalyzer />);
+    renderWithLanguageProvider(<ContentAnalyzer />);
     fireEvent.click(screen.getByRole('button', { name: /Analyze Content/i }));
     expect(mockToastFn).toHaveBeenCalledWith(expect.objectContaining({
       title: "Content Required",
@@ -67,9 +77,9 @@ Suggestion 2: Improve call to action.
     const mockApiError = { message: "Network error during analysis.", isApiKeyInvalid: false };
     const mockApiKeyError = { message: "API key invalid. Please go to Settings to add it.", isApiKeyInvalid: true };
 
-    test('successfully analyzes content and displays results', async () => {
+    test('successfully analyzes content and displays results (English)', async () => {
       mockCallGeminiApi.mockResolvedValueOnce(mockApiResponse);
-      render(<ContentAnalyzer />);
+      renderWithLanguageProvider(<ContentAnalyzer />, 'en');
 
       await userEvent.type(screen.getByLabelText(/Content/i), 'This is test content for analysis.');
       await userEvent.type(screen.getByLabelText(/Page Title/i), 'Test Title');
@@ -81,8 +91,8 @@ Suggestion 2: Improve call to action.
 
       await waitFor(() => {
         expect(mockCallGeminiApi).toHaveBeenCalledWith(
-          expect.stringContaining('Content to Analyze:\n---\nThis is test content for analysis.\n---'),
-          // API key is handled by service, so not passed here
+          // Check for the English instruction
+          expect.stringContaining('Analysis Required (please provide your entire response in English):')
         );
       });
 
@@ -102,7 +112,7 @@ Suggestion 2: Improve call to action.
 
     test('handles API key error from Gemini service', async () => {
       mockCallGeminiApi.mockRejectedValueOnce(mockApiKeyError);
-      render(<ContentAnalyzer />);
+      renderWithLanguageProvider(<ContentAnalyzer />);
 
       await userEvent.type(screen.getByLabelText(/Content/i), 'Test content.');
       fireEvent.click(screen.getByRole('button', { name: /Analyze Content/i }));
@@ -121,7 +131,7 @@ Suggestion 2: Improve call to action.
 
     test('handles generic API error from Gemini service', async () => {
       mockCallGeminiApi.mockRejectedValueOnce(mockApiError);
-      render(<ContentAnalyzer />);
+      renderWithLanguageProvider(<ContentAnalyzer />);
 
       await userEvent.type(screen.getByLabelText(/Content/i), 'Test content.');
       fireEvent.click(screen.getByRole('button', { name: /Analyze Content/i }));
@@ -142,7 +152,7 @@ Readability: Okay
 Suggestion 1: This is one suggestion.
       `;
       mockCallGeminiApi.mockResolvedValueOnce(incompleteResponse);
-      render(<ContentAnalyzer />);
+      renderWithLanguageProvider(<ContentAnalyzer />);
       await userEvent.type(screen.getByLabelText(/Content/i), 'Test content for parsing.');
       fireEvent.click(screen.getByRole('button', { name: /Analyze Content/i }));
 
@@ -153,6 +163,20 @@ Suggestion 1: This is one suggestion.
         // Check for default/fallback values for missing fields
         expect(screen.getByText('No justification provided.')).toBeInTheDocument();
         expect(screen.getByText('N/A')).toBeInTheDocument(); // For Keyword Density
+      });
+    });
+
+    test('prompt includes Thai instructions when language is "th"', async () => {
+      mockCallGeminiApi.mockResolvedValueOnce(mockApiResponse); // Response content doesn't matter for this prompt check
+      renderWithLanguageProvider(<ContentAnalyzer />, 'th');
+
+      await userEvent.type(screen.getByLabelText(/Content/i), 'เนื้อหาภาษาไทยสำหรับการวิเคราะห์');
+      fireEvent.click(screen.getByRole('button', { name: /Analyze Content/i }));
+
+      await waitFor(() => {
+        expect(mockCallGeminiApi).toHaveBeenCalledWith(
+          expect.stringContaining('Analysis Required (please provide your entire response in Thai):')
+        );
       });
     });
   });

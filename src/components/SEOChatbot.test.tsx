@@ -2,9 +2,11 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import SEOChatbot from './SEOChatbot'; // Adjust path as necessary
+import SEOChatbot from './SEOChatbot';
 import { useToast } from '@/hooks/use-toast';
 import * as geminiService from '@/lib/geminiService';
+import { LanguageProvider, Language } from '@/contexts/LanguageContext'; // Import LanguageProvider
+import React from 'react'; // Ensure React is in scope for JSX
 
 // Mock lucide-react icons
 jest.mock('lucide-react', () => ({
@@ -27,23 +29,30 @@ describe('SEOChatbot Component', () => {
   const mockToastFn = jest.fn();
   const mockGetChatbotResponse = geminiService.getChatbotResponse as jest.Mock;
 
+  const renderWithLanguageProvider = (ui: React.ReactElement, language: Language = 'en') => {
+    return render(
+      <LanguageProvider defaultLanguage={language}>
+        {ui}
+      </LanguageProvider>
+    );
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     (useToast as jest.Mock).mockReturnValue({ toast: mockToastFn });
-    // Reset messages state for each test by re-rendering or providing a key
   });
 
   test('renders initial chat interface correctly', () => {
-    render(<SEOChatbot />);
+    renderWithLanguageProvider(<SEOChatbot />);
     expect(screen.getByText(/SEO Assistant Chatbot/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/Ask about SEO.../i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Send/i })).toBeInTheDocument();
     // Initially no messages, so no message elements should be found beyond loading/empty state
   });
 
-  test('allows user to type and send a message, displays user and bot response', async () => {
+  test('allows user to type and send a message, displays user and bot response (English)', async () => {
     mockGetChatbotResponse.mockResolvedValueOnce("This is a helpful bot response about keywords.");
-    render(<SEOChatbot />);
+    renderWithLanguageProvider(<SEOChatbot />, 'en');
 
     const inputField = screen.getByPlaceholderText<HTMLInputElement>(/Ask about SEO.../i);
     const sendButton = screen.getByRole('button', { name: /Send/i });
@@ -67,17 +76,17 @@ describe('SEOChatbot Component', () => {
 
     // Check chat history formatting passed to service
     expect(mockGetChatbotResponse).toHaveBeenCalledWith(
-      // The first message includes the system prompt
-      expect.stringContaining("You are an expert SEO assistant.") && expect.stringContaining("My first question is: Tell me about keywords"),
-      [], // Initial history is empty
+      expect.stringContaining("You are an expert SEO assistant. Provide helpful, concise, and accurate advice on SEO topics.") &&
+      expect.stringContaining("My first question is: Tell me about keywords"),
+      [],
     );
   });
 
-  test('sends subsequent messages with formatted history', async () => {
+  test('sends subsequent messages with formatted history (English)', async () => {
     mockGetChatbotResponse
       .mockResolvedValueOnce("Response to first query.")
       .mockResolvedValueOnce("Response to second query about page speed.");
-    render(<SEOChatbot />);
+    renderWithLanguageProvider(<SEOChatbot />, 'en');
 
     const inputField = screen.getByPlaceholderText<HTMLInputElement>(/Ask about SEO.../i);
     const sendButton = screen.getByRole('button', { name: /Send/i });
@@ -118,10 +127,8 @@ describe('SEOChatbot Component', () => {
     // We'll rely on the internal formatChatHistory to be tested implicitly by what's sent.
 
     mockGetChatbotResponse.mockResolvedValue("Another response");
-    // To test this properly, we'd need to render with initial state or many interactions.
-    // Let's simplify by testing the arguments of the 11th user message.
 
-    render(<SEOChatbot />); // Start fresh
+    renderWithLanguageProvider(<SEOChatbot />, 'en'); // Start fresh
 
     // Simulate 10 messages (5 turns)
     for (let i = 0; i < 5; i++) {
@@ -139,16 +146,16 @@ describe('SEOChatbot Component', () => {
 
     const lastCallArgs = mockGetChatbotResponse.mock.calls[mockGetChatbotResponse.mock.calls.length - 1];
     const historySent: geminiService.ChatHistoryMessage[] = lastCallArgs[1];
-    expect(historySent.length).toBe(10); // Should be last 10 messages (5 user, 5 bot)
-    expect(historySent[0].parts[0].text).toBe('User query 1'); // Oldest message in history slice
-    expect(historySent[9].parts[0].text).toBe('Bot response 5'); // Newest message in history slice
+    expect(historySent.length).toBe(10);
+    expect(historySent[0].parts[0].text).toBe('User query 1');
+    expect(historySent[9].parts[0].text).toBe('Bot response 5');
   });
 
 
   test('handles API key error from getChatbotResponse', async () => {
     const apiKeyError = { message: "API Key is invalid or missing. Please configure it in Settings.", isApiKeyInvalid: true };
     mockGetChatbotResponse.mockRejectedValueOnce(apiKeyError);
-    render(<SEOChatbot />);
+    renderWithLanguageProvider(<SEOChatbot />);
 
     await userEvent.type(screen.getByPlaceholderText<HTMLInputElement>(/Ask about SEO.../i), 'Test with API key error');
     fireEvent.click(screen.getByRole('button', { name: /Send/i }));
@@ -167,7 +174,7 @@ describe('SEOChatbot Component', () => {
   test('handles generic API error from getChatbotResponse', async () => {
     const genericError = { message: "Network failed badly." };
     mockGetChatbotResponse.mockRejectedValueOnce(genericError);
-    render(<SEOChatbot />);
+    renderWithLanguageProvider(<SEOChatbot />);
 
     await userEvent.type(screen.getByPlaceholderText<HTMLInputElement>(/Ask about SEO.../i), 'Test with generic error');
     fireEvent.click(screen.getByRole('button', { name: /Send/i }));
@@ -181,5 +188,40 @@ describe('SEOChatbot Component', () => {
       // No persistent API key error message
       expect(screen.queryByTestId('alerttriangle-icon')?.closest('div')).not.toHaveTextContent(genericError.message);
     });
+  });
+
+  test('sends Thai-specific system prompt and instructions when language is "th"', async () => {
+    mockGetChatbotResponse
+      .mockResolvedValueOnce("นี่คือการตอบกลับภาษาไทยสำหรับคำถามแรก") // First response
+      .mockResolvedValueOnce("นี่คือการตอบกลับภาษาไทยสำหรับคำถามที่สอง"); // Second response
+    renderWithLanguageProvider(<SEOChatbot />, 'th');
+
+    const inputField = screen.getByPlaceholderText<HTMLInputElement>(/Ask about SEO.../i);
+    const sendButton = screen.getByRole('button', { name: /Send/i });
+
+    // First message
+    await userEvent.type(inputField, 'คำถามแรก');
+    fireEvent.click(sendButton);
+    await waitFor(() => screen.getByText("นี่คือการตอบกลับภาษาไทยสำหรับคำถามแรก"), { timeout: 2000 });
+
+    expect(mockGetChatbotResponse).toHaveBeenCalledWith(
+      expect.stringContaining("You are an expert SEO assistant. Please respond in Thai.") &&
+      expect.stringContaining("My first question is: คำถามแรก"),
+      [] // Initial history
+    );
+
+    // Second message
+    mockGetChatbotResponse.mockClear(); // Clear previous call info
+    await userEvent.type(inputField, 'คำถามที่สอง');
+    fireEvent.click(sendButton);
+    await waitFor(() => screen.getByText("นี่คือการตอบกลับภาษาไทยสำหรับคำถามที่สอง"), { timeout: 2000 });
+
+    expect(mockGetChatbotResponse).toHaveBeenCalledWith(
+      expect.stringContaining("คำถามที่สอง\n(Remember to respond in Thai.)"), // Subsequent messages get reminder
+      expect.arrayContaining([
+        expect.objectContaining({ role: 'user', parts: [{ text: 'คำถามแรก' }] }),
+        expect.objectContaining({ role: 'model', parts: [{ text: 'นี่คือการตอบกลับภาษาไทยสำหรับคำถามแรก' }] })
+      ])
+    );
   });
 });

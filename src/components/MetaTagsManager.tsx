@@ -5,12 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Wand2, Copy, Check, Globe, Sparkles, CheckCircle, AlertTriangle as AlertTriangleIcon } from 'lucide-react'; // Added AlertTriangleIcon
+import { Wand2, Copy, Check, Globe, Sparkles, CheckCircle, AlertTriangle as AlertTriangleIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { generateBlogContent as callGeminiApi } from '@/lib/geminiService'; // Using existing service function
+import { generateBlogContent as callGeminiApi } from '@/lib/geminiService';
+import { useLanguage, Language } from '@/contexts/LanguageContext'; // Import useLanguage
 
 const MetaTagsManager = () => {
-  const [language, setLanguage] = useState('en');
+  const { language, setLanguage: setGlobalLanguage } = useLanguage(); // Consume global language context
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -160,27 +161,13 @@ Generate the meta tags in ${langInstruction}.`;
             </CardTitle>
             <CardDescription>
               {language === 'th' 
-                ? 'AI สร้าง Meta Tags อัตโนมัติเมื่อคุณใส่เนื้อหา - ไม่ต้องกรอกข้อมูลเยอะ!'
-                : 'AI automatically generates meta tags as you type content - minimal input required!'
+                ? 'AI สร้าง Meta Tags อัตโนมัติสำหรับเนื้อหาของคุณ'
+                : 'AI automatically generates meta tags for your content.'
               }
             </CardDescription>
           </div>
-          <div className="flex gap-2">
-            <Button
-              variant={language === 'en' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setLanguage('en')}
-            >
-              EN
-            </Button>
-            <Button
-              variant={language === 'th' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setLanguage('th')}
-            >
-              TH
-            </Button>
-          </div>
+          {/* Language switcher is now global, so no local buttons here.
+              The global LanguageSwitcher component in SEODashboard handles this. */}
         </div>
       </CardHeader>
       <CardContent className="space-y-6">

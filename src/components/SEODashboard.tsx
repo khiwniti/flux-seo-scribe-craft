@@ -11,8 +11,9 @@ import SchemaMarkupGenerator from './SchemaMarkupGenerator';
 import TechnicalSEOAudit from './TechnicalSEOAudit';
 import SmartKeywordResearch from './SmartKeywordResearch';
 import SettingsTab from './SettingsTab';
-import SEOChatbot from './SEOChatbot'; // Import the new SEOChatbot component
-import { MessageCircle } from 'lucide-react'; // Import an icon for the chatbot tab
+import SEOChatbot from './SEOChatbot';
+import LanguageSwitcher from './LanguageSwitcher'; // Import the LanguageSwitcher
+import { MessageCircle } from 'lucide-react';
 
 const SEODashboard = () => {
   const [activeTab, setActiveTab] = useState('analyzer');
@@ -21,7 +22,7 @@ const SEODashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 relative"> {/* Added relative for positioning switcher */}
           <div className="flex items-center justify-center gap-2 mb-4">
             <div className="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
               <Zap className="h-6 w-6 text-white" />
@@ -29,6 +30,9 @@ const SEODashboard = () => {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Flux SEO Pro Optimizer
             </h1>
+          </div>
+          <div className="absolute top-0 right-0 mt-0 mr-0 md:mt-1 md:mr-1"> {/* Positioning the switcher */}
+            <LanguageSwitcher />
           </div>
           <p className="text-gray-600 max-w-2xl mx-auto">
             Professional SEO optimization suite with AI-powered automation and comprehensive analysis tools

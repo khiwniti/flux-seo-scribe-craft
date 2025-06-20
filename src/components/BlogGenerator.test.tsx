@@ -2,9 +2,11 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import BlogGenerator from './BlogGenerator'; // Adjust path as necessary
+import BlogGenerator from './BlogGenerator';
 import { useToast } from '@/hooks/use-toast';
-import * as geminiService from '@/lib/geminiService'; // To mock its functions
+import * as geminiService from '@/lib/geminiService';
+import { LanguageProvider, Language } from '@/contexts/LanguageContext'; // Import LanguageProvider
+import React from 'react'; // Ensure React is in scope for JSX
 
 // Mock lucide-react icons
 jest.mock('lucide-react', () => ({
@@ -43,13 +45,21 @@ describe('BlogGenerator Component', () => {
   const mockGenerateBlogContent = geminiService.generateBlogContent as jest.Mock;
   const mockGenerateImagePromptForText = geminiService.generateImagePromptForText as jest.Mock;
 
+  const renderWithLanguageProvider = (ui: React.ReactElement, language: Language = 'en') => {
+    return render(
+      <LanguageProvider defaultLanguage={language}>
+        {ui}
+      </LanguageProvider>
+    );
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     (useToast as jest.Mock).mockReturnValue({ toast: mockToastFn });
   });
 
   test('renders initial form elements correctly', () => {
-    render(<BlogGenerator />);
+    renderWithLanguageProvider(<BlogGenerator />);
     expect(screen.getByLabelText(/Blog Topic/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Primary Keyword/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Writing Tone/i)).toBeInTheDocument();
@@ -59,7 +69,7 @@ describe('BlogGenerator Component', () => {
   });
 
   test('updates topic and primary keyword fields on input', async () => {
-    render(<BlogGenerator />);
+    renderWithLanguageProvider(<BlogGenerator />);
     const topicInput = screen.getByLabelText<HTMLInputElement>(/Blog Topic/i);
     const keywordInput = screen.getByLabelText<HTMLInputElement>(/Primary Keyword/i);
 
@@ -75,10 +85,10 @@ describe('BlogGenerator Component', () => {
     const mockGetSentiment = jest.fn().mockReturnValue(0.5); // Positive
     natural.SentimentAnalyzer.mockImplementation(() => ({ getSentiment: mockGetSentiment }));
 
-    render(<BlogGenerator />);
+    renderWithLanguageProvider(<BlogGenerator />);
 
     const topicInput = screen.getByLabelText<HTMLInputElement>(/Blog Topic/i);
-    const toneSelectTrigger = screen.getByRole('combobox', { name: /Writing Tone/i }); // Assuming Select uses combobox role
+    const toneSelectTrigger = screen.getByRole('combobox', { name: /Writing Tone/i });
 
     // Initial state should be auto-suggest (empty value for tone state)
     expect(toneSelectTrigger).toHaveTextContent("Select tone or let AI suggest");
@@ -122,7 +132,7 @@ describe('BlogGenerator Component', () => {
   test('writing style selection updates state and is included in prompt', async () => {
     mockGenerateBlogContent.mockResolvedValueOnce('Styled content.');
     mockGenerateImagePromptForText.mockResolvedValueOnce('Styled image prompt.');
-    render(<BlogGenerator />);
+    renderWithLanguageProvider(<BlogGenerator />);
 
     const topicInput = screen.getByLabelText<HTMLInputElement>(/Blog Topic/i);
     await userEvent.type(topicInput, 'Style Test Topic');
@@ -164,16 +174,13 @@ describe('BlogGenerator Component', () => {
       mockGenerateBlogContent.mockResolvedValueOnce('Generated blog post content.');
       mockGenerateImagePromptForText.mockResolvedValueOnce('Generated image prompt.');
 
-      render(<BlogGenerator />);
+      renderWithLanguageProvider(<BlogGenerator />, 'en'); // Test with English
       await userEvent.type(screen.getByLabelText<HTMLInputElement>(/Blog Topic/i), 'Test Topic');
       await userEvent.type(screen.getByLabelText<HTMLInputElement>(/Primary Keyword/i), 'test keyword');
-      // Select a tone to prevent auto-suggestion from firing during this specific test
       const toneSelectTrigger = screen.getByRole('combobox', { name: /Writing Tone/i });
       await userEvent.click(toneSelectTrigger);
       const casualOption = await screen.findByText('Casual');
       await userEvent.click(casualOption);
-
-      // Writing style is Default / Informative by default
 
       fireEvent.click(screen.getByRole('button', { name: /Generate Blog Post/i }));
 
@@ -181,7 +188,13 @@ describe('BlogGenerator Component', () => {
 
       await waitFor(() => {
         expect(mockGenerateBlogContent).toHaveBeenCalledWith(
-          expect.stringContaining('Generate a blog post about "Test Topic". The primary focus keyword is "test keyword". The desired writing tone is "Casual". Write in a clear and informative style.')
+          expect.stringContaining('Generate a blog post about "Test Topic". The primary focus keyword is "test keyword". The desired writing tone is "Casual". Write in a clear and informative style. Please write this blog post entirely in English.')
+        );
+      });
+
+      await waitFor(() => {
+        expect(mockGenerateImagePromptForText).toHaveBeenCalledWith(
+          expect.stringContaining('generate an English image prompt based on the following English text.')
         );
       });
 
@@ -208,7 +221,7 @@ describe('BlogGenerator Component', () => {
       const apiKeyError = { message: "API key is invalid or missing. Please go to Settings to add it.", isApiKeyInvalid: true };
       mockGenerateBlogContent.mockRejectedValueOnce(apiKeyError);
 
-      render(<BlogGenerator />);
+      renderWithLanguageProvider(<BlogGenerator />);
       await userEvent.type(screen.getByLabelText<HTMLInputElement>(/Blog Topic/i), 'Test Topic');
       fireEvent.click(screen.getByRole('button', { name: /Generate Blog Post/i }));
 
@@ -227,7 +240,7 @@ describe('BlogGenerator Component', () => {
       const genericError = { message: "Network failed." };
       mockGenerateBlogContent.mockRejectedValueOnce(genericError);
 
-      render(<BlogGenerator />);
+      renderWithLanguageProvider(<BlogGenerator />);
       await userEvent.type(screen.getByLabelText<HTMLInputElement>(/Blog Topic/i), 'Test Topic');
       fireEvent.click(screen.getByRole('button', { name: /Generate Blog Post/i }));
 
@@ -245,7 +258,7 @@ describe('BlogGenerator Component', () => {
       const apiKeyErrorImg = { message: "API Key error during image prompt generation. Check Settings.", isApiKeyInvalid: true };
       mockGenerateImagePromptForText.mockRejectedValueOnce(apiKeyErrorImg);
 
-      render(<BlogGenerator />);
+      renderWithLanguageProvider(<BlogGenerator />);
       await userEvent.type(screen.getByLabelText<HTMLInputElement>(/Blog Topic/i), 'Test Topic');
       fireEvent.click(screen.getByRole('button', { name: /Generate Blog Post/i }));
 
@@ -260,5 +273,33 @@ describe('BlogGenerator Component', () => {
         expect(screen.getByText(new RegExp(apiKeyErrorImg.message.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))).toBeInTheDocument();
       });
     });
+
+    test('prompt includes Thai instructions when language is "th"', async () => {
+        mockGenerateBlogContent.mockResolvedValueOnce('เนื้อหาบล็อกที่สร้างขึ้น');
+        mockGenerateImagePromptForText.mockResolvedValueOnce('คำแนะนำรูปภาพที่สร้างขึ้น');
+
+        renderWithLanguageProvider(<BlogGenerator />, 'th');
+
+        await userEvent.type(screen.getByLabelText<HTMLInputElement>(/Blog Topic/i), 'หัวข้อภาษาไทย');
+        await userEvent.type(screen.getByLabelText<HTMLInputElement>(/Primary Keyword/i), 'คีย์เวิร์ด');
+
+        const styleSelectTrigger = screen.getByRole('combobox', { name: /Writing Style/i });
+        await userEvent.click(styleSelectTrigger);
+        const casualOption = await screen.findByText('Casual & Engaging'); // Use a non-default style
+        await userEvent.click(casualOption);
+
+        fireEvent.click(screen.getByRole('button', { name: /Generate Blog Post/i }));
+
+        await waitFor(() => {
+          expect(mockGenerateBlogContent).toHaveBeenCalledWith(
+            expect.stringContaining('Write the blog post in a Casual & Engaging style. Use conversational language and a friendly tone. Please write this blog post entirely in Thai.')
+          );
+        });
+        await waitFor(() => {
+            expect(mockGenerateImagePromptForText).toHaveBeenCalledWith(
+              expect.stringContaining('generate a Thai image prompt based on the following Thai text.')
+            );
+        });
+      });
   });
 });
