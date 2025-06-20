@@ -8,74 +8,167 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { FileText, Wand2, Copy, Download } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { FileText, Wand2, Copy, Download, AlertTriangle, Image as ImageIcon, Loader2 } from 'lucide-react'; // Added ImageIcon, Loader2
 import { useToast } from '@/hooks/use-toast';
+import { SentimentAnalyzer, WordTokenizer, PorterStemmer } from 'natural';
+import { generateBlogContent, generateImagePromptForText } from '@/lib/geminiService'; // Import Gemini services
 
 const BlogGenerator = () => {
   const [topic, setTopic] = useState('');
-  const [keywords, setKeywords] = useState('');
+  const [apiKeyError, setApiKeyError] = useState<string | null>(null);
+  const [primaryKeyword, setPrimaryKeyword] = useState('');
   const [tone, setTone] = useState('');
   const [wordCount, setWordCount] = useState('');
+  const [analyzedContentForSuggestions, setAnalyzedContentForSuggestions] = useState('');
   const [generatedContent, setGeneratedContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedImagePrompt, setGeneratedImagePrompt] = useState<string | null>(null);
+  const [isGeneratingImagePrompt, setIsGeneratingImagePrompt] = useState(false);
   const { toast } = useToast();
+
+  // AI-Suggestion for Tone
+  useEffect(() => {
+    if (analyzedContentForSuggestions.trim() && tone === '') { // Only suggest if tone is not manually set
+      const analyzer = new SentimentAnalyzer('English', PorterStemmer, 'afinn');
+      const tokenizer = new WordTokenizer();
+      const tokens = tokenizer.tokenize(analyzedContentForSuggestions.toLowerCase());
+
+      if (tokens && tokens.length > 0) {
+        const sentimentScore = analyzer.getSentiment(tokens);
+        let suggestedTone = 'Neutral'; // Default
+        if (sentimentScore > 0.33) {
+          suggestedTone = 'Positive';
+        } else if (sentimentScore < -0.33) {
+          suggestedTone = 'Negative';
+        }
+        // More specific heuristic from SmartFieldEnhancer (simplified)
+        const lowerContent = analyzedContentForSuggestions.toLowerCase();
+        if (lowerContent.includes('expert') || lowerContent.includes('professional') || lowerContent.includes('research')) {
+            suggestedTone = 'authoritative';
+        } else if (lowerContent.includes('easy') || lowerContent.includes('simple') || lowerContent.includes('beginner')) {
+            suggestedTone = 'casual';
+        } else if (lowerContent.includes('business') || lowerContent.includes('corporate') || lowerContent.includes('enterprise')) {
+            suggestedTone = 'professional';
+        } else if (lowerContent.includes('friend') || lowerContent.includes('welcome')) { // Example for friendly
+            suggestedTone = 'friendly';
+        }
+
+
+        // Only set if it's one of the predefined valid tones in the Select
+        const validTones = ["professional", "casual", "friendly", "authoritative", "conversational", "Positive", "Negative", "Neutral"];
+        if (validTones.includes(suggestedTone)) {
+            setTone(suggestedTone);
+             toast({
+                title: "AI Suggestion",
+                description: `Writing tone auto-suggested: ${suggestedTone}`,
+            });
+        }
+      }
+    }
+  }, [analyzedContentForSuggestions, tone]); // Re-run if content changes or if tone is reset to auto
 
   const generateBlog = async () => {
     if (!topic.trim()) {
       toast({
         title: "Topic Required",
         description: "Please enter a blog topic to generate content.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
-
+    setApiKeyError(null); // Clear previous API key error before trying
     setIsGenerating(true);
-    
-    // Simulate AI content generation
-    setTimeout(() => {
-      const sampleContent = `# ${topic}
+    setGeneratedContent(''); // Clear previous content
 
-## Introduction
+    // Construct the prompt
+    // For now, we'll use the fields available in BlogGenerator's state:
+    // topic, primaryKeyword, tone, wordCount.
+    // Other fields like contentType, writingStyle, etc., are from ContentGenerationForm
+    // and not directly available here unless BlogGenerator is refactored.
+    let prompt = `Generate a blog post about "${topic}".`;
+    if (primaryKeyword) {
+      prompt += ` The primary focus keyword is "${primaryKeyword}".`;
+    }
+    if (tone && tone !== "") { // Ensure tone is not "Auto-suggest" (empty string)
+      prompt += ` The desired writing tone is "${tone}".`;
+    }
+    if (wordCount) {
+      // Map wordCount to a more descriptive phrase if needed, or use as is.
+      // Example: 'short' -> 'around 500-800 words'
+      let targetLength = wordCount;
+      if (wordCount === "short") targetLength = "around 500-800 words";
+      else if (wordCount === "medium") targetLength = "around 800-1200 words";
+      else if (wordCount === "long") targetLength = "around 1200-2000 words";
+      else if (wordCount === "extended") targetLength = "over 2000 words";
+      prompt += ` The target length is ${targetLength}.`;
+    }
+    prompt += "\n\nThe blog post should be well-structured with headings, subheadings, and engaging content suitable for SEO."
 
-In today's digital landscape, understanding ${topic.toLowerCase()} has become more crucial than ever. This comprehensive guide will walk you through everything you need to know about ${topic.toLowerCase()}, providing actionable insights and practical strategies.
-
-## Key Benefits
-
-- **Enhanced Performance**: Implementing proper ${topic.toLowerCase()} strategies can significantly improve your results
-- **Cost Efficiency**: Smart approaches to ${topic.toLowerCase()} help optimize your budget and resources
-- **Competitive Advantage**: Stay ahead of the competition with advanced ${topic.toLowerCase()} techniques
-
-## Best Practices
-
-### 1. Planning Phase
-Before diving into ${topic.toLowerCase()}, it's essential to create a solid foundation. This involves:
-- Conducting thorough research
-- Setting clear objectives
-- Identifying your target audience
-
-### 2. Implementation
-The implementation phase requires careful attention to detail and consistent execution.
-
-### 3. Optimization
-Continuous optimization ensures long-term success with your ${topic.toLowerCase()} strategy.
-
-## Conclusion
-
-Mastering ${topic.toLowerCase()} is a journey that requires dedication, continuous learning, and strategic thinking. By following the guidelines outlined in this article, you'll be well-equipped to succeed in your ${topic.toLowerCase()} endeavors.
-
----
-
-*This content was generated with SEO optimization in mind, incorporating relevant keywords and maintaining readability for both users and search engines.*`;
-
-      setGeneratedContent(sampleContent);
-      setIsGenerating(false);
-      
+    try {
+      const content = await generateBlogContent(prompt); // API key is now handled by the service
+      setGeneratedContent(content);
+      setGeneratedImagePrompt(null); // Clear previous image prompt
       toast({
         title: "Content Generated Successfully!",
-        description: "Your SEO-optimized blog post is ready.",
+        description: "Your AI-generated blog post is ready. Generating image prompt next...",
       });
-    }, 3000);
+
+      // Now, automatically generate image prompt
+      setIsGeneratingImagePrompt(true);
+      try {
+        const imagePromptResult = await generateImagePromptForText(content); // API key handled by service
+        setGeneratedImagePrompt(imagePromptResult);
+        toast({
+          title: "Image Prompt Generated!",
+          description: "AI-suggested image prompt is ready.",
+        });
+      } catch (imgError: any) {
+        console.error("Error generating image prompt:", imgError);
+        // If the main content generation succeeded, but image prompt failed due to API key,
+        // it's unlikely but possible if key was removed between calls.
+        // More likely, other errors for image prompt.
+        let imgErrorDesc = imgError.message || "Could not generate image prompt.";
+        if (imgError.isApiKeyInvalid) {
+            imgErrorDesc = "API Key error during image prompt generation. Check Settings.";
+            setApiKeyError(imgErrorDesc); // Show persistent error if key became invalid
+        }
+        toast({
+          title: "Image Prompt Generation Failed",
+          description: imgErrorDesc,
+          variant: "destructive",
+        });
+        setGeneratedImagePrompt("Error: " + imgErrorDesc);
+      } finally {
+        setIsGeneratingImagePrompt(false);
+      }
+
+    } catch (error: any) { // This 'error' is from generateBlogContent
+      console.error("Error generating blog content:", error);
+      let description = "An unexpected error occurred while generating content.";
+      if (error.isApiKeyInvalid) {
+        description = "The Google Gemini API key is invalid or missing. Please go to Settings to add it.";
+        setApiKeyError(description);
+      } else if (error.message) {
+        description = error.message;
+      }
+      toast({
+        title: "Content Generation Failed",
+        description: description,
+        variant: "destructive",
+      });
+      setGeneratedContent(`Error: ${description}\n\nPrompt sent:\n${prompt}`); // Show error in content area
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const copyToClipboard = () => {
@@ -128,28 +221,49 @@ Mastering ${topic.toLowerCase()} is a journey that requires dedication, continuo
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="blog-keywords">Target Keywords</Label>
+            <Label htmlFor="topic">Blog Topic *</Label>
             <Input
-              id="blog-keywords"
-              placeholder="SEO, digital marketing, content strategy..."
-              value={keywords}
-              onChange={(e) => setKeywords(e.target.value)}
+              id="topic"
+              placeholder="e.g., Digital Marketing Strategies for 2024"
+              value={topic}
+              onChange={(e) => {
+                setTopic(e.target.value);
+                setAnalyzedContentForSuggestions(e.target.value + (primaryKeyword ? ' ' + primaryKeyword : ''));
+              }}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="primary-keyword">Primary Keyword</Label>
+            <Input
+              id="primary-keyword"
+              placeholder="Enter one primary keyword"
+              value={primaryKeyword}
+              onChange={(e) => {
+                setPrimaryKeyword(e.target.value);
+                setAnalyzedContentForSuggestions(topic + (e.target.value ? ' ' + e.target.value : ''));
+              }}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Writing Tone</Label>
+              <Label>Writing Tone (AI Suggested)</Label>
               <Select value={tone} onValueChange={setTone}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select tone" />
+                  <SelectValue placeholder="Select tone or let AI suggest" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="">Auto-suggest</SelectItem>
                   <SelectItem value="professional">Professional</SelectItem>
                   <SelectItem value="casual">Casual</SelectItem>
                   <SelectItem value="friendly">Friendly</SelectItem>
                   <SelectItem value="authoritative">Authoritative</SelectItem>
                   <SelectItem value="conversational">Conversational</SelectItem>
+                  {/* Add other tones from SmartFieldEnhancer if needed */}
+                  <SelectItem value="Positive">Positive</SelectItem>
+                  <SelectItem value="Negative">Negative</SelectItem>
+                  <SelectItem value="Neutral">Neutral</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -272,6 +386,36 @@ Mastering ${topic.toLowerCase()} is a journey that requires dedication, continuo
           )}
         </CardContent>
       </Card>
+
+      {/* Generated Image Prompt Section */}
+      {(generatedContent && !apiKeyError) && (isGeneratingImagePrompt || generatedImagePrompt) && (
+        <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg md:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ImageIcon className="h-5 w-5 text-blue-600" />
+              Suggested Image Prompt
+            </CardTitle>
+            <CardDescription>
+              Use this AI-generated prompt with your favorite image generation tool.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isGeneratingImagePrompt ? (
+              <div className="flex items-center gap-2 text-gray-500">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Generating image prompt...
+              </div>
+            ) : generatedImagePrompt ? (
+              <Textarea
+                readOnly
+                value={generatedImagePrompt}
+                className="min-h-[100px] bg-gray-50 text-sm"
+                onClick={(e) => (e.target as HTMLTextAreaElement).select()}
+              />
+            ) : null}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

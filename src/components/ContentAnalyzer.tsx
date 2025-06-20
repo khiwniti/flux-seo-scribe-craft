@@ -7,54 +7,145 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { AlertCircle, CheckCircle, Target, TrendingUp } from 'lucide-react';
+import { AlertCircle, CheckCircle, Target, TrendingUp, AlertTriangle as AlertTriangleIcon } from 'lucide-react'; // Added AlertTriangleIcon
 import { useToast } from '@/hooks/use-toast';
+import { generateBlogContent as callGeminiApi } from '@/lib/geminiService'; // Renamed for clarity
+
+interface AnalysisResults {
+  wordCount: number;
+  readabilityScore: number | string; // Can be qualitative like "Good" or a score
+  seoScore: number;
+  suggestions: string[];
+  keywordDensity?: string; // Optional: Gemini might provide this as text
+  justification?: string; // Justification for SEO score
+}
 
 const ContentAnalyzer = () => {
   const [content, setContent] = useState('');
   const [keywords, setKeywords] = useState('');
   const [title, setTitle] = useState('');
   const [metaDescription, setMetaDescription] = useState('');
-  const [analysis, setAnalysis] = useState(null);
+  const [analysis, setAnalysis] = useState<AnalysisResults | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [apiKeyError, setApiKeyError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const analyzeContent = () => {
+  const parseGeminiResponse = (responseText: string): Partial<AnalysisResults> => {
+    const results: Partial<AnalysisResults> = { suggestions: [] };
+    const lines = responseText.split('\n');
+
+    lines.forEach(line => {
+      if (line.match(/Overall SEO Score: (\d+)/i)) {
+        results.seoScore = parseInt(RegExp.$1, 10);
+      } else if (line.match(/Justification: (.*)/i)) {
+        results.justification = RegExp.$1;
+      } else if (line.match(/Readability: (.*)/i)) {
+        const readabilityValue = RegExp.$1;
+        results.readabilityScore = isNaN(parseFloat(readabilityValue)) ? readabilityValue : parseFloat(readabilityValue);
+      } else if (line.match(/Keyword Density: (.*)/i)) {
+        results.keywordDensity = RegExp.$1;
+      } else if (line.match(/Suggestion \d+: (.*)/i) || line.match(/- (.*)/i) || line.match(/\* (.*)/i) ) {
+         // Try to capture suggestions prefixed with "Suggestion X:", "-", or "*"
+        if (RegExp.$1.trim()) results.suggestions?.push(RegExp.$1.trim());
+      }
+    });
+     // If no specific suggestion format matched, but we have lines that aren't other fields, treat them as suggestions.
+    if (results.suggestions?.length === 0) {
+        const potentialSuggestions = lines.filter(
+            line => !line.startsWith("Overall SEO Score:") &&
+                    !line.startsWith("Justification:") &&
+                    !line.startsWith("Readability:") &&
+                    !line.startsWith("Keyword Density:") &&
+                    line.trim().length > 10 // Avoid empty or very short lines
+        );
+        if (potentialSuggestions.length > 0 && potentialSuggestions.length <= 7) { // Heuristic: if few lines left, might be suggestions
+             results.suggestions = potentialSuggestions;
+        }
+    }
+
+
+    // Fallback if parsing fails for some fields
+    if (results.seoScore === undefined) results.seoScore = 0; // Default if not found
+    if (results.readabilityScore === undefined) results.readabilityScore = "N/A";
+    if (!results.suggestions || results.suggestions.length === 0) {
+        results.suggestions = ["No specific suggestions extracted. Review the raw Gemini output if provided."];
+    }
+    return results;
+  };
+
+
+  const analyzeContent = async () => {
     if (!content.trim()) {
       toast({
         title: "Content Required",
         description: "Please enter content to analyze.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
-
+    setApiKeyError(null); // Clear previous API key error
     setIsAnalyzing(true);
-    
-    // Simulate analysis
-    setTimeout(() => {
-      const wordCount = content.split(/\s+/).length;
-      const readabilityScore = Math.floor(Math.random() * 40) + 60;
-      const keywordDensity = keywords ? Math.floor(Math.random() * 3) + 1 : 0;
-      const seoScore = Math.floor((readabilityScore + (keywordDensity * 10) + (title ? 10 : 0) + (metaDescription ? 10 : 0)) / 1.4);
+    setAnalysis(null);
+
+    let prompt = `Analyze the following content for SEO quality. Provide the output with clear headings for each section.
+
+Content to Analyze:
+---
+${content}
+---
+`;
+
+    if (title) prompt += `\nPage Title: "${title}"`;
+    if (metaDescription) prompt += `\nMeta Description: "${metaDescription}"`;
+    if (keywords) prompt += `\nFocus Keywords: "${keywords}"`;
+
+    prompt += `
+
+Analysis Required:
+1.  Overall SEO Score: (Provide a score from 0 to 100)
+2.  Justification: (Briefly explain the score)
+3.  Readability: (Assess readability, e.g., Flesch-Kincaid score, or qualitative like 'Good', 'Difficult to read')
+4.  Keyword Density: (Analyze usage of focus keywords if provided, otherwise general keyword cloudiness)
+5.  Suggestions: (Provide 3-5 actionable SEO suggestions to improve the content. Each suggestion should start with "Suggestion X:" or be a bullet point like "-" or "*")
+
+Format the response clearly.`;
+
+    try {
+      const rawResponse = await callGeminiApi(prompt); // API key is now handled by the service
+      const parsedAnalysis = parseGeminiResponse(rawResponse);
 
       setAnalysis({
-        wordCount,
-        readabilityScore,
-        keywordDensity,
-        seoScore,
-        suggestions: [
-          'Add more internal links to improve navigation',
-          'Include target keywords in subheadings',
-          'Optimize image alt texts for better accessibility',
-          'Add schema markup for better search visibility'
-        ]
+        wordCount: content.split(/\s+/).filter(Boolean).length, // Calculate locally
+        readabilityScore: parsedAnalysis.readabilityScore || "N/A",
+        seoScore: parsedAnalysis.seoScore || 0,
+        suggestions: parsedAnalysis.suggestions && parsedAnalysis.suggestions.length > 0 ? parsedAnalysis.suggestions : ["Gemini did not provide specific suggestions in the expected format."],
+        keywordDensity: parsedAnalysis.keywordDensity || "N/A",
+        justification: parsedAnalysis.justification || "No justification provided.",
       });
+
+    } catch (error: any) {
+      console.error("Error analyzing content with Gemini:", error);
+      let errorDesc = "An error occurred during content analysis.";
+      if (error.isApiKeyInvalid) {
+        errorDesc = "The Gemini API key is invalid or missing. Please go to Settings to add it.";
+        setApiKeyError(errorDesc);
+      } else if (error.message) {
+        errorDesc = error.message;
+      }
+      toast({ title: "Analysis Failed", description: errorDesc, variant: "destructive" });
+      setAnalysis({ // Provide some feedback in the analysis area
+        wordCount: content.split(/\s+/).filter(Boolean).length,
+        readabilityScore: "Error",
+        seoScore: 0,
+        suggestions: [errorDesc],
+        justification: "Analysis failed."
+      });
+    } finally {
       setIsAnalyzing(false);
-    }, 2000);
+    }
   };
 
-  const getScoreColor = (score) => {
+  const getScoreColor = (score: number | string) => {
     if (score >= 80) return 'text-green-600';
     if (score >= 60) return 'text-yellow-600';
     return 'text-red-600';

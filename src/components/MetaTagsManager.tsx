@@ -5,8 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Wand2, Copy, Check, Globe, Sparkles, CheckCircle } from 'lucide-react';
+import { Wand2, Copy, Check, Globe, Sparkles, CheckCircle, AlertTriangle as AlertTriangleIcon } from 'lucide-react'; // Added AlertTriangleIcon
 import { useToast } from '@/hooks/use-toast';
+import { generateBlogContent as callGeminiApi } from '@/lib/geminiService'; // Using existing service function
 
 const MetaTagsManager = () => {
   const [language, setLanguage] = useState('en');
@@ -17,114 +18,116 @@ const MetaTagsManager = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [autoEnhanced, setAutoEnhanced] = useState(false);
+  const [apiKeyError, setApiKeyError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Auto-generate when content changes
-  React.useEffect(() => {
-    if (content && content.length > 100 && !autoEnhanced) {
+  // Auto-generate when content changes and length is sufficient
+  useEffect(() => {
+    if (content && content.length > 100 && !autoEnhanced && !isGenerating) {
+      // Debounce or make this user-initiated if it causes too many API calls on fast typing.
+      // For now, direct call.
       generateMetaTags();
     }
-  }, [content]);
+  }, [content, autoEnhanced, isGenerating, language]); // Added language to dependencies
+
+  const parseMetaTagResponse = (text: string): { title: string; description: string; keywords: string } => {
+    let genTitle = '';
+    let genDescription = '';
+    let genKeywords = '';
+
+    const lines = text.split('\n');
+    lines.forEach(line => {
+      if (line.toLowerCase().startsWith('title:')) {
+        genTitle = line.substring('title:'.length).trim();
+      } else if (line.toLowerCase().startsWith('description:')) {
+        genDescription = line.substring('description:'.length).trim();
+      } else if (line.toLowerCase().startsWith('keywords:')) {
+        genKeywords = line.substring('keywords:'.length).trim();
+      }
+    });
+
+    // Fallbacks if parsing is not perfect
+    if (!genTitle && !genDescription && !genKeywords && lines.length >= 3) {
+        // Assuming first line is title, second description, third keywords if no labels found
+        genTitle = lines[0] || '';
+        genDescription = lines[1] || '';
+        genKeywords = lines[2] || '';
+    } else {
+        if (!genTitle) genTitle = "Could not extract title";
+        if (!genDescription) genDescription = "Could not extract description";
+        if (!genKeywords) genKeywords = "Could not extract keywords";
+    }
+
+
+    return { title: genTitle, description: genDescription, keywords: genKeywords };
+  };
 
   const generateMetaTags = async () => {
     if (!content.trim()) {
       toast({
         title: language === 'th' ? "กรุณาใส่เนื้อหา" : "Please enter content",
         description: language === 'th' ? "ใส่เนื้อหาเพื่อสร้าง Meta Tags อัตโนมัติ" : "Enter content to generate meta tags automatically",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
-
+    setApiKeyError(null); // Clear previous API key error
     setIsGenerating(true);
-    
-    // Enhanced AI generation with better algorithms
-    setTimeout(() => {
-      const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 0);
-      const firstSentence = sentences[0]?.trim() || '';
-      const words = content.split(' ');
+    setAutoEnhanced(false); // Reset this flag before generation
+
+    const langInstruction = language === 'th' ? 'Thai' : 'English';
+    const titleCharLimit = language === 'th' ? 65 : 60; // Thai titles can sometimes be a bit longer due to script
+    const descCharLimit = language === 'th' ? 150 : 160;
+
+    const prompt = `Based on the following content in ${langInstruction}, generate SEO-friendly meta tags.
+
+Content:
+---
+${content.substring(0, 2000)}
+---
+
+Please generate the following, ensuring each is on a new line and clearly labeled:
+1.  Title: An SEO-friendly title, around ${titleCharLimit} characters.
+2.  Description: A compelling meta description, around ${descCharLimit} characters.
+3.  Keywords: 5-7 relevant keywords, comma-separated.
+
+Output format example:
+Title: [Generated Title Here]
+Description: [Generated Meta Description Here]
+Keywords: [keyword1, keyword2, keyword3, keyword4, keyword5]
+
+Generate the meta tags in ${langInstruction}.`;
+
+    try {
+      const response = await callGeminiApi(prompt); // API key is now handled by the service
+      const { title: genTitle, description: genDescription, keywords: genKeywords } = parseMetaTagResponse(response);
       
-      // Smart title generation
-      let autoTitle = '';
-      if (firstSentence.length > 10 && firstSentence.length <= 60) {
-        autoTitle = firstSentence;
-      } else {
-        // Extract key phrases
-        const keyPhrases = extractKeyPhrases(content);
-        autoTitle = keyPhrases[0] || words.slice(0, 8).join(' ');
-      }
-      
-      // Smart description generation
-      const autoDescription = generateSmartDescription(content, language);
-      
-      // Smart keyword extraction
-      const autoKeywords = extractSmartKeywords(content, language);
-      
-      if (language === 'th') {
-        setTitle(`${autoTitle} - คู่มือครบถ้วน`);
-        setDescription(autoDescription + ' อ่านเพิ่มเติมเพื่อความรู้ที่ครบถ้วน');
-        setKeywords(autoKeywords + ', ไทย, คู่มือ, ความรู้, ข้อมูล');
-      } else {
-        setTitle(`${autoTitle} - Complete Guide`);
-        setDescription(autoDescription + ' Read more for comprehensive insights.');
-        setKeywords(autoKeywords + ', guide, tips, information, insights');
-      }
-      
+      setTitle(genTitle);
+      setDescription(genDescription);
+      setKeywords(genKeywords);
       setAutoEnhanced(true);
-      setIsGenerating(false);
       
       toast({
         title: language === 'th' ? "สร้าง Meta Tags สำเร็จ!" : "Smart Meta Tags Generated!",
-        description: language === 'th' ? "AI สร้าง Meta Tags ที่เหมาะสมแล้ว" : "AI has generated optimized meta tags with smart analysis"
+        description: language === 'th' ? "AI สร้าง Meta Tags ที่เหมาะสมแล้ว" : "AI has generated optimized meta tags."
       });
-    }, 2000);
-  };
 
-  const extractKeyPhrases = (text: string): string[] => {
-    const sentences = text.split(/[.!?]+/);
-    return sentences
-      .filter(s => s.trim().length > 10 && s.trim().length < 100)
-      .map(s => s.trim())
-      .slice(0, 3);
-  };
-
-  const generateSmartDescription = (text: string, lang: string): string => {
-    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
-    let description = '';
-    
-    // Try to get 2-3 meaningful sentences
-    for (let i = 0; i < Math.min(3, sentences.length); i++) {
-      if (description.length + sentences[i].length < 150) {
-        description += sentences[i].trim() + '. ';
-      } else {
-        break;
+    } catch (error: any) {
+      console.error("Error generating meta tags with Gemini:", error);
+      let errorDesc = "An error occurred while generating meta tags.";
+      if (error.isApiKeyInvalid) {
+        errorDesc = "The Gemini API key is invalid or missing. Please go to Settings to add it.";
+        setApiKeyError(errorDesc);
+      } else if (error.message) {
+        errorDesc = error.message;
       }
+      toast({ title: "Meta Tag Generation Failed", description: errorDesc, variant: "destructive" });
+    } finally {
+      setIsGenerating(false);
     }
-    
-    return description.trim();
   };
 
-  const extractSmartKeywords = (text: string, lang: string): string => {
-    const commonWords = lang === 'th' 
-      ? ['และ', 'หรือ', 'แต่', 'ใน', 'บน', 'ที่', 'เพื่อ', 'ของ', 'กับ', 'โดย', 'เป็น', 'มี', 'ได้', 'จะ', 'ควร', 'อาจ', 'ต้อง', 'สามารถ', 'นี้', 'นั้น']
-      : ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'a', 'an', 'this', 'that'];
-    
-    const words = text.toLowerCase()
-      .replace(/[^\w\s]/g, ' ')
-      .split(/\s+/)
-      .filter(word => word.length > 2 && !commonWords.includes(word));
-    
-    const frequency: { [key: string]: number } = {};
-    words.forEach(word => {
-      frequency[word] = (frequency[word] || 0) + 1;
-    });
-    
-    return Object.entries(frequency)
-      .sort(([,a], [,b]) => b - a)
-      .slice(0, 5)
-      .map(([word]) => word)
-      .join(', ');
-  };
+  // Remove extractKeyPhrases, generateSmartDescription, extractSmartKeywords as they are replaced by Gemini
 
   const copyToClipboard = () => {
     const metaHtml = `<title>${title}</title>
