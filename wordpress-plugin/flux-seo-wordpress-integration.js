@@ -5,14 +5,6 @@
 
 (function() {
     'use strict';
-    
-    console.log('⏭️ FluxSEO WordPress Integration: Script loaded');
-    console.log('🔍 Integration environment check:', {
-        FluxSEOApp: typeof window.FluxSEOApp,
-        React: typeof window.React,
-        ReactDOM: typeof window.ReactDOM,
-        fluxSeoAjax: typeof window.fluxSeoAjax
-    });
 
     // WordPress integration object
     window.FluxSEOWordPress = {
@@ -153,31 +145,17 @@
                 return;
             }
             
-            // Override fetch for API calls (only for specific WordPress-related APIs)
+            // Override fetch for API calls
             const originalFetch = window.fetch;
             window.fetch = function(url, options) {
-                // Only intercept WordPress admin-ajax calls or specific plugin APIs
-                if (url.includes('admin-ajax.php') || 
-                    url.includes('/wp-json/') || 
-                    (url.includes('/api/') && url.includes('flux-seo'))) {
-                    console.log('🔄 Intercepting WordPress API call:', url);
+                // Check if this is an API call that should go through WordPress
+                if (url.includes('/api/') || url.includes('api.')) {
                     return FluxSEOWordPress.wordpressAjaxCall(url, options);
                 }
                 
-                // For external APIs (like image generation), use original fetch with timeout
-                console.log('🌐 External API call (not intercepted):', url);
-                return FluxSEOWordPress.fetchWithTimeout(originalFetch, url, options);
+                // For other requests, use original fetch
+                return originalFetch.apply(this, arguments);
             };
-        },
-        
-        // Fetch with timeout for external APIs
-        fetchWithTimeout: function(originalFetch, url, options, timeout = 30000) {
-            return Promise.race([
-                originalFetch.call(window, url, options),
-                new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error('Request timed out')), timeout)
-                )
-            ]);
         },
         
         // Handle API calls through WordPress AJAX
@@ -211,18 +189,12 @@
                     formData.append('data', JSON.stringify(data));
                 }
                 
-                // Make the AJAX call with timeout
-                const ajaxTimeout = 15000; // 15 seconds timeout
-                Promise.race([
-                    fetch(fluxSeoAjax.ajaxurl, {
-                        method: 'POST',
-                        body: formData,
-                        credentials: 'same-origin'
-                    }),
-                    new Promise((_, reject) => 
-                        setTimeout(() => reject(new Error('WordPress AJAX request timed out')), ajaxTimeout)
-                    )
-                ])
+                // Make the AJAX call
+                fetch(fluxSeoAjax.ajaxurl, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin'
+                })
                 .then(response => {
                     return response.text().then(text => {
                         console.log('FluxSEOWordPress.wordpressAjaxCall: Raw response text:', text);

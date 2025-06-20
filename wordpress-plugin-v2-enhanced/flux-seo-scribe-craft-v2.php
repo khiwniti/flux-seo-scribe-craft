@@ -151,25 +151,16 @@ class FluxSEOScribeCraftV2 {
             FLUX_SEO_PLUGIN_VERSION
         );
         
-        // Enqueue main JavaScript from v2.0
+        // Enqueue WordPress app from v2.0 (main React app)
         wp_enqueue_script(
-            'flux-seo-scribe-craft-js',
-            FLUX_SEO_PLUGIN_URL . 'dist/flux-seo-scribe-craft.js',
+            'flux-seo-wordpress-app',
+            FLUX_SEO_PLUGIN_URL . 'dist/flux-seo-wordpress-app.js',
             array('react', 'react-dom'),
             FLUX_SEO_PLUGIN_VERSION,
             true
         );
         
-        // Enqueue WordPress app from v2.0
-        wp_enqueue_script(
-            'flux-seo-wordpress-app',
-            FLUX_SEO_PLUGIN_URL . 'dist/flux-seo-wordpress-app.js',
-            array('flux-seo-scribe-craft-js'),
-            FLUX_SEO_PLUGIN_VERSION,
-            true
-        );
-        
-        // Enqueue React loader from v2.0
+        // Enqueue React loader (initializes the app)
         wp_enqueue_script(
             'flux-seo-react-loader',
             FLUX_SEO_PLUGIN_URL . 'dist/flux-seo-react-loader.js',
