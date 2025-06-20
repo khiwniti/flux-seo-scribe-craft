@@ -117,4 +117,121 @@ describe('SEODashboard Integration Tests', () => {
     expect(within(rowWithKeyword).getByText("30.00")).toBeInTheDocument();
   });
 
+  test('navigates to Settings tab and renders SettingsTab component', async () => {
+    render(<SEODashboard />);
+    const settingsTabTrigger = screen.getByRole('tab', { name: /Settings/i });
+    expect(settingsTabTrigger).toBeInTheDocument();
+
+    fireEvent.click(settingsTabTrigger);
+
+    await waitFor(() => {
+      expect(screen.getByText(/API Key Management/i)).toBeInTheDocument(); // Title of SettingsTab
+    });
+    expect(screen.getByLabelText(/Google Gemini API Key/i)).toBeInTheDocument();
+  });
+
+  describe('API Key Workflow Integration Test', () => {
+    let localStorageMock: Storage;
+
+    beforeEach(() => {
+      // Setup localStorage mock for this describe block
+      localStorageMock = (function () {
+        let store: { [key: string]: string } = {};
+        return {
+          getItem: jest.fn((key: string) => store[key] || null),
+          setItem: jest.fn((key: string, value: string) => { store[key] = value.toString(); }),
+          removeItem: jest.fn((key: string) => { delete store[key]; }),
+          clear: jest.fn(() => { store = {}; }),
+          length: 0,
+          key: jest.fn(),
+        };
+      })();
+      Object.defineProperty(window, 'localStorage', { value: localStorageMock, writable: true });
+
+      // Clear any environment variable for this specific test suite to ensure localStorage is prioritized or tested as missing
+      delete process.env.REACT_APP_GEMINI_API_KEY;
+    });
+
+    afterEach(() => {
+        localStorageMock.clear(); // Clear after each test in this block
+         // Restore process.env if modified, though it's deleted here. Consider a more robust backup/restore if needed elsewhere.
+    });
+
+    test('shows API key error in BlogGenerator, then works after setting key in Settings', async () => {
+      const { generateBlogContent } = jest.requireActual('@/lib/geminiService'); // Get actual for mocking specific implementation details
+      const mockGenerateBlogContent = geminiService.generateBlogContent as jest.Mock;
+
+
+      render(<SEODashboard />);
+
+      // 1. Navigate to BlogGenerator (AI Generator Tab) - Assume it's "generator"
+      const generatorTabTrigger = screen.getByRole('tab', { name: /AI Generator/i });
+      fireEvent.click(generatorTabTrigger);
+
+      // Wait for BlogGenerator to load (check for a unique element)
+      await screen.findByLabelText(/Blog Topic/i);
+
+      // Try to generate content - expect API key error because none is set
+      mockGenerateBlogContent.mockImplementation(async () => {
+        // Simulate the service throwing an API key error if no key is found by it
+        const error: any = new Error("API key is missing. Please set it in Settings or as REACT_APP_GEMINI_API_KEY.");
+        error.isApiKeyInvalid = true;
+        throw error;
+      });
+
+      await userEvent.type(screen.getByLabelText<HTMLInputElement>(/Blog Topic/i), 'Initial Topic');
+      fireEvent.click(screen.getByRole('button', { name: /Generate Blog Post/i }));
+
+      await waitFor(() => {
+        // Check for the API key error message displayed by BlogGenerator
+        expect(screen.getByText(/API key is missing. Please set it in Settings/i)).toBeInTheDocument();
+      });
+      expect(mockToastFn).toHaveBeenCalledWith(expect.objectContaining({
+        title: "Content Generation Failed",
+        description: expect.stringContaining("API key is missing."),
+      }));
+
+      // 2. Navigate to Settings tab
+      const settingsTabTrigger = screen.getByRole('tab', { name: /Settings/i });
+      fireEvent.click(settingsTabTrigger);
+      await screen.findByText(/API Key Management/i);
+
+      // 3. Enter and save API key
+      const apiKeyInput = screen.getByLabelText<HTMLInputElement>(/Google Gemini API Key/i);
+      const saveApiKeyButton = screen.getByRole('button', { name: /Save API Key/i });
+      await userEvent.type(apiKeyInput, 'test_ls_api_key_123');
+      fireEvent.click(saveApiKeyButton);
+
+      await waitFor(() => {
+        expect(localStorageMock.setItem).toHaveBeenCalledWith('geminiApiKey', 'test_ls_api_key_123');
+        expect(mockToastFn).toHaveBeenCalledWith(expect.objectContaining({ title: 'API Key Saved' }));
+      });
+
+      // 4. Navigate back to BlogGenerator
+      fireEvent.click(generatorTabTrigger);
+      await screen.findByLabelText(/Blog Topic/i); // Wait for it to load
+
+      // 5. Try to generate content again - this time it should succeed
+      mockGenerateBlogContent.mockReset(); // Reset previous mock
+      mockGenerateBlogContent.mockResolvedValueOnce("Successfully generated blog content with new key!");
+      (geminiService.generateImagePromptForText as jest.Mock).mockResolvedValueOnce("Successful image prompt!");
+
+
+      // Topic field might be reset or retain value depending on component structure, re-type if needed or ensure it persists
+      // For this test, let's assume it persists or re-type for safety:
+      await userEvent.clear(screen.getByLabelText<HTMLInputElement>(/Blog Topic/i));
+      await userEvent.type(screen.getByLabelText<HTMLInputElement>(/Blog Topic/i), 'New Topic with API Key');
+      fireEvent.click(screen.getByRole('button', { name: /Generate Blog Post/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText("Successfully generated blog content with new key!")).toBeInTheDocument();
+        expect(mockToastFn).toHaveBeenCalledWith(expect.objectContaining({ title: "Content Generated Successfully!" }));
+      });
+       await waitFor(() => {
+        expect(screen.getByDisplayValue("Successful image prompt!")).toBeInTheDocument();
+      });
+      // Ensure no API key error is shown this time
+      expect(screen.queryByText(/API key is missing. Please set it in Settings/i)).not.toBeInTheDocument();
+    });
+  });
 });

@@ -10,6 +10,7 @@ import MetaTagsManager from './MetaTagsManager';
 import SchemaMarkupGenerator from './SchemaMarkupGenerator';
 import TechnicalSEOAudit from './TechnicalSEOAudit';
 import SmartKeywordResearch from './SmartKeywordResearch';
+import SettingsTab from './SettingsTab'; // Import the new SettingsTab component
 
 const SEODashboard = () => {
   const [activeTab, setActiveTab] = useState('analyzer');
@@ -44,7 +45,7 @@ const SEODashboard = () => {
         {/* Main Dashboard */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="mb-8 bg-white/70 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-white/20">
-            <TabsList className="grid w-full h-auto bg-transparent p-1 gap-1" style={{ gridTemplateColumns: 'repeat(7, 1fr)' }}>
+            <TabsList className="grid w-full h-auto bg-transparent p-1 gap-1" style={{ gridTemplateColumns: 'repeat(8, 1fr)' }}> {/* Updated to 8 columns */}
               <TabsTrigger 
                 value="analyzer" 
                 className="flex items-center justify-center gap-2 text-sm px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-md transition-all duration-200"
@@ -97,9 +98,19 @@ const SEODashboard = () => {
                 value="technical" 
                 className="flex items-center justify-center gap-2 text-sm px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-md transition-all duration-200"
               >
+                {/* Note: The original 'Technical' tab also used <Settings>, so this might be a duplicate icon if not changed.
+                    For the purpose of this step, we'll keep it as is, but ideally, 'Technical' might get a different icon. */}
                 <Settings className="h-4 w-4" />
                 <span className="hidden sm:inline">Technical</span>
                 <span className="sm:hidden">Tech</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="settings"
+                className="flex items-center justify-center gap-2 text-sm px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-md transition-all duration-200"
+              >
+                <Settings className="h-4 w-4" /> {/* Actual Settings icon for Settings Tab */}
+                <span className="hidden sm:inline">Settings</span>
+                <span className="sm:hidden">Config</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -131,6 +142,10 @@ const SEODashboard = () => {
 
             <TabsContent value="technical" className="mt-0">
               <TechnicalSEOAudit />
+            </TabsContent>
+
+            <TabsContent value="settings" className="mt-0">
+              <SettingsTab />
             </TabsContent>
           </div>
         </Tabs>
