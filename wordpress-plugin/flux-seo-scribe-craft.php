@@ -31,6 +31,10 @@ class FluxSEOScribeCraft {
         // AJAX handlers for the React app
         add_action('wp_ajax_flux_seo_proxy', array($this, 'ajax_proxy_handler'));
         add_action('wp_ajax_nopriv_flux_seo_proxy', array($this, 'ajax_proxy_handler'));
+
+        // Settings page hooks
+        add_action('admin_init', array($this, 'flux_seo_register_settings'));
+        add_action('admin_menu', array($this, 'flux_seo_add_settings_page'));
     }
     
     public function init() {
@@ -48,66 +52,35 @@ class FluxSEOScribeCraft {
     }
     
     private function enqueue_app_assets() {
-        // Enqueue React and ReactDOM from CDN first
-        wp_enqueue_script(
-            'react',
-            'https://unpkg.com/react@18/umd/react.production.min.js',
-            array(),
-            '18.3.1',
-            false
-        );
-        
-        wp_enqueue_script(
-            'react-dom',
-            'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',
-            array('react'),
-            '18.3.1',
-            false
-        );
-        
-        // Enqueue main CSS
+        // Enqueue enhanced CSS
+        // Note: WordPress handles 'wp-element' (React/ReactDOM) loading automatically when set as a dependency.
+        // It's typically loaded in the footer by default when enqueued as a dependency for a footer script.
         wp_enqueue_style(
-            'flux-seo-scribe-craft-css',
-            FLUX_SEO_PLUGIN_URL . 'flux-seo-scribe-craft.css',
+            'flux-seo-scribe-craft-css', // Changed handle
+            FLUX_SEO_ENHANCED_URL . 'flux-seo-scribe-craft.css', // Changed filename
             array(),
-            FLUX_SEO_PLUGIN_VERSION
+            FLUX_SEO_ENHANCED_VERSION
         );
         
-        // Enqueue WordPress-specific overrides
-        wp_enqueue_style(
-            'flux-seo-wordpress-overrides',
-            FLUX_SEO_PLUGIN_URL . 'wordpress-overrides.css',
-            array('flux-seo-scribe-craft-css'),
-            FLUX_SEO_PLUGIN_VERSION
-        );
-        
-        // Enqueue React loader (handles loading the main app)
+        // Enqueue enhanced JavaScript (React app)
         wp_enqueue_script(
-            'flux-seo-react-loader',
-            FLUX_SEO_PLUGIN_URL . 'flux-seo-react-loader.js',
-            array('react', 'react-dom'),
-            FLUX_SEO_PLUGIN_VERSION,
-            true
+            'flux-seo-wordpress-app-js', // Changed handle
+            FLUX_SEO_ENHANCED_URL . 'flux-seo-wordpress-app.js', // Changed filename
+            array('wp-element', 'jquery'), // Changed dependencies to use WordPress's React
+            FLUX_SEO_ENHANCED_VERSION,
+            true // Load in footer
         );
         
-        // Enqueue WordPress integration script
-        wp_enqueue_script(
-            'flux-seo-wordpress-integration',
-            FLUX_SEO_PLUGIN_URL . 'flux-seo-wordpress-integration.js',
-            array('flux-seo-react-loader'),
-            FLUX_SEO_PLUGIN_VERSION,
-            true
-        );
+        // Removed enqueue for 'flux-seo-auto-blog-js' as the file is missing.
         
-        // Localize script for AJAX
-        wp_localize_script('flux-seo-react-loader', 'fluxSeoAjax', array(
+        // Localize script with enhanced data
+        wp_localize_script('flux-seo-wordpress-app-js', 'fluxSeoEnhanced', array( // Changed handle
             'ajaxurl' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('flux_seo_nonce'),
-            'pluginUrl' => FLUX_SEO_PLUGIN_URL,
-            'adminUrl' => admin_url(),
-            'siteUrl' => get_site_url(),
-            'currentUser' => wp_get_current_user()->ID,
-            'isAdmin' => current_user_can('manage_options')
+            'nonce' => wp_create_nonce('flux_seo_enhanced_nonce'),
+            'pluginUrl' => FLUX_SEO_ENHANCED_URL,
+            'isAdmin' => current_user_can('manage_options'),
+            'geminiEnabled' => true, // Assuming this is still relevant
+            'strings' => $this->get_localized_strings()
         ));
     }
     
@@ -156,7 +129,7 @@ class FluxSEOScribeCraft {
     private function render_app() {
         ob_start();
         ?>
-        <div id="flux-seo-root" class="flux-seo-container">
+        <div id="root" class="flux-seo-container">
             <div id="root">
                 <div class="flux-seo-loading">
                     <div class="loading-content">
@@ -360,6 +333,176 @@ class FluxSEOScribeCraft {
         
         error_log('[Flux SEO] Sending success response for content_generation: ' . print_r($generated_content, true));
         wp_send_json_success($generated_content);
+    }
+
+    public function flux_seo_register_settings() {
+        register_setting(
+            'flux_seo_api_settings_group', // Option group
+            'flux_seo_gemini_api_key',     // Option name
+            array(
+                'type' => 'string',
+                'sanitize_callback' => 'sanitize_text_field',
+                'default' => ''
+            )
+        );
+    }
+
+    public function flux_seo_add_settings_page() {
+        add_options_page(
+            'Flux SEO API Key',          // Page title
+            'Flux SEO API Key',          // Menu title
+            'manage_options',            // Capability
+            'flux-seo-api-key-settings', // Menu slug
+            array($this, 'flux_seo_render_settings_page') // Function to display page content
+        );
+    }
+
+    public function flux_seo_render_settings_page() {
+        ?>
+        <div class="wrap">
+            <h1>Flux SEO Gemini API Key Configuration</h1>
+            <form method="post" action="options.php">
+                <?php
+                settings_fields('flux_seo_api_settings_group'); // Output settings fields for the registered group
+                do_settings_sections('flux_seo_api_settings_group'); // Output settings sections (if any)
+                ?>
+                <table class="form-table">
+                    <tr valign="top">
+                        <th scope="row"><label for="flux_seo_gemini_api_key_field">Gemini API Key</label></th>
+                        <td>
+                            <input type="text"
+                                   id="flux_seo_gemini_api_key_field"
+                                   name="flux_seo_gemini_api_key"
+                                   value="<?php echo esc_attr(get_option('flux_seo_gemini_api_key')); ?>"
+                                   class="regular-text"
+                                   placeholder="Enter your Gemini API Key"/>
+                            <p class="description">
+                                You can obtain your API key from Google AI Studio.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                <?php submit_button('Save API Key'); ?>
+            </form>
+        </div>
+        <?php
+    }
+
+    private function call_gemini_api($prompt, $language = 'en') {
+        $api_key = get_option('flux_seo_gemini_api_key');
+
+        if (empty($api_key)) {
+            error_log('[Flux SEO] Gemini API Key is not set. Please configure it in Settings.');
+            return false; // Or handle this error appropriately, e.g., throw an exception
+        }
+
+        // Assuming $this->gemini_endpoint is still a class property or defined appropriately.
+        // If $this->gemini_endpoint also needs to be configurable, it should be fetched similarly.
+        if (empty($this->gemini_endpoint)) { // Added check for endpoint for robustness
+            error_log('[Flux SEO] Gemini API endpoint not configured.');
+            return false;
+        }
+
+        $url = $this->gemini_endpoint . '?key=' . $api_key;
+
+        // System prompt setup (example)
+        $system_prompt_text = "You are a helpful AI assistant. Please respond in " . $language . ".";
+
+        $data = array(
+            'contents' => array(
+                array(
+                    'role' => 'user',
+                    'parts' => array(
+                        array('text' => $prompt)
+                    )
+                ),
+                // System prompt can be part of the initial message or a separate instruction
+                // For simplicity here, adding it as a model pre-fill which might not be standard for all Gemini models
+                // A more common approach for system instructions is via `systemInstruction` field at the top level for some models.
+                // Given the example, we are following a multi-turn like structure.
+                array(
+                    'role' => 'model',
+                    'parts' => array(
+                        // Assuming the system prompt is to guide the model's persona
+                        array('text' => $system_prompt_text)
+                    )
+                )
+            ),
+            'generationConfig' => array(
+                'temperature' => 0.7, // Example value
+                'topK' => 1,         // Example value
+                'topP' => 1,         // Example value
+                'maxOutputTokens' => 2048, // Changed from 4096 to 2048
+                'stopSequences' => []  // Example value
+            ),
+            'safetySettings' => array( // Preserved safety settings
+                array(
+                    'category' => 'HARM_CATEGORY_HARASSMENT',
+                    'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'
+                ),
+                array(
+                    'category' => 'HARM_CATEGORY_HATE_SPEECH',
+                    'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'
+                ),
+                array(
+                    'category' => 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+                    'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'
+                ),
+                array(
+                    'category' => 'HARM_CATEGORY_DANGEROUS_CONTENT',
+                    'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'
+                )
+            )
+        );
+
+        $start_time = microtime(true); // Added before wp_remote_post
+
+        $response = wp_remote_post($url, array(
+            'method' => 'POST',
+            'headers' => array(
+                'Content-Type' => 'application/json'
+            ),
+            'body' => json_encode($data),
+            'timeout' => 60 // Changed from 30 to 60
+        ));
+
+        $end_time = microtime(true); // Added after wp_remote_post
+        $duration = $end_time - $start_time;
+        // Added detailed error log with URL, duration and prompt length
+        error_log('[Flux SEO] Gemini API call to ' . esc_url_raw($url) . ' duration: ' . round($duration, 3) . ' seconds. Prompt length: ' . strlen($prompt) . ' chars.');
+
+        if (is_wp_error($response)) {
+            // Modified error log for WP_Error
+            error_log('[Flux SEO] Gemini API WP_Error: ' . $response->get_error_message());
+            return false;
+        }
+
+        $http_code = wp_remote_retrieve_response_code($response);
+        $body = wp_remote_retrieve_body($response);
+
+        // Added check for HTTP error codes
+        if ($http_code >= 400) {
+            error_log('[Flux SEO] Gemini API HTTP Error: Code ' . $http_code . ' - Body: ' . $body);
+            return false;
+        }
+
+        $result = json_decode($body, true);
+
+        // Check if $result is null or not an array, which indicates a JSON decode error
+        if (null === $result && json_last_error() !== JSON_ERROR_NONE) {
+            error_log('[Flux SEO] Gemini API JSON Decode Error: ' . json_last_error_msg() . '. HTTP Code: ' . $http_code . '. Body: ' . $body);
+            return false;
+        }
+
+        // Example of how one might extract text, structure depends on actual API response
+        // This part should be robust to API response variations.
+        if (isset($result['candidates'][0]['content']['parts'][0]['text'])) {
+            return $result['candidates'][0]['content']['parts'][0]['text'];
+        } else {
+            // Modified final error log for unexpected structure or empty text
+            error_log('[Flux SEO] Gemini API Response Error - Unexpected structure or empty text. HTTP Code: ' . $http_code . '. Body: ' . $body);
+            return false;
+        }
     }
 }
 
