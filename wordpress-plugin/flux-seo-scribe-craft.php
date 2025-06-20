@@ -65,7 +65,17 @@ class FluxSEOScribeCraft {
             false
         );
         
-        // Enqueue main CSS
+        // Define file paths
+        $css_file_path = FLUX_SEO_PLUGIN_PATH . 'flux-seo-scribe-craft.css';
+        $loader_js_file_path = FLUX_SEO_PLUGIN_PATH . 'flux-seo-react-loader.js';
+        $integration_js_file_path = FLUX_SEO_PLUGIN_PATH . 'flux-seo-wordpress-integration.js';
+
+        // Check CSS file readability
+        if (!is_readable($css_file_path)) {
+            add_action('admin_notices', function() use ($css_file_path) {
+                echo '<div class="notice notice-error"><p><strong>Flux SEO Scribe Craft Error:</strong> The main CSS file is not readable. Please check file permissions: ' . esc_html($css_file_path) . '</p></div>';
+            });
+        }
         wp_enqueue_style(
             'flux-seo-scribe-craft-css',
             FLUX_SEO_PLUGIN_URL . 'flux-seo-scribe-craft.css',
@@ -73,7 +83,7 @@ class FluxSEOScribeCraft {
             FLUX_SEO_PLUGIN_VERSION
         );
         
-        // Enqueue WordPress-specific overrides
+        // Enqueue WordPress-specific overrides (less critical, no readability check for now)
         wp_enqueue_style(
             'flux-seo-wordpress-overrides',
             FLUX_SEO_PLUGIN_URL . 'wordpress-overrides.css',
@@ -81,7 +91,12 @@ class FluxSEOScribeCraft {
             FLUX_SEO_PLUGIN_VERSION
         );
         
-        // Enqueue React loader (handles loading the main app)
+        // Check React loader script readability
+        if (!is_readable($loader_js_file_path)) {
+            add_action('admin_notices', function() use ($loader_js_file_path) {
+                echo '<div class="notice notice-error"><p><strong>Flux SEO Scribe Craft Error:</strong> The React loader script is not readable. Please check file permissions: ' . esc_html($loader_js_file_path) . '</p></div>';
+            });
+        }
         wp_enqueue_script(
             'flux-seo-react-loader',
             FLUX_SEO_PLUGIN_URL . 'flux-seo-react-loader.js',
@@ -90,7 +105,12 @@ class FluxSEOScribeCraft {
             true
         );
         
-        // Enqueue WordPress integration script
+        // Check WordPress integration script readability
+        if (!is_readable($integration_js_file_path)) {
+            add_action('admin_notices', function() use ($integration_js_file_path) {
+                echo '<div class="notice notice-error"><p><strong>Flux SEO Scribe Craft Error:</strong> The WordPress integration script is not readable. Please check file permissions: ' . esc_html($integration_js_file_path) . '</p></div>';
+            });
+        }
         wp_enqueue_script(
             'flux-seo-wordpress-integration',
             FLUX_SEO_PLUGIN_URL . 'flux-seo-wordpress-integration.js',

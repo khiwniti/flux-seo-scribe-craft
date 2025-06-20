@@ -101,32 +101,39 @@
             }, 500);
         };
         script.onerror = function() {
-            console.error('❌ Failed to load FluxSEO App script');
-            showAppLoadError();
+            console.error('❌ Failed to load FluxSEO App script from:', script.src); // Log the src
+            showAppLoadError(script.src); // Pass script.src to the error display function
         };
         
         document.head.appendChild(script);
     }
     
     // Show error if app script fails to load
-    function showAppLoadError() {
+    function showAppLoadError(failedUrl) { // Accept the failed URL as a parameter
         const rootElement = document.getElementById('root');
         if (rootElement) {
             rootElement.innerHTML = `
                 <div style="padding: 20px; border: 2px solid #dc3545; border-radius: 8px; background: #f8d7da; color: #721c24; margin: 20px;">
                     <h3>⚠️ App Loading Error</h3>
                     <p>The FluxSEO application script could not be loaded.</p>
+                    <p><strong>Attempted to load:</strong> ${failedUrl ? `<code style="background:#fff3cd;padding:2px 4px;border-radius:3px;">${failedUrl}</code>` : 'Unknown URL'}</p>
                     <p><strong>Possible causes:</strong></p>
                     <ul>
-                        <li>Plugin files are missing or corrupted</li>
-                        <li>Server permissions issue</li>
-                        <li>JavaScript syntax error in the app</li>
+                        <li>Plugin files are missing or corrupted.</li>
+                        <li>Server permissions issue (check if the file above is accessible directly in your browser - you might see a 403 Forbidden or 404 Not Found error).</li>
+                        <li>JavaScript syntax error in the app or conflicts with other plugins/themes.</li>
+                        <li>The server might be configured to block direct access to .js files in this directory.</li>
                     </ul>
+                    <p>Please check your browser's console (F12) for more specific error messages (e.g., network errors like 403, 404, 500, or JavaScript errors).</p>
                     <button onclick="location.reload()" style="margin-top: 10px; padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
                         Refresh Page
                     </button>
                 </div>
             `;
+        } else {
+            // If rootElement itself is missing, this is a more fundamental issue.
+            console.error('❌ FluxSEO: Critical error in showAppLoadError. Target element "root" NOT found. Cannot display error message in page.');
+            alert(`FluxSEO Scribe Craft: Critical error - Could not load application script from ${failedUrl || 'Unknown URL'} and failed to display error message in page. Root element missing. Check console.`);
         }
     }
     
