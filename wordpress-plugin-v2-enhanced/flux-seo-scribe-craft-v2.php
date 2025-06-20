@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: Flux SEO Scribe Craft v2.0 Enhanced
+ * Plugin Name: Flux SEO Scribe Craft v2.0 Enhanced (Real UI)
  * Plugin URI: https://github.com/khiwniti/flux-seo-scribe-craft
- * Description: Professional SEO optimization suite with integrated content generation, Gemini AI, and advanced analytics. Enhanced v2.0 with improved React UI.
- * Version: 2.0.0
+ * Description: Professional SEO optimization suite with real React UI from /src directory. Features comprehensive dashboard, AI content generation, advanced analytics, and multi-language support.
+ * Version: 2.0.1
  * Author: Flux SEO Team
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
 // Define plugin constants
 define('FLUX_SEO_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('FLUX_SEO_PLUGIN_PATH', plugin_dir_path(__FILE__));
-define('FLUX_SEO_PLUGIN_VERSION', '2.0.0');
+define('FLUX_SEO_PLUGIN_VERSION', '2.0.1');
 
 class FluxSEOScribeCraftV2 {
     
@@ -294,8 +294,15 @@ class FluxSEOScribeCraftV2 {
             <div id="root">
                 <div class="flux-seo-loading">
                     <div class="loading-content">
-                        <h3>🚀 Loading Flux SEO Scribe Craft v2.0...</h3>
-                        <p>Initializing enhanced SEO optimization suite...</p>
+                        <h3>🎯 Loading Flux SEO Pro Optimizer</h3>
+                        <p>Real UI components with comprehensive dashboard</p>
+                        <div class="loading-features">
+                            <span>✨ Content Analyzer</span>
+                            <span>🤖 AI Generator</span>
+                            <span>📊 Advanced Analytics</span>
+                            <span>🔍 Keyword Research</span>
+                            <span>🌐 Multi-language</span>
+                        </div>
                         <div class="loading-spinner"></div>
                     </div>
                 </div>
