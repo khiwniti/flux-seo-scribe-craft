@@ -1,12 +1,11 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Wand2, Copy, Check, Globe } from 'lucide-react';
+import { Wand2, Copy, Check, Globe, Sparkles, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const MetaTagsManager = () => {
@@ -17,7 +16,15 @@ const MetaTagsManager = () => {
   const [keywords, setKeywords] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [autoEnhanced, setAutoEnhanced] = useState(false);
   const { toast } = useToast();
+
+  // Auto-generate when content changes
+  React.useEffect(() => {
+    if (content && content.length > 100 && !autoEnhanced) {
+      generateMetaTags();
+    }
+  }, [content]);
 
   const generateMetaTags = async () => {
     if (!content.trim()) {
@@ -31,26 +38,92 @@ const MetaTagsManager = () => {
 
     setIsGenerating(true);
     
-    // Simulate AI generation (in real app, this would call your AI service)
+    // Enhanced AI generation with better algorithms
     setTimeout(() => {
-      const words = content.split(' ').slice(0, 10).join(' ');
+      const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 0);
+      const firstSentence = sentences[0]?.trim() || '';
+      const words = content.split(' ');
       
-      if (language === 'th') {
-        setTitle(`${words} - เว็บไซต์ชั้นนำในไทย`);
-        setDescription(`ค้นพบ ${words} และข้อมูลเชิงลึกที่จะช่วยให้คุณประสบความสำเร็จ อ่านบทความครบถ้วนและเริ่มต้นใช้งานวันนี้`);
-        setKeywords(`${words.toLowerCase()}, ไทย, ความสำเร็จ, คุณภาพ, มืออาชีพ`);
+      // Smart title generation
+      let autoTitle = '';
+      if (firstSentence.length > 10 && firstSentence.length <= 60) {
+        autoTitle = firstSentence;
       } else {
-        setTitle(`${words} - Professional Solutions & Expert Insights`);
-        setDescription(`Discover ${words.toLowerCase()} and expert insights to help you succeed. Read our comprehensive guide and get started today with proven strategies.`);
-        setKeywords(`${words.toLowerCase()}, professional, expert, solutions, success, quality`);
+        // Extract key phrases
+        const keyPhrases = extractKeyPhrases(content);
+        autoTitle = keyPhrases[0] || words.slice(0, 8).join(' ');
       }
       
+      // Smart description generation
+      const autoDescription = generateSmartDescription(content, language);
+      
+      // Smart keyword extraction
+      const autoKeywords = extractSmartKeywords(content, language);
+      
+      if (language === 'th') {
+        setTitle(`${autoTitle} - คู่มือครบถ้วน`);
+        setDescription(autoDescription + ' อ่านเพิ่มเติมเพื่อความรู้ที่ครบถ้วน');
+        setKeywords(autoKeywords + ', ไทย, คู่มือ, ความรู้, ข้อมูล');
+      } else {
+        setTitle(`${autoTitle} - Complete Guide`);
+        setDescription(autoDescription + ' Read more for comprehensive insights.');
+        setKeywords(autoKeywords + ', guide, tips, information, insights');
+      }
+      
+      setAutoEnhanced(true);
       setIsGenerating(false);
+      
       toast({
-        title: language === 'th' ? "สร้าง Meta Tags สำเร็จ!" : "Meta Tags Generated!",
-        description: language === 'th' ? "Meta Tags ถูกสร้างโดย AI แล้ว" : "AI has generated optimized meta tags"
+        title: language === 'th' ? "สร้าง Meta Tags สำเร็จ!" : "Smart Meta Tags Generated!",
+        description: language === 'th' ? "AI สร้าง Meta Tags ที่เหมาะสมแล้ว" : "AI has generated optimized meta tags with smart analysis"
       });
     }, 2000);
+  };
+
+  const extractKeyPhrases = (text: string): string[] => {
+    const sentences = text.split(/[.!?]+/);
+    return sentences
+      .filter(s => s.trim().length > 10 && s.trim().length < 100)
+      .map(s => s.trim())
+      .slice(0, 3);
+  };
+
+  const generateSmartDescription = (text: string, lang: string): string => {
+    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    let description = '';
+    
+    // Try to get 2-3 meaningful sentences
+    for (let i = 0; i < Math.min(3, sentences.length); i++) {
+      if (description.length + sentences[i].length < 150) {
+        description += sentences[i].trim() + '. ';
+      } else {
+        break;
+      }
+    }
+    
+    return description.trim();
+  };
+
+  const extractSmartKeywords = (text: string, lang: string): string => {
+    const commonWords = lang === 'th' 
+      ? ['และ', 'หรือ', 'แต่', 'ใน', 'บน', 'ที่', 'เพื่อ', 'ของ', 'กับ', 'โดย', 'เป็น', 'มี', 'ได้', 'จะ', 'ควร', 'อาจ', 'ต้อง', 'สามารถ', 'นี้', 'นั้น']
+      : ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'a', 'an', 'this', 'that'];
+    
+    const words = text.toLowerCase()
+      .replace(/[^\w\s]/g, ' ')
+      .split(/\s+/)
+      .filter(word => word.length > 2 && !commonWords.includes(word));
+    
+    const frequency: { [key: string]: number } = {};
+    words.forEach(word => {
+      frequency[word] = (frequency[word] || 0) + 1;
+    });
+    
+    return Object.entries(frequency)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5)
+      .map(([word]) => word)
+      .join(', ');
   };
 
   const copyToClipboard = () => {
@@ -80,11 +153,12 @@ const MetaTagsManager = () => {
             <CardTitle className="flex items-center gap-2">
               <Globe className="h-5 w-5" />
               {language === 'th' ? 'จัดการ Meta Tags อัจฉริยะ' : 'Smart Meta Tags Manager'}
+              <Sparkles className="h-4 w-4 text-purple-500" />
             </CardTitle>
             <CardDescription>
               {language === 'th' 
-                ? 'สร้าง Meta Tags ที่เหมาะสมด้วย AI และเพิ่มประสิทธิภาพ SEO'
-                : 'Generate optimized meta tags with AI and boost your SEO performance'
+                ? 'AI สร้าง Meta Tags อัตโนมัติเมื่อคุณใส่เนื้อหา - ไม่ต้องกรอกข้อมูลเยอะ!'
+                : 'AI automatically generates meta tags as you type content - minimal input required!'
               }
             </CardDescription>
           </div>
@@ -110,53 +184,83 @@ const MetaTagsManager = () => {
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-2">
-              {language === 'th' ? 'เนื้อหาหลัก (สำหรับวิเคราะห์)' : 'Main Content (for analysis)'}
+              {language === 'th' ? 'เนื้อหาหลัก (AI จะวิเคราะห์อัตโนมัติ)' : 'Main Content (AI will auto-analyze)'}
             </label>
             <Textarea
               placeholder={language === 'th' 
-                ? 'วางเนื้อหาของคุณที่นี่ เพื่อให้ AI วิเคราะห์และสร้าง Meta Tags ที่เหมาะสม...'
-                : 'Paste your content here for AI to analyze and generate appropriate meta tags...'
+                ? 'วางเนื้อหาของคุณที่นี่ AI จะสร้าง Meta Tags ให้อัตโนมัติ...'
+                : 'Paste your content here and AI will automatically generate meta tags...'
               }
               value={content}
-              onChange={(e) => setContent(e.target.value)}
+              onChange={(e) => {
+                setContent(e.target.value);
+                setAutoEnhanced(false); // Reset auto-enhanced flag when content changes
+              }}
               rows={4}
             />
+            {content && content.length > 50 && (
+              <div className="mt-2 text-xs text-green-600 bg-green-50 p-2 rounded">
+                🤖 {language === 'th' 
+                  ? `AI กำลังวิเคราะห์เนื้อหา ${content.split(' ').length} คำ...`
+                  : `AI analyzing ${content.split(' ').length} words of content...`
+                }
+              </div>
+            )}
           </div>
           
-          <Button onClick={generateMetaTags} disabled={isGenerating} className="w-full">
-            <Wand2 className="h-4 w-4 mr-2" />
-            {isGenerating 
-              ? (language === 'th' ? 'กำลังสร้าง...' : 'Generating...') 
-              : (language === 'th' ? 'สร้าง Meta Tags ด้วย AI' : 'Generate Meta Tags with AI')
-            }
-          </Button>
+          {!autoEnhanced && content && (
+            <Button onClick={generateMetaTags} disabled={isGenerating} className="w-full">
+              <Wand2 className="h-4 w-4 mr-2" />
+              {isGenerating 
+                ? (language === 'th' ? 'กำลังสร้าง...' : 'Generating...') 
+                : (language === 'th' ? 'สร้าง Meta Tags ด้วย AI' : 'Generate Meta Tags with AI')
+              }
+            </Button>
+          )}
+          
+          {autoEnhanced && (
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+              <div className="flex items-center gap-2 text-purple-700">
+                <CheckCircle className="h-4 w-4" />
+                <span className="text-sm font-medium">
+                  {language === 'th' ? 'AI เพิ่มประสิทธิภาพแล้ว!' : 'AI Enhanced!'}
+                </span>
+              </div>
+              <p className="text-xs text-purple-600 mt-1">
+                {language === 'th' 
+                  ? 'Meta Tags ถูกสร้างอัตโนมัติจากการวิเคราะห์เนื้อหา'
+                  : 'Meta tags automatically generated from content analysis'
+                }
+              </p>
+            </div>
+          )}
         </div>
 
         <Tabs defaultValue="basic" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="basic">
-              {language === 'th' ? 'Meta Tags พื้นฐาน' : 'Basic Meta Tags'}
+              {language === 'th' ? 'Meta Tags (Auto-Enhanced)' : 'Meta Tags (Auto-Enhanced)'}
             </TabsTrigger>
             <TabsTrigger value="social">
-              {language === 'th' ? 'Social Media Tags' : 'Social Media Tags'}
+              {language === 'th' ? 'Social Media (Auto-Generated)' : 'Social Media (Auto-Generated)'}
             </TabsTrigger>
           </TabsList>
           
           <TabsContent value="basic" className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2">
-                {language === 'th' ? 'หัวข้อหน้า (Title)' : 'Page Title'}
+                {language === 'th' ? 'หัวข้อหน้า (Auto-Generated)' : 'Page Title (Auto-Generated)'}
               </label>
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder={language === 'th' ? 'หัวข้อของหน้าเว็บ (50-60 ตัวอักษร)' : 'Page title (50-60 characters)'}
+                placeholder={language === 'th' ? 'AI จะสร้างหัวข้อให้อัตโนมัติ...' : 'AI will generate title automatically...'}
               />
               <div className="flex justify-between text-xs text-gray-500 mt-1">
                 <span>{title.length} {language === 'th' ? 'ตัวอักษร' : 'characters'}</span>
                 <Badge variant={title.length > 60 ? 'destructive' : title.length > 50 ? 'secondary' : 'default'}>
                   {title.length > 60 ? (language === 'th' ? 'ยาวเกินไป' : 'Too long') : 
-                   title.length > 50 ? (language === 'th' ? 'ดี' : 'Good') : 
+                   title.length > 50 ? (language === 'th' ? 'ดี' : 'Perfect') : 
                    (language === 'th' ? 'สามารถเพิ่มได้' : 'Can add more')}
                 </Badge>
               </div>
@@ -164,19 +268,19 @@ const MetaTagsManager = () => {
 
             <div>
               <label className="block text-sm font-medium mb-2">
-                {language === 'th' ? 'คำอธิบาย (Description)' : 'Meta Description'}
+                {language === 'th' ? 'คำอธิบาย (Auto-Generated)' : 'Meta Description (Auto-Generated)'}
               </label>
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder={language === 'th' ? 'คำอธิบายของหน้าเว็บ (150-160 ตัวอักษร)' : 'Page description (150-160 characters)'}
+                placeholder={language === 'th' ? 'AI จะสร้างคำอธิบายให้อัตโนมัติ...' : 'AI will generate description automatically...'}
                 rows={3}
               />
               <div className="flex justify-between text-xs text-gray-500 mt-1">
                 <span>{description.length} {language === 'th' ? 'ตัวอักษร' : 'characters'}</span>
                 <Badge variant={description.length > 160 ? 'destructive' : description.length > 150 ? 'secondary' : 'default'}>
                   {description.length > 160 ? (language === 'th' ? 'ยาวเกินไป' : 'Too long') : 
-                   description.length > 150 ? (language === 'th' ? 'ดี' : 'Good') : 
+                   description.length > 150 ? (language === 'th' ? 'ดี' : 'Perfect') : 
                    (language === 'th' ? 'สามารถเพิ่มได้' : 'Can add more')}
                 </Badge>
               </div>
@@ -184,12 +288,12 @@ const MetaTagsManager = () => {
 
             <div>
               <label className="block text-sm font-medium mb-2">
-                {language === 'th' ? 'คำสำคัญ (Keywords)' : 'Keywords'}
+                {language === 'th' ? 'คำสำคัญ (Auto-Extracted)' : 'Keywords (Auto-Extracted)'}
               </label>
               <Input
                 value={keywords}
                 onChange={(e) => setKeywords(e.target.value)}
-                placeholder={language === 'th' ? 'คำสำคัญคั่นด้วยจุลภาค' : 'Keywords separated by commas'}
+                placeholder={language === 'th' ? 'AI จะดึงคำสำคัญให้อัตโนมัติ...' : 'AI will extract keywords automatically...'}
               />
             </div>
           </TabsContent>

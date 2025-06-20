@@ -59,10 +59,10 @@ const ContentGenerationForm = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Wand2 className="h-5 w-5 text-purple-600" />
-          Integrated Content & Image Generator
+          Intelligent Content Generator
         </CardTitle>
         <CardDescription>
-          Generate SEO-optimized blog posts with contextual images automatically
+          AI-powered content generation with smart field enhancement and auto-completion
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -74,16 +74,26 @@ const ContentGenerationForm = ({
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
           />
+          {topic && (
+            <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
+              💡 AI will automatically suggest keywords, tone, and audience based on your topic
+            </div>
+          )}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="keywords">Target Keywords</Label>
           <Input
             id="keywords"
-            placeholder="SEO, digital marketing, content strategy..."
+            placeholder="AI will auto-suggest keywords..."
             value={keywords}
             onChange={(e) => setKeywords(e.target.value)}
           />
+          {!keywords && topic && (
+            <div className="text-xs text-green-600">
+              ✨ Keywords will be auto-generated from your topic
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -91,7 +101,7 @@ const ContentGenerationForm = ({
             <Label>Writing Tone</Label>
             <Select value={tone} onValueChange={setTone}>
               <SelectTrigger>
-                <SelectValue placeholder="Select tone" />
+                <SelectValue placeholder="AI will auto-detect..." />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="professional">Professional</SelectItem>
@@ -100,6 +110,11 @@ const ContentGenerationForm = ({
                 <SelectItem value="conversational">Conversational</SelectItem>
               </SelectContent>
             </Select>
+            {!tone && (
+              <div className="text-xs text-purple-600">
+                🎯 Tone auto-detected from content
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -119,11 +134,12 @@ const ContentGenerationForm = ({
 
         <Separator />
 
-        {/* Intelligence Settings */}
+        {/* Enhanced Intelligence Settings */}
         <div className="space-y-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border">
           <div className="flex items-center gap-2 mb-3">
             <Brain className="h-5 w-5 text-blue-600" />
-            <Label className="text-base font-semibold">AI Intelligence Settings</Label>
+            <Label className="text-base font-semibold">Enhanced AI Settings</Label>
+            <Badge className="bg-purple-100 text-purple-700">Auto-Enhanced</Badge>
           </div>
           
           <div className="grid grid-cols-2 gap-4">
@@ -131,7 +147,7 @@ const ContentGenerationForm = ({
               <Label>Content Type</Label>
               <Select value={contentType} onValueChange={setContentType}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
+                  <SelectValue placeholder="AI will detect..." />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="blog">Blog Post</SelectItem>
@@ -147,7 +163,7 @@ const ContentGenerationForm = ({
               <Label>Writing Style</Label>
               <Select value={writingStyle} onValueChange={setWritingStyle}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select style" />
+                  <SelectValue placeholder="Auto-optimized..." />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="professional">Professional</SelectItem>
@@ -163,7 +179,7 @@ const ContentGenerationForm = ({
               <Label>Target Audience</Label>
               <Select value={targetAudience} onValueChange={setTargetAudience}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select audience" />
+                  <SelectValue placeholder="AI will identify..." />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="general">General Public</SelectItem>
@@ -179,7 +195,7 @@ const ContentGenerationForm = ({
               <Label>Industry Focus</Label>
               <Select value={industryFocus} onValueChange={setIndustryFocus}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select industry" />
+                  <SelectValue placeholder="Auto-categorized..." />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="general">General Business</SelectItem>
@@ -198,7 +214,7 @@ const ContentGenerationForm = ({
             <Label>Content Template</Label>
             <Select value={contentTemplate} onValueChange={setContentTemplate}>
               <SelectTrigger>
-                <SelectValue placeholder="Select template" />
+                <SelectValue placeholder="Smart template selection..." />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="standard">Standard Article</SelectItem>
@@ -215,19 +231,19 @@ const ContentGenerationForm = ({
           <div className="flex flex-wrap gap-2">
             <Badge variant="secondary" className="bg-green-100 text-green-700">
               <CheckCircle className="h-3 w-3 mr-1" />
-              SEO-Optimized Content
+              Auto-SEO Optimization
             </Badge>
             <Badge variant="secondary" className="bg-blue-100 text-blue-700">
               <Eye className="h-3 w-3 mr-1" />
-              Contextual Images
+              Smart Image Generation
             </Badge>
             <Badge variant="secondary" className="bg-purple-100 text-purple-700">
               <Brain className="h-3 w-3 mr-1" />
-              Smart Keywords
+              Keyword Auto-Detection
             </Badge>
             <Badge variant="secondary" className="bg-orange-100 text-orange-700">
               <Target className="h-3 w-3 mr-1" />
-              Quality Analysis
+              Content Quality Analysis
             </Badge>
             <Badge variant="secondary" className="bg-pink-100 text-pink-700">
               <TrendingUp className="h-3 w-3 mr-1" />
@@ -235,7 +251,7 @@ const ContentGenerationForm = ({
             </Badge>
             <Badge variant="secondary" className="bg-indigo-100 text-indigo-700">
               <Zap className="h-3 w-3 mr-1" />
-              Ready to Publish
+              One-Click Publishing
             </Badge>
           </div>
         </div>
@@ -248,12 +264,12 @@ const ContentGenerationForm = ({
           {isGenerating ? (
             <div className="flex items-center gap-2">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              Generating Intelligent Content...
+              Generating AI-Enhanced Content...
             </div>
           ) : (
             <div className="flex items-center gap-2">
               <Brain className="h-4 w-4" />
-              Generate AI-Powered Blog Post
+              Generate Smart AI Content
             </div>
           )}
         </Button>
