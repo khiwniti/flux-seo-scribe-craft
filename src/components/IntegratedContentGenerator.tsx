@@ -1,11 +1,12 @@
 
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Wand2, Calendar, Clock } from 'lucide-react';
+import { Wand2, Calendar, Clock, BarChart } from 'lucide-react';
 import ContentGenerationForm from './content-generator/ContentGenerationForm';
 import AutoGenerationSettings from './content-generator/AutoGenerationSettings';
 import GenerationHistory from './content-generator/GenerationHistory';
 import GeneratedContentDisplay from './content-generator/GeneratedContentDisplay';
+import AnalyticsBasedGenerator from './content-generator/AnalyticsBasedGenerator';
 import { useContentGeneration } from './content-generator/useContentGeneration';
 
 const IntegratedContentGenerator = () => {
@@ -19,13 +20,9 @@ const IntegratedContentGenerator = () => {
     setTone,
     wordCount,
     setWordCount,
-    
-    // Generated content
     generatedContent,
     generatedImages,
     isGenerating,
-    
-    // Auto-generation states
     autoGenEnabled,
     autoGenFrequency,
     setAutoGenFrequency,
@@ -39,8 +36,6 @@ const IntegratedContentGenerator = () => {
     setAutoGenKeywords,
     autoGenHistory,
     nextScheduledRun,
-    
-    // Intelligence states
     contentQuality,
     seoScore,
     readabilityScore,
@@ -58,8 +53,6 @@ const IntegratedContentGenerator = () => {
     setContentTemplate,
     smartKeywords,
     contentInsights,
-    
-    // Actions
     generateContent,
     generateAutoContent,
     toggleAutoGeneration,
@@ -69,8 +62,12 @@ const IntegratedContentGenerator = () => {
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="manual" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-6">
+      <Tabs defaultValue="analytics" className="w-full">
+        <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsTrigger value="analytics" className="flex items-center gap-2">
+            <BarChart className="h-4 w-4" />
+            Analytics Generation
+          </TabsTrigger>
           <TabsTrigger value="manual" className="flex items-center gap-2">
             <Wand2 className="h-4 w-4" />
             Manual Generation
@@ -84,6 +81,10 @@ const IntegratedContentGenerator = () => {
             Generation History
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="analytics" className="space-y-6">
+          <AnalyticsBasedGenerator />
+        </TabsContent>
 
         <TabsContent value="manual" className="space-y-6">
           <ContentGenerationForm
@@ -118,7 +119,9 @@ const IntegratedContentGenerator = () => {
               readabilityScore={readabilityScore}
               smartKeywords={smartKeywords}
               contentInsights={contentInsights}
-              onCopyToClipboard={copyToClipboard}
+              onCopyToClipboard={copyToClip
+
+board}
               onDownloadImage={downloadImage}
             />
           )}

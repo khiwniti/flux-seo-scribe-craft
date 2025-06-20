@@ -1,41 +1,16 @@
 
 import { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
-
-interface ContentInsights {
-  estimatedReadTime?: number;
-  targetKeywordDensity?: string;
-  recommendedHeadings?: number;
-  suggestedImages?: number;
-  seoComplexity?: string;
-  competitiveLevel?: string;
-}
-
-interface GeneratedImage {
-  id: number;
-  url: string;
-  alt: string;
-  prompt: string;
-  enhanced: boolean;
-  quality: string;
-  seoOptimized: boolean;
-}
-
-interface GenerationHistoryEntry {
-  id: number;
-  topic: string;
-  keywords: string;
-  generatedAt: string;
-  status: string;
-}
 
 export const useContentGeneration = () => {
+  // Form states
   const [topic, setTopic] = useState('');
   const [keywords, setKeywords] = useState('');
   const [tone, setTone] = useState('');
   const [wordCount, setWordCount] = useState('');
+  
+  // Generated content
   const [generatedContent, setGeneratedContent] = useState('');
-  const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
+  const [generatedImages, setGeneratedImages] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   
   // Auto-generation states
@@ -45,457 +20,241 @@ export const useContentGeneration = () => {
   const [autoGenDay, setAutoGenDay] = useState('monday');
   const [autoGenTopics, setAutoGenTopics] = useState('');
   const [autoGenKeywords, setAutoGenKeywords] = useState('');
-  const [autoGenHistory, setAutoGenHistory] = useState<GenerationHistoryEntry[]>([]);
+  const [autoGenHistory, setAutoGenHistory] = useState<any[]>([]);
   const [nextScheduledRun, setNextScheduledRun] = useState<Date | null>(null);
   
-  // Intelligence and Quality Enhancement States
+  // Intelligence states
   const [contentQuality, setContentQuality] = useState(0);
   const [seoScore, setSeoScore] = useState(0);
   const [readabilityScore, setReadabilityScore] = useState(0);
   const [trendingTopics, setTrendingTopics] = useState<string[]>([]);
   const [contentSuggestions, setContentSuggestions] = useState<string[]>([]);
-  const [targetAudience, setTargetAudience] = useState('general');
-  const [contentType, setContentType] = useState('blog');
-  const [writingStyle, setWritingStyle] = useState('professional');
-  const [industryFocus, setIndustryFocus] = useState('general');
-  const [contentTemplate, setContentTemplate] = useState('standard');
+  const [targetAudience, setTargetAudience] = useState('');
+  const [contentType, setContentType] = useState('');
+  const [writingStyle, setWritingStyle] = useState('');
+  const [industryFocus, setIndustryFocus] = useState('');
+  const [contentTemplate, setContentTemplate] = useState('');
   const [smartKeywords, setSmartKeywords] = useState<string[]>([]);
-  const [contentInsights, setContentInsights] = useState<ContentInsights>({});
-  
-  const { toast } = useToast();
+  const [contentInsights, setContentInsights] = useState<string[]>([]);
 
-  // Enhanced Content Generation with Intelligence
-  const generateContent = async () => {
-    if (!topic.trim()) {
-      toast({
-        title: "Topic Required",
-        description: "Please enter a blog topic to generate content and images.",
-        variant: "destructive"
-      });
-      return;
+  // Analytics-based states
+  const [analyticsData, setAnalyticsData] = useState<any>(null);
+  const [blogSuggestions, setBlogSuggestions] = useState<any[]>([]);
+  const [selectedAnalyticsSuggestion, setSelectedAnalyticsSuggestion] = useState<any>(null);
+
+  // Initialize trending topics and suggestions
+  useEffect(() => {
+    setTrendingTopics([
+      'AI Content Creation',
+      'Voice Search SEO',
+      'Local Business Marketing',
+      'Content Personalization',
+      'Video Marketing Trends'
+    ]);
+    
+    setContentSuggestions([
+      'Create evergreen content that maintains relevance over time',
+      'Focus on solving specific problems your audience faces',
+      'Include data-driven insights to boost credibility',
+      'Optimize for featured snippets with structured content',
+      'Add visual elements to improve engagement'
+    ]);
+  }, []);
+
+  // Auto-fill based on topic
+  useEffect(() => {
+    if (topic && topic.length > 10) {
+      // Simulate AI-powered field enhancement
+      setTimeout(() => {
+        if (!keywords) {
+          const autoKeywords = extractKeywordsFromTopic(topic);
+          setKeywords(autoKeywords.join(', '));
+        }
+        
+        if (!tone) {
+          const detectedTone = detectToneFromTopic(topic);
+          setTone(detectedTone);
+        }
+        
+        if (!targetAudience) {
+          const detectedAudience = detectAudienceFromTopic(topic);
+          setTargetAudience(detectedAudience);
+        }
+        
+        if (!contentType) {
+          const detectedType = detectContentTypeFromTopic(topic);
+          setContentType(detectedType);
+        }
+      }, 1000);
     }
+  }, [topic]);
 
+  const extractKeywordsFromTopic = (topicText: string): string[] => {
+    const commonWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'];
+    return topicText
+      .toLowerCase()
+      .split(' ')
+      .filter(word => word.length > 3 && !commonWords.includes(word))
+      .slice(0, 5);
+  };
+
+  const detectToneFromTopic = (topicText: string): string => {
+    if (topicText.includes('guide') || topicText.includes('how to')) return 'professional';
+    if (topicText.includes('tips') || topicText.includes('tricks')) return 'casual';
+    if (topicText.includes('strategy') || topicText.includes('analysis')) return 'authoritative';
+    return 'conversational';
+  };
+
+  const detectAudienceFromTopic = (topicText: string): string => {
+    if (topicText.includes('beginner') || topicText.includes('basic')) return 'beginners';
+    if (topicText.includes('advanced') || topicText.includes('expert')) return 'experts';
+    if (topicText.includes('business') || topicText.includes('enterprise')) return 'professionals';
+    return 'general';
+  };
+
+  const detectContentTypeFromTopic = (topicText: string): string => {
+    if (topicText.includes('how to') || topicText.includes('guide')) return 'how-to';
+    if (topicText.includes('best') || topicText.includes('top')) return 'listicle';
+    if (topicText.includes('vs') || topicText.includes('compare')) return 'comparison';
+    return 'blog';
+  };
+
+  const generateContent = async () => {
     setIsGenerating(true);
     
-    // Analyze content requirements and generate smart suggestions
-    const analyzeContentRequirements = () => {
-      const topicWords = topic.toLowerCase().split(' ');
-      const suggestedKeywords = [
-        ...topicWords,
-        `${topic.toLowerCase()} strategy`,
-        `${topic.toLowerCase()} best practices`,
-        `${topic.toLowerCase()} guide`,
-        `${topic.toLowerCase()} tips`,
-        `${topic.toLowerCase()} 2024`
-      ];
-      
-      setSmartKeywords(suggestedKeywords);
-      
-      // Generate content insights
-      setContentInsights({
-        estimatedReadTime: Math.ceil(wordCount ? parseInt(wordCount) / 200 : 5),
-        targetKeywordDensity: '1-2%',
-        recommendedHeadings: 6,
-        suggestedImages: 4,
-        seoComplexity: 'Medium',
-        competitiveLevel: 'High'
-      });
-    };
-
-    analyzeContentRequirements();
-    
-    // Generate enhanced content templates based on content type and industry
-    const getContentTemplate = () => {
-      const templates = {
-        'how-to': {
-          structure: ['Introduction', 'Prerequisites', 'Step-by-Step Guide', 'Tips & Best Practices', 'Common Mistakes', 'Conclusion'],
-          tone: 'instructional'
-        },
-        'listicle': {
-          structure: ['Introduction', 'List Items (5-10)', 'Detailed Explanations', 'Key Takeaways', 'Conclusion'],
-          tone: 'engaging'
-        },
-        'standard': {
-          structure: ['Introduction', 'Main Content Sections', 'Examples & Case Studies', 'Actionable Tips', 'Conclusion'],
-          tone: writingStyle
-        },
-        'comparison': {
-          structure: ['Introduction', 'Comparison Criteria', 'Detailed Analysis', 'Pros & Cons', 'Recommendation', 'Conclusion'],
-          tone: 'analytical'
-        }
-      };
-      
-      return templates[contentTemplate as keyof typeof templates] || templates['standard'];
-    };
-
-    const template = getContentTemplate();
-    
-    // Generate enhanced image prompts based on content type and industry
-    const generateSmartImagePrompts = () => {
-      const industryContext = industryFocus !== 'general' ? `${industryFocus} industry` : 'business';
-      const audienceContext = targetAudience !== 'general' ? `for ${targetAudience}` : '';
-      
-      return [
-        `Professional ${topic.toLowerCase()} concept in ${industryContext}, modern workspace, high-quality photography ${audienceContext}`,
-        `${topic.toLowerCase()} infographic design, clean minimalist style, data visualization, professional presentation`,
-        `Team collaboration on ${topic.toLowerCase()}, diverse professionals, ${industryContext} environment, business photography`,
-        `${topic.toLowerCase()} dashboard interface, modern UI/UX design, analytics visualization, clean aesthetic`,
-        `${topic.toLowerCase()} success metrics, charts and graphs, business intelligence, professional design`
-      ];
-    };
-
-    const imagePrompts = generateSmartImagePrompts();
-
-    // Simulate intelligent content generation with quality analysis
+    // Simulate AI content generation with analytics enhancement
     setTimeout(() => {
-      // Calculate quality scores
-      const calculateQualityScores = () => {
-        const baseQuality = 75 + Math.random() * 20;
-        const seoBonus = keywords.length > 0 ? 10 : 0;
-        const structureBonus = template.structure.length > 4 ? 5 : 0;
-        
-        const quality = Math.min(95, baseQuality + seoBonus + structureBonus);
-        const seo = Math.min(95, quality - 5 + (keywords.split(',').length * 2));
-        const readability = Math.min(95, quality - 10 + (writingStyle === 'conversational' ? 10 : 0));
-        
-        setContentQuality(Math.round(quality));
-        setSeoScore(Math.round(seo));
-        setReadabilityScore(Math.round(readability));
-      };
-
-      calculateQualityScores();
-
-      // Generate enhanced content with intelligent structure
-      const generateIntelligentContent = () => {
-        const keywordList = keywords ? keywords.split(',').map(k => k.trim()) : smartKeywords.slice(0, 5);
-        const primaryKeyword = keywordList[0] || topic.toLowerCase();
-        
-        return `# ${topic}: Complete ${new Date().getFullYear()} Guide
+      const content = `# ${topic}
 
 ## Introduction
 
-${topic} has become increasingly important in today's digital landscape. This comprehensive guide provides data-driven insights, proven strategies, and actionable tips that industry leaders use to achieve exceptional results.
+${generateIntroduction()}
 
-**Key Takeaways:**
-- Master the fundamentals of ${topic.toLowerCase()}
-- Implement advanced ${primaryKeyword} strategies
-- Avoid common pitfalls and mistakes
-- Measure and optimize your results
+## Key Points
 
-## Why ${topic} Matters in ${new Date().getFullYear()}
+${generateKeyPoints()}
 
-Recent studies show that businesses implementing effective ${topic.toLowerCase()} strategies experience:
+## SEO-Optimized Content
 
-- **📈 40% increase** in overall performance metrics
-- **🎯 60% better** audience engagement rates  
-- **💰 35% higher** return on investment
-- **🚀 50% faster** goal achievement
-
-## ${template.structure[2] || 'Core Strategies'}
-
-### 1. Data-Driven Foundation
-Build your ${topic.toLowerCase()} strategy on solid analytics:
-- **Performance Tracking**: Monitor key metrics and KPIs
-- **Audience Analysis**: Understand your target demographic
-- **Competitive Intelligence**: Analyze market positioning
-- **Trend Identification**: Stay ahead of industry changes
-
-### 2. Content Excellence Framework
-Create compelling, high-quality content that converts:
-- **Keyword Integration**: Natural use of ${primaryKeyword} and related terms
-- **User Intent Matching**: Address specific audience needs
-- **Multimedia Enhancement**: Include visuals, videos, and interactive elements
-- **Mobile Optimization**: Ensure seamless cross-device experience
-
-### 3. Technical Implementation
-Ensure robust technical foundation:
-- **Performance Optimization**: Fast loading speeds and smooth functionality
-- **SEO Best Practices**: Proper meta tags, schema markup, and structure
-- **Security Measures**: Implement latest security protocols
-- **Accessibility Standards**: Ensure inclusive user experience
-
-## Advanced ${topic} Techniques
-
-### Smart Automation
-Leverage technology to scale your efforts:
-- AI-powered content optimization
-- Automated performance monitoring
-- Intelligent audience segmentation
-- Predictive analytics implementation
-
-### Personalization Strategies
-Deliver tailored experiences:
-- Dynamic content adaptation
-- Behavioral trigger campaigns
-- Custom user journey mapping
-- Real-time optimization
-
-## Implementation Roadmap
-
-**Phase 1: Foundation (Weeks 1-2)**
-✅ Audit current ${topic.toLowerCase()} setup
-✅ Define clear objectives and KPIs
-✅ Research target audience and competitors
-✅ Establish baseline measurements
-
-**Phase 2: Strategy Development (Weeks 3-4)**
-✅ Create comprehensive ${primaryKeyword} strategy
-✅ Develop content calendar and workflows
-✅ Set up tracking and analytics systems
-✅ Design testing and optimization protocols
-
-**Phase 3: Execution (Weeks 5-8)**
-✅ Launch optimized ${topic.toLowerCase()} campaigns
-✅ Monitor performance and gather data
-✅ Conduct A/B tests and iterations
-✅ Scale successful initiatives
-
-**Phase 4: Optimization (Ongoing)**
-✅ Analyze results and identify improvements
-✅ Refine strategies based on data insights
-✅ Expand successful tactics
-✅ Stay updated with industry trends
-
-## Measuring Success: Key Metrics
-
-Track these essential performance indicators:
-
-**Primary Metrics:**
-- ${primaryKeyword} ranking positions
-- Organic traffic growth rate
-- Conversion rate improvements
-- User engagement metrics
-
-**Secondary Metrics:**
-- Brand awareness indicators
-- Social media engagement
-- Email marketing performance
-- Customer lifetime value
-
-**Advanced Analytics:**
-- Attribution modeling
-- Cohort analysis
-- Predictive performance indicators
-- ROI optimization metrics
-
-## Common Mistakes to Avoid
-
-❌ **Neglecting mobile optimization**
-❌ **Ignoring user experience factors**
-❌ **Overlooking technical SEO elements**
-❌ **Focusing only on short-term gains**
-❌ **Not tracking the right metrics**
-
-## Expert Tips for ${topic} Success
-
-💡 **Pro Tip 1**: Always prioritize user value over search engine manipulation
-💡 **Pro Tip 2**: Invest in long-term sustainable strategies
-💡 **Pro Tip 3**: Regularly audit and update your approach
-💡 **Pro Tip 4**: Stay informed about industry algorithm changes
-💡 **Pro Tip 5**: Test everything and let data guide decisions
-
-## Future Trends and Predictions
-
-Stay ahead of the curve with these emerging trends:
-- AI and machine learning integration
-- Voice search optimization
-- Visual and video content dominance
-- Privacy-first marketing approaches
-- Sustainable and ethical business practices
+${generateSEOContent()}
 
 ## Conclusion
 
-Mastering ${topic.toLowerCase()} requires a strategic, data-driven approach combined with consistent execution and continuous optimization. By implementing the strategies outlined in this guide, you'll be well-positioned to achieve sustainable growth and competitive advantage.
-
-Remember: Success in ${primaryKeyword} isn't about quick fixes—it's about building a solid foundation, delivering genuine value, and adapting to evolving market conditions.
+${generateConclusion()}
 
 ---
 
-**About This Content:**
-- ✅ SEO-optimized with natural keyword integration
-- ✅ Structured for maximum readability and engagement
-- ✅ Based on current industry best practices and data
-- ✅ Designed for ${targetAudience} audience
-- ✅ Optimized for ${writingStyle} tone and style
-
-*Generated with AI-powered content intelligence for maximum impact and search visibility.*`;
-      };
-
-      const enhancedContent = generateIntelligentContent();
-
-      // Generate contextual images with enhanced prompts
-      const newImages = imagePrompts.map((prompt, index) => ({
-        id: index + 1,
-        url: `https://images.unsplash.com/photo-${1558655146 + index}?w=800&h=500&fit=crop&crop=entropy&cs=tinysrgb`,
-        alt: `${topic} - Professional ${index + 1}`,
-        prompt: prompt,
-        enhanced: true,
-        quality: 'high',
-        seoOptimized: true
-      }));
-
-      setGeneratedContent(enhancedContent);
-      setGeneratedImages(newImages);
+**Content Quality Score**: ${Math.floor(Math.random() * 20 + 80)}%
+**SEO Score**: ${Math.floor(Math.random() * 15 + 85)}%
+**Readability Score**: ${Math.floor(Math.random() * 10 + 90)}%`;
+      
+      setGeneratedContent(content);
+      setContentQuality(Math.floor(Math.random() * 20 + 80));
+      setSeoScore(Math.floor(Math.random() * 15 + 85));
+      setReadabilityScore(Math.floor(Math.random() * 10 + 90));
+      setSmartKeywords(extractKeywordsFromTopic(topic));
+      setContentInsights([
+        'Content is optimized for target keywords',
+        'Reading level is appropriate for target audience',
+        'Structure follows SEO best practices',
+        'Content length is optimal for topic depth'
+      ]);
+      
       setIsGenerating(false);
-      
-      // Generate trending topics and suggestions
-      setTrendingTopics([
-        `${topic} automation trends`,
-        `AI-powered ${topic.toLowerCase()}`,
-        `${topic} ROI optimization`,
-        `Future of ${topic.toLowerCase()}`,
-        `${topic} case studies 2024`
-      ]);
-      
-      setContentSuggestions([
-        `Create a follow-up post about advanced ${topic.toLowerCase()} techniques`,
-        `Develop a case study showcasing ${topic.toLowerCase()} success stories`,
-        `Write a comparison guide for ${topic.toLowerCase()} tools and platforms`,
-        `Create an infographic summarizing key ${topic.toLowerCase()} statistics`,
-        `Develop a video series explaining ${topic.toLowerCase()} step-by-step`
-      ]);
-      
-      toast({
-        title: "🚀 Intelligent Content Generated!",
-        description: `High-quality ${topic.toLowerCase()} content with ${Math.round(contentQuality)}% quality score and SEO optimization.`,
-      });
-    }, 5000);
+    }, 3000);
   };
 
-  // Auto-generation functions
-  const calculateNextRun = () => {
-    const now = new Date();
-    const [hours, minutes] = autoGenTime.split(':').map(Number);
+  const generateIntroduction = (): string => {
+    return `In today's digital landscape, understanding ${topic.toLowerCase()} has become increasingly important. This comprehensive guide will explore the key aspects of ${topic.toLowerCase()} and provide you with actionable insights to improve your results.`;
+  };
+
+  const generateKeyPoints = (): string => {
+    const points = [
+      `Understanding the fundamentals of ${topic.toLowerCase()}`,
+      `Best practices and proven strategies`,
+      `Common mistakes to avoid`,
+      `Tools and resources for success`,
+      `Measuring and optimizing performance`
+    ];
     
-    let nextRun = new Date();
-    nextRun.setHours(hours, minutes, 0, 0);
-    
-    if (autoGenFrequency === 'daily') {
-      if (nextRun <= now) {
-        nextRun.setDate(nextRun.getDate() + 1);
-      }
-    } else if (autoGenFrequency === 'weekly') {
-      const dayMap = {
-        'monday': 1, 'tuesday': 2, 'wednesday': 3, 'thursday': 4,
-        'friday': 5, 'saturday': 6, 'sunday': 0
-      };
-      const targetDay = dayMap[autoGenDay as keyof typeof dayMap];
-      const currentDay = nextRun.getDay();
-      
-      let daysUntilTarget = targetDay - currentDay;
-      if (daysUntilTarget <= 0 || (daysUntilTarget === 0 && nextRun <= now)) {
-        daysUntilTarget += 7;
-      }
-      
-      nextRun.setDate(nextRun.getDate() + daysUntilTarget);
-    }
-    
-    return nextRun;
+    return points.map((point, index) => `${index + 1}. ${point}`).join('\n');
+  };
+
+  const generateSEOContent = (): string => {
+    return `When implementing ${topic.toLowerCase()}, it's crucial to focus on both quality and search engine optimization. The key is to create content that serves your audience while incorporating relevant keywords naturally.
+
+### Best Practices:
+- Focus on user intent and search behavior
+- Create comprehensive, valuable content
+- Optimize for featured snippets
+- Include internal and external links
+- Monitor performance and adjust strategies`;
+  };
+
+  const generateConclusion = (): string => {
+    return `Mastering ${topic.toLowerCase()} requires a strategic approach, continuous learning, and consistent implementation. By following the guidelines outlined in this article, you'll be well-positioned to achieve your goals and drive meaningful results.`;
   };
 
   const generateAutoContent = async () => {
-    const topics = autoGenTopics.split(',').map(t => t.trim()).filter(t => t);
-    const randomTopic = topics[Math.floor(Math.random() * topics.length)] || 'Digital Marketing Trends';
+    if (!autoGenTopics.trim()) return;
+    
+    const topics = autoGenTopics.split(',').map(t => t.trim());
+    const randomTopic = topics[Math.floor(Math.random() * topics.length)];
     
     setTopic(randomTopic);
-    setKeywords(autoGenKeywords);
+    
+    // Generate content with the random topic
+    setTimeout(() => {
+      generateContent();
+    }, 1000);
     
     // Add to history
     const newEntry = {
       id: Date.now(),
       topic: randomTopic,
-      keywords: autoGenKeywords,
-      generatedAt: new Date().toISOString(),
-      status: 'generated'
+      date: new Date(),
+      status: 'completed',
+      wordCount: Math.floor(Math.random() * 1000 + 1500),
+      seoScore: Math.floor(Math.random() * 20 + 80)
     };
     
-    setAutoGenHistory(prev => [newEntry, ...prev.slice(0, 9)]); // Keep last 10
-    
-    // Generate content
-    await generateContent();
-    
-    toast({
-      title: "Auto-Generated Content Ready!",
-      description: `Blog post about "${randomTopic}" has been automatically generated.`,
-    });
+    setAutoGenHistory(prev => [newEntry, ...prev.slice(0, 9)]);
   };
 
   const toggleAutoGeneration = () => {
     setAutoGenEnabled(!autoGenEnabled);
     
     if (!autoGenEnabled) {
-      const nextRun = calculateNextRun();
-      setNextScheduledRun(nextRun);
+      // Calculate next scheduled run
+      const now = new Date();
+      const nextRun = new Date(now);
       
-      toast({
-        title: "Auto-Generation Enabled",
-        description: `Next blog post will be generated on ${nextRun.toLocaleDateString()} at ${nextRun.toLocaleTimeString()}`,
-      });
+      if (autoGenFrequency === 'daily') {
+        nextRun.setDate(now.getDate() + 1);
+      } else {
+        nextRun.setDate(now.getDate() + 7);
+      }
+      
+      const [hours, minutes] = autoGenTime.split(':');
+      nextRun.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      
+      setNextScheduledRun(nextRun);
     } else {
       setNextScheduledRun(null);
-      toast({
-        title: "Auto-Generation Disabled",
-        description: "Automatic blog generation has been stopped.",
-      });
     }
   };
 
-  // Update next run when settings change
-  useEffect(() => {
-    if (autoGenEnabled) {
-      const nextRun = calculateNextRun();
-      setNextScheduledRun(nextRun);
-    }
-  }, [autoGenFrequency, autoGenTime, autoGenDay, autoGenEnabled]);
-
-  // Simulate auto-generation check (in real app, this would be handled by backend)
-  useEffect(() => {
-    if (!autoGenEnabled || !nextScheduledRun) return;
-    
-    const checkInterval = setInterval(() => {
-      const now = new Date();
-      if (now >= nextScheduledRun) {
-        generateAutoContent();
-        const nextRun = calculateNextRun();
-        setNextScheduledRun(nextRun);
-      }
-    }, 60000); // Check every minute
-    
-    return () => clearInterval(checkInterval);
-  }, [autoGenEnabled, nextScheduledRun, autoGenTopics, autoGenKeywords]);
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(generatedContent);
-    toast({
-      title: "Copied to Clipboard",
-      description: "Blog content has been copied to your clipboard.",
-    });
+  const copyToClipboard = (content: string) => {
+    navigator.clipboard.writeText(content);
   };
 
-  const downloadImage = async (imageUrl: string, fileName: string) => {
-    try {
-      const response = await fetch(imageUrl);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName || 'blog-image.jpg';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-      
-      toast({
-        title: "Image Downloaded",
-        description: "Image has been saved to your device.",
-      });
-    } catch (error) {
-      toast({
-        title: "Download Failed",
-        description: "Could not download the image. Please try again.",
-        variant: "destructive"
-      });
-    }
+  const downloadImage = (imageUrl: string) => {
+    const link = document.createElement('a');
+    link.href = imageUrl;
+    link.download = 'generated-image.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return {
@@ -516,7 +275,6 @@ Remember: Success in ${primaryKeyword} isn't about quick fixes—it's about buil
     
     // Auto-generation states
     autoGenEnabled,
-    setAutoGenEnabled,
     autoGenFrequency,
     setAutoGenFrequency,
     autoGenTime,
@@ -548,6 +306,14 @@ Remember: Success in ${primaryKeyword} isn't about quick fixes—it's about buil
     setContentTemplate,
     smartKeywords,
     contentInsights,
+    
+    // Analytics-based states
+    analyticsData,
+    setAnalyticsData,
+    blogSuggestions,
+    setBlogSuggestions,
+    selectedAnalyticsSuggestion,
+    setSelectedAnalyticsSuggestion,
     
     // Actions
     generateContent,
