@@ -234,4 +234,85 @@ describe('Gemini Service', () => {
         });
       });
   });
+
+  describe('getChatbotResponse', () => {
+    const MOCK_USER_PROMPT = "Hello bot";
+    const MOCK_CHAT_HISTORY: ChatHistoryMessage[] = [
+      { role: 'user', parts: [{ text: "Previous user message" }] },
+      { role: 'model', parts: [{ text: "Previous bot response" }] },
+    ];
+
+    // Mock for chat session
+    const mockSendMessage = jest.fn();
+    const mockStartChat = jest.fn(() => ({
+        sendMessage: mockSendMessage,
+    }));
+
+    beforeEach(() => {
+        // Reset chat mocks for each test
+        mockSendMessage.mockClear();
+        mockStartChat.mockClear();
+        // Re-assign to the main model mock if it was changed by other tests
+        if (mockGetGenerativeModel) {
+            mockGetGenerativeModel.mockReturnValue({
+                generateContent: mockGenerateContent, // Keep existing mock for other functions
+                startChat: mockStartChat // Add startChat mock for this context
+            });
+        }
+    });
+
+    it('should return chatbot response on successful API call', async () => {
+        localStorageMock.setItem('geminiApiKey', LS_API_KEY);
+        const mockResponseText = "Chatbot response text.";
+        mockSendMessage.mockResolvedValueOnce({ response: { text: () => mockResponseText } });
+
+        const result = await getChatbotResponse(MOCK_USER_PROMPT, MOCK_CHAT_HISTORY);
+        expect(result).toBe(mockResponseText);
+        expect(mockStartChat).toHaveBeenCalledWith({
+            history: MOCK_CHAT_HISTORY,
+            safetySettings: expect.any(Array),
+            generationConfig: expect.objectContaining({ maxOutputTokens: 1000 })
+        });
+        expect(mockSendMessage).toHaveBeenCalledWith(MOCK_USER_PROMPT);
+    });
+
+    it('should use override API key if provided for chatbot', async () => {
+        const overrideKey = "override_chatbot_key";
+        mockSendMessage.mockResolvedValueOnce({ response: { text: () => "Success" } });
+        await getChatbotResponse(MOCK_USER_PROMPT, MOCK_CHAT_HISTORY, overrideKey);
+        expect(mockGoogleGenerativeAI).toHaveBeenCalledWith(overrideKey);
+    });
+
+    it('should throw error if no API key is found for chatbot', async () => {
+        localStorageMock.removeItem('geminiApiKey');
+        delete process.env.REACT_APP_GEMINI_API_KEY;
+
+        await expect(getChatbotResponse(MOCK_USER_PROMPT, MOCK_CHAT_HISTORY)).rejects.toMatchObject({
+          message: expect.stringContaining("API key is missing for chatbot."),
+          isApiKeyInvalid: true,
+        });
+    });
+
+    it('should handle API error from sendMessage and set isApiKeyInvalid if applicable', async () => {
+        localStorageMock.setItem('geminiApiKey', LS_API_KEY);
+        const apiError = new Error('API key not valid during chat.');
+        mockSendMessage.mockRejectedValueOnce(apiError);
+
+        await expect(getChatbotResponse(MOCK_USER_PROMPT, MOCK_CHAT_HISTORY)).rejects.toMatchObject({
+          message: expect.stringContaining('API key not valid during chat.'),
+          isApiKeyInvalid: true, // This relies on the error message containing "API key not valid" or similar
+        });
+    });
+
+    it('should handle content blockage during chat', async () => {
+        localStorageMock.setItem('geminiApiKey', LS_API_KEY);
+        mockSendMessage.mockResolvedValueOnce({
+            response: {
+                text: () => '',
+                promptFeedback: { blockReason: 'SAFETY_CHAT' }
+            }
+        });
+        await expect(getChatbotResponse(MOCK_USER_PROMPT, MOCK_CHAT_HISTORY)).rejects.toThrow(/Chatbot response blocked. Reason: SAFETY_CHAT/);
+    });
+  });
 });

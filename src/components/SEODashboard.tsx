@@ -10,7 +10,9 @@ import MetaTagsManager from './MetaTagsManager';
 import SchemaMarkupGenerator from './SchemaMarkupGenerator';
 import TechnicalSEOAudit from './TechnicalSEOAudit';
 import SmartKeywordResearch from './SmartKeywordResearch';
-import SettingsTab from './SettingsTab'; // Import the new SettingsTab component
+import SettingsTab from './SettingsTab';
+import SEOChatbot from './SEOChatbot'; // Import the new SEOChatbot component
+import { MessageCircle } from 'lucide-react'; // Import an icon for the chatbot tab
 
 const SEODashboard = () => {
   const [activeTab, setActiveTab] = useState('analyzer');
@@ -45,72 +47,78 @@ const SEODashboard = () => {
         {/* Main Dashboard */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="mb-8 bg-white/70 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-white/20">
-            <TabsList className="grid w-full h-auto bg-transparent p-1 gap-1" style={{ gridTemplateColumns: 'repeat(8, 1fr)' }}> {/* Updated to 8 columns */}
+            <TabsList className="grid w-full h-auto bg-transparent p-1 gap-1" style={{ gridTemplateColumns: 'repeat(9, 1fr)' }}> {/* Updated to 9 columns */}
               <TabsTrigger 
                 value="analyzer" 
                 className="flex items-center justify-center gap-2 text-sm px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-md transition-all duration-200"
               >
                 <Search className="h-4 w-4" />
-                <span className="hidden sm:inline">Content Analyzer</span>
-                <span className="sm:hidden">Analyzer</span>
+                <span className="hidden md:inline">Analyzer</span>
+                <span className="md:hidden">Analyze</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="generator" 
                 className="flex items-center justify-center gap-2 text-sm px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-md transition-all duration-200"
               >
                 <FileText className="h-4 w-4" />
-                <span className="hidden sm:inline">AI Generator</span>
-                <span className="sm:hidden">Generator</span>
+                <span className="hidden md:inline">Generator</span>
+                <span className="md:hidden">Gen</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="analytics" 
                 className="flex items-center justify-center gap-2 text-sm px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-md transition-all duration-200"
               >
                 <BarChart3 className="h-4 w-4" />
-                <span className="hidden sm:inline">Analytics</span>
-                <span className="sm:hidden">Analytics</span>
+                <span className="hidden md:inline">Analytics</span>
+                <span className="md:hidden">Stats</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="keywords" 
                 className="flex items-center justify-center gap-2 text-sm px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-md transition-all duration-200"
               >
                 <Target className="h-4 w-4" />
-                <span className="hidden sm:inline">Keywords</span>
-                <span className="sm:hidden">Keywords</span>
+                <span className="hidden md:inline">Keywords</span>
+                <span className="md:hidden">Keys</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="meta" 
                 className="flex items-center justify-center gap-2 text-sm px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-md transition-all duration-200"
               >
                 <Globe className="h-4 w-4" />
-                <span className="hidden sm:inline">Meta Tags</span>
-                <span className="sm:hidden">Meta</span>
+                <span className="hidden md:inline">Meta Tags</span>
+                <span className="md:hidden">Meta</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="schema" 
                 className="flex items-center justify-center gap-2 text-sm px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-md transition-all duration-200"
               >
                 <Code className="h-4 w-4" />
-                <span className="hidden sm:inline">Schema</span>
-                <span className="sm:hidden">Schema</span>
+                <span className="hidden md:inline">Schema</span>
+                <span className="md:hidden">Schema</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="technical" 
                 className="flex items-center justify-center gap-2 text-sm px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-md transition-all duration-200"
               >
-                {/* Note: The original 'Technical' tab also used <Settings>, so this might be a duplicate icon if not changed.
-                    For the purpose of this step, we'll keep it as is, but ideally, 'Technical' might get a different icon. */}
                 <Settings className="h-4 w-4" />
-                <span className="hidden sm:inline">Technical</span>
-                <span className="sm:hidden">Tech</span>
+                <span className="hidden md:inline">Technical</span>
+                <span className="md:hidden">Tech</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="chatbot"
+                className="flex items-center justify-center gap-2 text-sm px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-md transition-all duration-200"
+              >
+                <MessageCircle className="h-4 w-4" />
+                <span className="hidden md:inline">Chatbot</span>
+                <span className="md:hidden">Chat</span>
               </TabsTrigger>
               <TabsTrigger
                 value="settings"
                 className="flex items-center justify-center gap-2 text-sm px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-md transition-all duration-200"
               >
-                <Settings className="h-4 w-4" /> {/* Actual Settings icon for Settings Tab */}
-                <span className="hidden sm:inline">Settings</span>
-                <span className="sm:hidden">Config</span>
+                <Settings className="h-4 w-4" />
+                <span className="hidden md:inline">Settings</span>
+                <span className="md:hidden">Config</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -146,6 +154,10 @@ const SEODashboard = () => {
 
             <TabsContent value="settings" className="mt-0">
               <SettingsTab />
+            </TabsContent>
+
+            <TabsContent value="chatbot" className="mt-0">
+              <SEOChatbot />
             </TabsContent>
           </div>
         </Tabs>

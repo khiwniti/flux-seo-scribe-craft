@@ -98,13 +98,14 @@ describe('BlogGenerator Component', () => {
       // To verify the Select itself, you might need to inspect its 'value' prop if possible,
       // or see if "Positive" becomes the displayed value.
       // If the Select component updates its displayed text based on the value prop:
-      // expect(toneSelectTrigger).toHaveTextContent("Positive"); // This might be too specific depending on Select impl.
+      expect(toneSelectTrigger).toHaveTextContent("Positive");
     });
 
     // Manually select a different tone
     await userEvent.click(toneSelectTrigger);
     const professionalOption = await screen.findByText('Professional');
     await userEvent.click(professionalOption);
+     expect(toneSelectTrigger).toHaveTextContent("Professional");
 
     // Clear mocks for the next interaction
     mockGetSentiment.mockClear();
@@ -118,8 +119,48 @@ describe('BlogGenerator Component', () => {
     expect(mockToastFn).not.toHaveBeenCalledWith(expect.objectContaining({ title: "AI Suggestion" }));
   });
 
+  test('writing style selection updates state and is included in prompt', async () => {
+    mockGenerateBlogContent.mockResolvedValueOnce('Styled content.');
+    mockGenerateImagePromptForText.mockResolvedValueOnce('Styled image prompt.');
+    render(<BlogGenerator />);
+
+    const topicInput = screen.getByLabelText<HTMLInputElement>(/Blog Topic/i);
+    await userEvent.type(topicInput, 'Style Test Topic');
+
+    const styleSelectTrigger = screen.getByRole('combobox', { name: /Writing Style/i });
+    expect(styleSelectTrigger).toHaveTextContent('Default / Informative'); // Initial value
+
+    await userEvent.click(styleSelectTrigger);
+    const humorousOption = await screen.findByText('Humorous & Witty');
+    await userEvent.click(humorousOption);
+    expect(styleSelectTrigger).toHaveTextContent('Humorous & Witty'); // Check if display value updated
+
+    fireEvent.click(screen.getByRole('button', { name: /Generate Blog Post/i }));
+
+    await waitFor(() => {
+      expect(mockGenerateBlogContent).toHaveBeenCalledWith(
+        expect.stringContaining('Write the blog post in a Humorous & Witty style. Incorporate humor and wit where appropriate.')
+      );
+    });
+
+    // Test default/Informative style
+    mockGenerateBlogContent.mockClear();
+    await userEvent.click(styleSelectTrigger);
+    const informativeOption = await screen.findByText('Default / Informative');
+    await userEvent.click(informativeOption);
+    expect(styleSelectTrigger).toHaveTextContent('Default / Informative');
+
+    fireEvent.click(screen.getByRole('button', { name: /Generate Blog Post/i }));
+    await waitFor(() => {
+        expect(mockGenerateBlogContent).toHaveBeenCalledWith(
+          expect.stringContaining('Write in a clear and informative style.')
+        );
+      });
+  });
+
+
   describe('Gemini API Integration', () => {
-    test('successfully generates blog content and image prompt', async () => {
+    test('successfully generates blog content and image prompt with default style', async () => {
       mockGenerateBlogContent.mockResolvedValueOnce('Generated blog post content.');
       mockGenerateImagePromptForText.mockResolvedValueOnce('Generated image prompt.');
 
@@ -132,6 +173,7 @@ describe('BlogGenerator Component', () => {
       const casualOption = await screen.findByText('Casual');
       await userEvent.click(casualOption);
 
+      // Writing style is Default / Informative by default
 
       fireEvent.click(screen.getByRole('button', { name: /Generate Blog Post/i }));
 
@@ -139,7 +181,7 @@ describe('BlogGenerator Component', () => {
 
       await waitFor(() => {
         expect(mockGenerateBlogContent).toHaveBeenCalledWith(
-          expect.stringContaining('Generate a blog post about "Test Topic". The primary focus keyword is "test keyword". The desired writing tone is "Casual".')
+          expect.stringContaining('Generate a blog post about "Test Topic". The primary focus keyword is "test keyword". The desired writing tone is "Casual". Write in a clear and informative style.')
         );
       });
 
