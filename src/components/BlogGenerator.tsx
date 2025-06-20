@@ -28,6 +28,7 @@ const BlogGenerator = () => {
   const [primaryKeyword, setPrimaryKeyword] = useState('');
   const [tone, setTone] = useState('');
   const [wordCount, setWordCount] = useState('');
+  const [writingStyle, setWritingStyle] = useState('Informative'); // Default style
   const [analyzedContentForSuggestions, setAnalyzedContentForSuggestions] = useState('');
   const [generatedContent, setGeneratedContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -110,6 +111,19 @@ const BlogGenerator = () => {
       else if (wordCount === "long") targetLength = "around 1200-2000 words";
       else if (wordCount === "extended") targetLength = "over 2000 words";
       prompt += ` The target length is ${targetLength}.`;
+    }
+    // Add writing style instruction
+    if (writingStyle && writingStyle !== "Informative") { // Assuming "Informative" is default and implies no special instruction
+        prompt += ` Write the blog post in a ${writingStyle} style.`;
+        // More specific instructions could be added per style:
+        if (writingStyle === "Casual & Engaging") prompt += " Use conversational language and a friendly tone.";
+        if (writingStyle === "Authoritative & Expert") prompt += " Convey expertise and authority on the subject.";
+        if (writingStyle === "Storytelling / Narrative") prompt += " Weave a narrative or story throughout the post.";
+        if (writingStyle === "Technical & Precise") prompt += " Be technically accurate and precise in language.";
+        if (writingStyle === "Humorous & Witty") prompt += " Incorporate humor and wit where appropriate.";
+        if (writingStyle === "Persuasive & Marketing-focused") prompt += " Aim to persuade the reader or market an idea/product.";
+    } else {
+        prompt += " Write in a clear and informative style."; // Default instruction
     }
     prompt += "\n\nThe blog post should be well-structured with headings, subheadings, and engaging content suitable for SEO."
 
@@ -282,6 +296,24 @@ const BlogGenerator = () => {
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="writing-style">Writing Style</Label>
+            <Select value={writingStyle} onValueChange={setWritingStyle}>
+              <SelectTrigger id="writing-style">
+                <SelectValue placeholder="Select writing style" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Informative">Default / Informative</SelectItem>
+                <SelectItem value="Casual & Engaging">Casual & Engaging</SelectItem>
+                <SelectItem value="Authoritative & Expert">Authoritative & Expert</SelectItem>
+                <SelectItem value="Storytelling / Narrative">Storytelling / Narrative</SelectItem>
+                <SelectItem value="Technical & Precise">Technical & Precise</SelectItem>
+                <SelectItem value="Humorous & Witty">Humorous & Witty</SelectItem>
+                <SelectItem value="Persuasive & Marketing-focused">Persuasive & Marketing-focused</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <Separator />

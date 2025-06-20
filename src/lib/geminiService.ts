@@ -114,6 +114,81 @@ export async function generateBlogContent(prompt: string, apiKeyOverride?: strin
   }
 }
 
+// For SEOChatbot
+interface ChatMessagePart {
+    text: string;
+}
+export interface ChatHistoryMessage {
+    role: "user" | "model"; // "model" is used for bot's responses
+    parts: ChatMessagePart[];
+}
+
+export async function getChatbotResponse(
+    userPrompt: string,
+    chatHistory: ChatHistoryMessage[],
+    apiKeyOverride?: string
+): Promise<string> {
+    const apiKeyToUse = apiKeyOverride || getApiKey();
+
+    if (!apiKeyToUse) {
+        const error = new Error("API key is missing for chatbot. Please set it in Settings or as REACT_APP_GEMINI_API_KEY.") as GeminiServiceError;
+        error.isApiKeyInvalid = true;
+        throw error;
+    }
+
+    try {
+        const genAI = new GoogleGenerativeAI(apiKeyToUse);
+        // Default to gemini-pro, but consider gemini-1.5-flash for chat if available and suitable for faster responses
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+        const chat = model.startChat({
+            history: chatHistory,
+            // Safety settings can be configured here as well, similar to generateContent
+            safetySettings: [
+                { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+                { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+                { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+                { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+            ],
+            generationConfig: {
+                maxOutputTokens: 1000, // Adjust as needed for chat response length
+                temperature: 0.7, // Slightly lower temperature for more focused chat responses
+            }
+        });
+
+        const result = await chat.sendMessage(userPrompt);
+
+        if (result.response && typeof result.response.text === 'function') {
+            const text = result.response.text();
+            if (text) {
+                return text;
+            } else {
+                const blockReason = result.response.promptFeedback?.blockReason;
+                if (blockReason) {
+                    throw new Error(`Chatbot response blocked. Reason: ${blockReason}.`);
+                }
+                const finishReason = result.response.candidates?.[0]?.finishReason;
+                if (finishReason && finishReason !== "STOP") {
+                   throw new Error(`Chatbot response stopped. Reason: ${finishReason}.`);
+               }
+               throw new Error("Received empty response from Gemini API for chatbot or content was blocked.");
+            }
+        } else if (result.response?.candidates?.[0]?.content?.parts?.[0]?.text) {
+            return result.response.candidates[0].content.parts[0].text;
+        }
+
+        throw new Error("Could not extract text for chatbot response from Gemini API.");
+
+    } catch (error: any) {
+        console.error("Error calling Gemini API (getChatbotResponse):", error);
+        const serviceError = new Error(`Gemini Chatbot Error: ${error.message || 'Unknown error'}`) as GeminiServiceError;
+        if (error.message && (error.message.includes("API key not valid") || error.message.includes("API key invalid") || error.message.includes("API key is missing"))) {
+            serviceError.isApiKeyInvalid = true;
+        }
+        throw serviceError;
+    }
+}
+
 export async function generateImagePromptForText(textInput: string, apiKeyOverride?: string): Promise<string> {
   const apiKeyToUse = apiKeyOverride || getApiKey();
 

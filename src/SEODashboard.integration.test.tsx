@@ -233,5 +233,105 @@ describe('SEODashboard Integration Tests', () => {
       // Ensure no API key error is shown this time
       expect(screen.queryByText(/API key is missing. Please set it in Settings/i)).not.toBeInTheDocument();
     });
+
+    test('Chatbot also works after API key is set in Settings', async () => {
+      // This test assumes the API key has been set in localStorage by a previous step/test
+      // or we can set it directly here for isolation if preferred.
+      // For this flow, we'll assume the previous test in this describe block set the key.
+      // If localStorageMock is not persisted across tests in the same describe, set it here.
+      if (!localStorageMock.getItem('geminiApiKey')) { // Ensure key is set from previous test or set it now
+        localStorageMock.setItem('geminiApiKey', 'test_ls_api_key_123');
+      }
+
+      const mockGetChatbotResponse = geminiService.getChatbotResponse as jest.Mock;
+      mockGetChatbotResponse.mockResolvedValueOnce("Hello from the integrated chatbot!");
+
+      render(<SEODashboard />);
+
+      // Navigate to Chatbot tab
+      const chatbotTabTrigger = screen.getByRole('tab', { name: /Chatbot/i });
+      fireEvent.click(chatbotTabTrigger);
+      await screen.findByText(/SEO Assistant Chatbot/i); // Wait for chatbot title
+
+      // Interact with chatbot
+      const chatInput = screen.getByPlaceholderText<HTMLInputElement>(/Ask about SEO.../i);
+      const sendChatButton = screen.getByRole('button', { name: /Send/i });
+
+      await userEvent.type(chatInput, 'Hello chatbot');
+      fireEvent.click(sendChatButton);
+
+      await waitFor(() => {
+        expect(screen.getByText('Hello chatbot')).toBeInTheDocument(); // User message
+      });
+      await waitFor(() => {
+        expect(screen.getByText("Hello from the integrated chatbot!")).toBeInTheDocument(); // Bot response
+      }, {timeout: 2000});
+
+      // Verify no API key error is shown in chatbot either
+      expect(screen.queryByText(/API key is missing. Please configure it in Settings./i)).not.toBeInTheDocument();
+      expect(mockGetChatbotResponse).toHaveBeenCalledWith(
+        expect.stringContaining("Hello chatbot"), // Prompt will include system message + user message
+        expect.any(Array) // History
+      );
+    });
+  });
+
+  test('navigates to Chatbot tab and renders SEOChatbot component', async () => {
+    render(<SEODashboard />);
+    const chatbotTabTrigger = screen.getByRole('tab', { name: /Chatbot/i });
+    expect(chatbotTabTrigger).toBeInTheDocument();
+
+    fireEvent.click(chatbotTabTrigger);
+
+    await waitFor(() => {
+      expect(screen.getByText(/SEO Assistant Chatbot/i)).toBeInTheDocument();
+    });
+    expect(screen.getByPlaceholderText(/Ask about SEO.../i)).toBeInTheDocument();
+  });
+
+  test('basic interaction within SEOChatbot on Chatbot tab', async () => {
+    const mockGetChatbotResponse = geminiService.getChatbotResponse as jest.Mock;
+    mockGetChatbotResponse.mockResolvedValueOnce("Test bot response from dashboard.");
+
+    // Ensure API key is available for this test, either via mock or actual localStorage setup if needed
+    // For simplicity, we assume geminiService will find a key (e.g. from mock localStorage or env)
+    // If not, this test might show API key error instead of expected interaction.
+    // Let's ensure localStorage has a key for this test.
+     Object.defineProperty(window, 'localStorage', {
+        value: {
+            getItem: jest.fn(() => 'dummy_integration_key'), // Mock key present
+            setItem: jest.fn(),
+            removeItem: jest.fn(),
+            clear: jest.fn(),
+            length: 0,
+            key: jest.fn(),
+        },
+        writable: true
+    });
+
+
+    render(<SEODashboard />);
+
+    const chatbotTabTrigger = screen.getByRole('tab', { name: /Chatbot/i });
+    fireEvent.click(chatbotTabTrigger);
+
+    await waitFor(() => {
+      expect(screen.getByText(/SEO Assistant Chatbot/i)).toBeInTheDocument();
+    });
+
+    const chatInput = screen.getByPlaceholderText<HTMLInputElement>(/Ask about SEO.../i);
+    const sendChatButton = screen.getByRole('button', { name: /Send/i });
+
+    await userEvent.type(chatInput, "Hello from integration test");
+    fireEvent.click(sendChatButton);
+
+    await waitFor(() => {
+      expect(screen.getByText("Hello from integration test")).toBeInTheDocument(); // User message
+    });
+     await waitFor(() => {
+      expect(screen.getByText("Test bot response from dashboard.")).toBeInTheDocument(); // Bot response
+    }, {timeout: 2000});
+
+    expect(mockGetChatbotResponse).toHaveBeenCalled();
   });
 });
