@@ -7,9 +7,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { AlertCircle, CheckCircle, Target, TrendingUp, AlertTriangle as AlertTriangleIcon } from 'lucide-react'; // Added AlertTriangleIcon
+import { AlertCircle, CheckCircle, Target, TrendingUp, AlertTriangle as AlertTriangleIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { generateBlogContent as callGeminiApi } from '@/lib/geminiService'; // Renamed for clarity
+import { generateBlogContent as callGeminiApi } from '@/lib/geminiService';
+import { useLanguage } from '@/contexts/LanguageContext'; // Import useLanguage
 
 interface AnalysisResults {
   wordCount: number;
@@ -28,6 +29,7 @@ const ContentAnalyzer = () => {
   const [analysis, setAnalysis] = useState<AnalysisResults | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [apiKeyError, setApiKeyError] = useState<string | null>(null);
+  const { language } = useLanguage(); // Consume global language context
   const { toast } = useToast();
 
   const parseGeminiResponse = (responseText: string): Partial<AnalysisResults> => {
@@ -101,7 +103,7 @@ ${content}
 
     prompt += `
 
-Analysis Required:
+Analysis Required (please provide your entire response in ${language === 'th' ? 'Thai' : 'English'}):
 1.  Overall SEO Score: (Provide a score from 0 to 100)
 2.  Justification: (Briefly explain the score)
 3.  Readability: (Assess readability, e.g., Flesch-Kincaid score, or qualitative like 'Good', 'Difficult to read')
@@ -111,7 +113,7 @@ Analysis Required:
 Format the response clearly.`;
 
     try {
-      const rawResponse = await callGeminiApi(prompt); // API key is now handled by the service
+      const rawResponse = await callGeminiApi(prompt);
       const parsedAnalysis = parseGeminiResponse(rawResponse);
 
       setAnalysis({

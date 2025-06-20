@@ -1,14 +1,6 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import React, { useState, useEffect } from 'react';
+// Duplicate ShadCN imports were removed here by only keeping one block
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,8 +13,10 @@ import { FileText, Wand2, Copy, Download, AlertTriangle, Image as ImageIcon, Loa
 import { useToast } from '@/hooks/use-toast';
 import { SentimentAnalyzer, WordTokenizer, PorterStemmer } from 'natural';
 import { generateBlogContent, generateImagePromptForText } from '@/lib/geminiService'; // Import Gemini services
+import { useLanguage } from '@/contexts/LanguageContext'; // Import useLanguage
 
 const BlogGenerator = () => {
+  const { language } = useLanguage(); // Consume global language context
   const [topic, setTopic] = useState('');
   const [apiKeyError, setApiKeyError] = useState<string | null>(null);
   const [primaryKeyword, setPrimaryKeyword] = useState('');
@@ -123,14 +117,20 @@ const BlogGenerator = () => {
         if (writingStyle === "Humorous & Witty") prompt += " Incorporate humor and wit where appropriate.";
         if (writingStyle === "Persuasive & Marketing-focused") prompt += " Aim to persuade the reader or market an idea/product.";
     } else {
-        prompt += " Write in a clear and informative style."; // Default instruction
+        prompt += " Write in a clear and informative style.";
+    }
+
+    if (language === 'th') {
+        prompt += " Please write this blog post entirely in Thai.";
+    } else {
+        prompt += " Please write this blog post entirely in English."; // Default or explicit English
     }
     prompt += "\n\nThe blog post should be well-structured with headings, subheadings, and engaging content suitable for SEO."
 
     try {
-      const content = await generateBlogContent(prompt); // API key is now handled by the service
+      const content = await generateBlogContent(prompt);
       setGeneratedContent(content);
-      setGeneratedImagePrompt(null); // Clear previous image prompt
+      setGeneratedImagePrompt(null);
       toast({
         title: "Content Generated Successfully!",
         description: "Your AI-generated blog post is ready. Generating image prompt next...",
@@ -139,7 +139,14 @@ const BlogGenerator = () => {
       // Now, automatically generate image prompt
       setIsGeneratingImagePrompt(true);
       try {
-        const imagePromptResult = await generateImagePromptForText(content); // API key handled by service
+        // The generateImagePromptForText in geminiService already has a detailed internal prompt structure
+        // asking for an image prompt. We just pass the blog content (which might be in Thai)
+        // and an additional instruction for the desired language of the image prompt itself.
+        let imagePromptInput = `Based on the following ${language === 'th' ? 'Thai' : 'English'} text, generate a suitable image prompt.`;
+        imagePromptInput += ` The image prompt itself should be in ${language === 'th' ? 'Thai' : 'English'}.`;
+        imagePromptInput += `\n\nText for context: "${content.substring(0, 500)}..."`; // Provide a snippet of the content
+
+        const imagePromptResult = await generateImagePromptForText(imagePromptInput);
         setGeneratedImagePrompt(imagePromptResult);
         toast({
           title: "Image Prompt Generated!",
@@ -147,13 +154,10 @@ const BlogGenerator = () => {
         });
       } catch (imgError: any) {
         console.error("Error generating image prompt:", imgError);
-        // If the main content generation succeeded, but image prompt failed due to API key,
-        // it's unlikely but possible if key was removed between calls.
-        // More likely, other errors for image prompt.
         let imgErrorDesc = imgError.message || "Could not generate image prompt.";
         if (imgError.isApiKeyInvalid) {
             imgErrorDesc = "API Key error during image prompt generation. Check Settings.";
-            setApiKeyError(imgErrorDesc); // Show persistent error if key became invalid
+            setApiKeyError(imgErrorDesc);
         }
         toast({
           title: "Image Prompt Generation Failed",
@@ -165,7 +169,7 @@ const BlogGenerator = () => {
         setIsGeneratingImagePrompt(false);
       }
 
-    } catch (error: any) { // This 'error' is from generateBlogContent
+    } catch (error: any) {
       console.error("Error generating blog content:", error);
       let description = "An unexpected error occurred while generating content.";
       if (error.isApiKeyInvalid) {
@@ -224,16 +228,7 @@ const BlogGenerator = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="topic">Blog Topic *</Label>
-            <Input
-              id="topic"
-              placeholder="e.g., Digital Marketing Strategies for 2024"
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-            />
-          </div>
-
+          {/* The first, simpler Blog Topic input was removed here */}
           <div className="space-y-2">
             <Label htmlFor="topic">Blog Topic *</Label>
             <Input

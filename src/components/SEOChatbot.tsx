@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Bot, User, SendHorizonal, AlertTriangle } from 'lucide-react';
-import { getChatbotResponse, ChatHistoryMessage } from '@/lib/geminiService'; // Import Gemini service and types
+import { getChatbotResponse, ChatHistoryMessage } from '@/lib/geminiService';
 import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '@/contexts/LanguageContext'; // Import useLanguage
 
 
 interface Message {
@@ -17,6 +18,7 @@ interface Message {
 }
 
 const SEOChatbot: React.FC = () => {
+  const { language } = useLanguage(); // Consume global language context
   const [messages, setMessages] = useState<Message[]>([]);
   const [userInput, setUserInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -24,11 +26,14 @@ const SEOChatbot: React.FC = () => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  // System instruction (optional, can be prepended or part of first user message if model supports)
-  const systemInstruction = "You are an expert SEO assistant. Provide helpful, concise, and accurate advice on SEO topics. If you don't know an answer, say so. Keep responses relatively short and easy to read in a chat interface.";
+  const getSystemInstruction = (): string => {
+    if (language === 'th') {
+      return "You are an expert SEO assistant. Please respond in Thai. Provide helpful, concise, and accurate advice on SEO topics. If you don't know an answer, say so. Keep responses relatively short and easy to read in a chat interface.";
+    }
+    return "You are an expert SEO assistant. Provide helpful, concise, and accurate advice on SEO topics. If you don't know an answer, say so. Keep responses relatively short and easy to read in a chat interface.";
+  };
 
   const formatChatHistory = (msgs: Message[]): ChatHistoryMessage[] => {
-    // Take last N messages to keep history concise (e.g., last 6 turns = 12 messages, or fewer)
     const recentMessages = msgs.slice(-10);
     return recentMessages.map(msg => ({
       role: msg.sender === 'user' ? 'user' : 'model',

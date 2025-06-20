@@ -277,7 +277,11 @@ describe('SEODashboard Integration Tests', () => {
   });
 
   test('navigates to Chatbot tab and renders SEOChatbot component', async () => {
-    render(<SEODashboard />);
+    render(
+      <LanguageProvider>
+        <SEODashboard />
+      </LanguageProvider>
+    );
     const chatbotTabTrigger = screen.getByRole('tab', { name: /Chatbot/i });
     expect(chatbotTabTrigger).toBeInTheDocument();
 
@@ -289,35 +293,25 @@ describe('SEODashboard Integration Tests', () => {
     expect(screen.getByPlaceholderText(/Ask about SEO.../i)).toBeInTheDocument();
   });
 
-  test('basic interaction within SEOChatbot on Chatbot tab', async () => {
+  test('basic interaction within SEOChatbot on Chatbot tab (English default)', async () => {
     const mockGetChatbotResponse = geminiService.getChatbotResponse as jest.Mock;
     mockGetChatbotResponse.mockResolvedValueOnce("Test bot response from dashboard.");
 
-    // Ensure API key is available for this test, either via mock or actual localStorage setup if needed
-    // For simplicity, we assume geminiService will find a key (e.g. from mock localStorage or env)
-    // If not, this test might show API key error instead of expected interaction.
-    // Let's ensure localStorage has a key for this test.
-     Object.defineProperty(window, 'localStorage', {
-        value: {
-            getItem: jest.fn(() => 'dummy_integration_key'), // Mock key present
-            setItem: jest.fn(),
-            removeItem: jest.fn(),
-            clear: jest.fn(),
-            length: 0,
-            key: jest.fn(),
-        },
+    // Mock localStorage for API key
+    Object.defineProperty(window, 'localStorage', {
+        value: { getItem: jest.fn(() => 'dummy_integration_key'), setItem: jest.fn(), removeItem: jest.fn(), clear: jest.fn(), length: 0, key: jest.fn() },
         writable: true
     });
 
-
-    render(<SEODashboard />);
+    render(
+      <LanguageProvider>
+        <SEODashboard />
+      </LanguageProvider>
+    );
 
     const chatbotTabTrigger = screen.getByRole('tab', { name: /Chatbot/i });
     fireEvent.click(chatbotTabTrigger);
-
-    await waitFor(() => {
-      expect(screen.getByText(/SEO Assistant Chatbot/i)).toBeInTheDocument();
-    });
+    await screen.findByText(/SEO Assistant Chatbot/i);
 
     const chatInput = screen.getByPlaceholderText<HTMLInputElement>(/Ask about SEO.../i);
     const sendChatButton = screen.getByRole('button', { name: /Send/i });
@@ -325,13 +319,92 @@ describe('SEODashboard Integration Tests', () => {
     await userEvent.type(chatInput, "Hello from integration test");
     fireEvent.click(sendChatButton);
 
-    await waitFor(() => {
-      expect(screen.getByText("Hello from integration test")).toBeInTheDocument(); // User message
-    });
-     await waitFor(() => {
-      expect(screen.getByText("Test bot response from dashboard.")).toBeInTheDocument(); // Bot response
-    }, {timeout: 2000});
+    await waitFor(() => screen.getByText("Hello from integration test"));
+    await waitFor(() => screen.getByText("Test bot response from dashboard."), {timeout: 2000});
 
-    expect(mockGetChatbotResponse).toHaveBeenCalled();
+    expect(mockGetChatbotResponse).toHaveBeenCalledWith(
+        expect.stringContaining("You are an expert SEO assistant. Provide helpful, concise, and accurate advice on SEO topics.") && // English system prompt
+        expect.stringContaining("My first question is: Hello from integration test"),
+        [] // History
+    );
+  });
+
+  describe('Global Language Switching and AI Interaction', () => {
+    let localStorageMock: Storage;
+    beforeEach(() => {
+        localStorageMock = (function () {
+            let store: { [key: string]: string } = {'geminiApiKey': 'dummy_api_key_for_lang_test'}; // Ensure key is set
+            return {
+              getItem: jest.fn((key: string) => store[key] || null),
+              setItem: jest.fn((key: string, value: string) => { store[key] = value.toString(); }),
+              removeItem: jest.fn((key: string) => { delete store[key]; }),
+              clear: jest.fn(() => { store = {}; }),
+              length: 0, key: jest.fn(),
+            };
+          })();
+          Object.defineProperty(window, 'localStorage', { value: localStorageMock, writable: true });
+    });
+
+    test('BlogGenerator and Chatbot adapt to global language change (EN to TH)', async () => {
+        const mockGenerateBlogContent = geminiService.generateBlogContent as jest.Mock;
+        const mockGetChatbotResponse = geminiService.getChatbotResponse as jest.Mock;
+
+        mockGenerateBlogContent.mockResolvedValue("English blog content.");
+        (geminiService.generateImagePromptForText as jest.Mock).mockResolvedValue("English image prompt.");
+        mockGetChatbotResponse.mockResolvedValue("English chatbot response.");
+
+        render( // Render SEODashboard wrapped in LanguageProvider for the test
+            <LanguageProvider defaultLanguage="en">
+                <SEODashboard />
+            </LanguageProvider>
+        );
+
+        // 1. Test BlogGenerator in English (default)
+        const generatorTab = screen.getByRole('tab', { name: /Generator/i });
+        fireEvent.click(generatorTab);
+        await screen.findByLabelText(/Blog Topic/i);
+        await userEvent.type(screen.getByLabelText<HTMLInputElement>(/Blog Topic/i), 'English Topic');
+        fireEvent.click(screen.getByRole('button', { name: /Generate Blog Post/i }));
+        await waitFor(() => expect(mockGenerateBlogContent).toHaveBeenCalledWith(expect.stringContaining("entirely in English.")));
+
+        // 2. Switch language to Thai using LanguageSwitcher (assuming it's rendered in SEODashboard header)
+        const thButton = screen.getByRole('button', { name: 'TH' }); // From LanguageSwitcher
+        expect(thButton).toBeInTheDocument();
+        fireEvent.click(thButton);
+
+        // Wait for re-render or context update if necessary (usually happens quickly)
+        // Verify button style changes to confirm language switch
+        await waitFor(() => expect(thButton).toHaveClass('bg-gradient-to-r'));
+
+
+        // 3. Test BlogGenerator again, now expecting Thai prompt
+        mockGenerateBlogContent.mockClear();
+        mockGenerateBlogContent.mockResolvedValue("เนื้อหาบล็อกภาษาไทย");
+        fireEvent.click(generatorTab); // May need to re-click or ensure tab content re-evaluates context
+        await screen.findByLabelText(/Blog Topic/i); // Ensure it's loaded
+        // Input fields might retain old values or be cleared based on component logic, re-type for safety
+        await userEvent.clear(screen.getByLabelText<HTMLInputElement>(/Blog Topic/i));
+        await userEvent.type(screen.getByLabelText<HTMLInputElement>(/Blog Topic/i), 'หัวข้อภาษาไทย');
+        fireEvent.click(screen.getByRole('button', { name: /Generate Blog Post/i }));
+        await waitFor(() => expect(mockGenerateBlogContent).toHaveBeenCalledWith(expect.stringContaining("entirely in Thai.")));
+
+        // 4. Test Chatbot, expecting Thai prompt
+        mockGetChatbotResponse.mockClear();
+        mockGetChatbotResponse.mockResolvedValue("แชทบอทตอบกลับเป็นภาษาไทย");
+        const chatbotTab = screen.getByRole('tab', { name: /Chatbot/i });
+        fireEvent.click(chatbotTab);
+        await screen.findByText(/SEO Assistant Chatbot/i);
+
+        const chatInput = screen.getByPlaceholderText<HTMLInputElement>(/Ask about SEO.../i);
+        await userEvent.type(chatInput, 'สวัสดี');
+        fireEvent.click(screen.getByRole('button', { name: /Send/i }));
+
+        await waitFor(() => expect(mockGetChatbotResponse).toHaveBeenCalledWith(
+            expect.stringContaining("You are an expert SEO assistant. Please respond in Thai.") &&
+            expect.stringContaining("My first question is: สวัสดี"),
+            [] // History for first message
+        ));
+        await screen.findByText("แชทบอทตอบกลับเป็นภาษาไทย");
+    });
   });
 });
