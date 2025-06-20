@@ -48,66 +48,35 @@ class FluxSEOScribeCraft {
     }
     
     private function enqueue_app_assets() {
-        // Enqueue React and ReactDOM from CDN first
-        wp_enqueue_script(
-            'react',
-            'https://unpkg.com/react@18/umd/react.production.min.js',
-            array(),
-            '18.3.1',
-            false
-        );
-        
-        wp_enqueue_script(
-            'react-dom',
-            'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',
-            array('react'),
-            '18.3.1',
-            false
-        );
-        
-        // Enqueue main CSS
+        // Enqueue enhanced CSS
+        // Note: WordPress handles 'wp-element' (React/ReactDOM) loading automatically when set as a dependency.
+        // It's typically loaded in the footer by default when enqueued as a dependency for a footer script.
         wp_enqueue_style(
-            'flux-seo-scribe-craft-css',
-            FLUX_SEO_PLUGIN_URL . 'flux-seo-scribe-craft.css',
+            'flux-seo-scribe-craft-css', // Changed handle
+            FLUX_SEO_ENHANCED_URL . 'flux-seo-scribe-craft.css', // Changed filename
             array(),
-            FLUX_SEO_PLUGIN_VERSION
+            FLUX_SEO_ENHANCED_VERSION
         );
         
-        // Enqueue WordPress-specific overrides
-        wp_enqueue_style(
-            'flux-seo-wordpress-overrides',
-            FLUX_SEO_PLUGIN_URL . 'wordpress-overrides.css',
-            array('flux-seo-scribe-craft-css'),
-            FLUX_SEO_PLUGIN_VERSION
-        );
-        
-        // Enqueue React loader (handles loading the main app)
+        // Enqueue enhanced JavaScript (React app)
         wp_enqueue_script(
-            'flux-seo-react-loader',
-            FLUX_SEO_PLUGIN_URL . 'flux-seo-react-loader.js',
-            array('react', 'react-dom'),
-            FLUX_SEO_PLUGIN_VERSION,
-            true
+            'flux-seo-wordpress-app-js', // Changed handle
+            FLUX_SEO_ENHANCED_URL . 'flux-seo-wordpress-app.js', // Changed filename
+            array('wp-element', 'jquery'), // Changed dependencies to use WordPress's React
+            FLUX_SEO_ENHANCED_VERSION,
+            true // Load in footer
         );
         
-        // Enqueue WordPress integration script
-        wp_enqueue_script(
-            'flux-seo-wordpress-integration',
-            FLUX_SEO_PLUGIN_URL . 'flux-seo-wordpress-integration.js',
-            array('flux-seo-react-loader'),
-            FLUX_SEO_PLUGIN_VERSION,
-            true
-        );
+        // Removed enqueue for 'flux-seo-auto-blog-js' as the file is missing.
         
-        // Localize script for AJAX
-        wp_localize_script('flux-seo-react-loader', 'fluxSeoAjax', array(
+        // Localize script with enhanced data
+        wp_localize_script('flux-seo-wordpress-app-js', 'fluxSeoEnhanced', array( // Changed handle
             'ajaxurl' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('flux_seo_nonce'),
-            'pluginUrl' => FLUX_SEO_PLUGIN_URL,
-            'adminUrl' => admin_url(),
-            'siteUrl' => get_site_url(),
-            'currentUser' => wp_get_current_user()->ID,
-            'isAdmin' => current_user_can('manage_options')
+            'nonce' => wp_create_nonce('flux_seo_enhanced_nonce'),
+            'pluginUrl' => FLUX_SEO_ENHANCED_URL,
+            'isAdmin' => current_user_can('manage_options'),
+            'geminiEnabled' => true, // Assuming this is still relevant
+            'strings' => $this->get_localized_strings()
         ));
     }
     
@@ -156,7 +125,7 @@ class FluxSEOScribeCraft {
     private function render_app() {
         ob_start();
         ?>
-        <div id="flux-seo-root" class="flux-seo-container">
+        <div id="root" class="flux-seo-container">
             <div id="root">
                 <div class="flux-seo-loading">
                     <div class="loading-content">
