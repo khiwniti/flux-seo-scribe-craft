@@ -119,9 +119,7 @@ const IntegratedContentGenerator = () => {
               readabilityScore={readabilityScore}
               smartKeywords={smartKeywords}
               contentInsights={contentInsights}
-              onCopyToClipboard={copyToClip
-
-board}
+              onCopyToClipboard={copyToClipboard}
               onDownloadImage={downloadImage}
             />
           )}
