@@ -44,8 +44,7 @@ function flux_seo_app_enqueue_scripts() {
         'flux-seo-app-script',
         'fluxSeoAppData',
         array(
-            'api_url' => rest_url( 'flux-seo/v1/' ),
-            'nonce'   => wp_create_nonce( 'wp_rest' ),
+
         )
     );
 
@@ -134,6 +133,7 @@ function flux_seo_app_admin_menu() {
         'dashicons-chart-area',              // Icon URL or dashicon class
         80                                   // Position
     );
+
 }
 add_action( 'admin_menu', 'flux_seo_app_admin_menu' );
 
@@ -185,6 +185,7 @@ function flux_seo_app_admin_page_content() {
 }
 
 /**
+
  * Activation hook.
  */
 function flux_seo_app_activate() {
@@ -250,4 +251,3 @@ if ( function_exists( 'register_uninstall_hook' ) ) {
 // return new WP_REST_Response( 'Settings saved.', 200 );
 // }
 
-?>
