@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   Accordion,
@@ -126,10 +127,10 @@ const AdvancedSEOAnalytics: React.FC = () => {
         relevance: '',
         currentRanking: '',
         cpc: '',
-        intent: '',
+        intent: '' as const, // Fix type issue by explicitly casting to const
         targetPage: '',
         score: 0, // Initial score
-      }));
+      } as KeywordRow)); // Explicitly cast to KeywordRow type
 
     const updatedKeywords = [...keywordRows, ...newKeywords];
     updatedKeywords.forEach(kw => kw.score = calculateKeywordScore(kw));
@@ -498,7 +499,7 @@ const AdvancedSEOAnalytics: React.FC = () => {
                     </Card>
                 </div>
                 <div className="flex space-x-2 mt-4">
-                    <Button variant="destructive" outline>Identify Toxic Links (Mock)</Button>
+                    <Button variant="destructive">Identify Toxic Links (Mock)</Button>
                     <Button>Start Link Building Campaign (Mock)</Button>
                 </div>
             </div>

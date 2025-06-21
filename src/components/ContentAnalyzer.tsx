@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -148,14 +147,16 @@ Format the response clearly.`;
   };
 
   const getScoreColor = (score: number | string) => {
-    if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-yellow-600';
+    const numScore = typeof score === 'string' ? parseFloat(score) || 0 : score;
+    if (numScore >= 80) return 'text-green-600';
+    if (numScore >= 60) return 'text-yellow-600';
     return 'text-red-600';
   };
 
-  const getScoreBadge = (score) => {
-    if (score >= 80) return { variant: 'default' as const, className: 'bg-green-100 text-green-700', text: 'Excellent' };
-    if (score >= 60) return { variant: 'secondary' as const, className: 'bg-yellow-100 text-yellow-700', text: 'Good' };
+  const getScoreBadge = (score: number | string) => {
+    const numScore = typeof score === 'string' ? parseFloat(score) || 0 : score;
+    if (numScore >= 80) return { variant: 'default' as const, className: 'bg-green-100 text-green-700', text: 'Excellent' };
+    if (numScore >= 60) return { variant: 'secondary' as const, className: 'bg-yellow-100 text-yellow-700', text: 'Good' };
     return { variant: 'destructive' as const, className: 'bg-red-100 text-red-700', text: 'Needs Work' };
   };
 
