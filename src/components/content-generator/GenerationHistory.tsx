@@ -3,17 +3,10 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock } from 'lucide-react';
-
-interface GenerationHistoryEntry {
-  id: number;
-  topic: string;
-  keywords: string;
-  generatedAt: string;
-  status: string;
-}
+import { AutoGenHistoryEntry } from './types';
 
 interface GenerationHistoryProps {
-  autoGenHistory: GenerationHistoryEntry[];
+  autoGenHistory: AutoGenHistoryEntry[];
 }
 
 const GenerationHistory = ({ autoGenHistory }: GenerationHistoryProps) => {
@@ -44,9 +37,9 @@ const GenerationHistory = ({ autoGenHistory }: GenerationHistoryProps) => {
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
                     <h4 className="font-medium text-gray-900">{entry.topic}</h4>
-                    <p className="text-sm text-gray-600">Keywords: {entry.keywords}</p>
+                    <p className="text-sm text-gray-600">Word Count: {entry.wordCount}</p>
                     <p className="text-xs text-gray-500">
-                      Generated: {new Date(entry.generatedAt).toLocaleDateString()} at {new Date(entry.generatedAt).toLocaleTimeString()}
+                      Generated: {entry.date.toLocaleDateString()} at {entry.date.toLocaleTimeString()}
                     </p>
                   </div>
                   <Badge variant="secondary" className="bg-green-100 text-green-700">
