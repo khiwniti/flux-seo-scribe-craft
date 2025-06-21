@@ -1,5 +1,23 @@
-
 import { useState, useEffect } from 'react';
+
+interface GeneratedImage {
+  id: number;
+  url: string;
+  alt: string;
+  prompt: string;
+  enhanced: boolean;
+  quality: string;
+  seoOptimized: boolean;
+}
+
+interface ContentInsights {
+  estimatedReadTime?: number;
+  targetKeywordDensity?: string;
+  recommendedHeadings?: number;
+  suggestedImages?: number;
+  seoComplexity?: string;
+  competitiveLevel?: string;
+}
 
 export const useContentGeneration = () => {
   // Form states
@@ -10,7 +28,7 @@ export const useContentGeneration = () => {
   
   // Generated content
   const [generatedContent, setGeneratedContent] = useState('');
-  const [generatedImages, setGeneratedImages] = useState<string[]>([]);
+  const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   
   // Auto-generation states
@@ -35,7 +53,7 @@ export const useContentGeneration = () => {
   const [industryFocus, setIndustryFocus] = useState('');
   const [contentTemplate, setContentTemplate] = useState('');
   const [smartKeywords, setSmartKeywords] = useState<string[]>([]);
-  const [contentInsights, setContentInsights] = useState<string[]>([]);
+  const [contentInsights, setContentInsights] = useState<ContentInsights>({});
 
   // Analytics-based states
   const [analyticsData, setAnalyticsData] = useState<any>(null);
@@ -153,11 +171,37 @@ ${generateConclusion()}
       setSeoScore(Math.floor(Math.random() * 15 + 85));
       setReadabilityScore(Math.floor(Math.random() * 10 + 90));
       setSmartKeywords(extractKeywordsFromTopic(topic));
-      setContentInsights([
-        'Content is optimized for target keywords',
-        'Reading level is appropriate for target audience',
-        'Structure follows SEO best practices',
-        'Content length is optimal for topic depth'
+      
+      // Set proper ContentInsights object
+      setContentInsights({
+        estimatedReadTime: Math.ceil(content.split(' ').length / 200),
+        targetKeywordDensity: '2.5%',
+        recommendedHeadings: content.split('\n').filter(line => line.trim().startsWith('#')).length,
+        suggestedImages: 3,
+        seoComplexity: 'Medium',
+        competitiveLevel: 'Moderate'
+      });
+
+      // Generate sample images
+      setGeneratedImages([
+        {
+          id: 1,
+          url: '/placeholder.svg',
+          alt: `${topic} illustration`,
+          prompt: `Professional illustration for ${topic}`,
+          enhanced: true,
+          quality: 'high',
+          seoOptimized: true
+        },
+        {
+          id: 2,
+          url: '/placeholder.svg',
+          alt: `${topic} infographic`,
+          prompt: `Infographic showing key concepts of ${topic}`,
+          enhanced: true,
+          quality: 'high',
+          seoOptimized: true
+        }
       ]);
       
       setIsGenerating(false);
@@ -248,10 +292,10 @@ ${generateConclusion()}
     navigator.clipboard.writeText(content);
   };
 
-  const downloadImage = (imageUrl: string) => {
+  const downloadImage = (imageUrl: string, fileName: string) => {
     const link = document.createElement('a');
     link.href = imageUrl;
-    link.download = 'generated-image.png';
+    link.download = fileName;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
