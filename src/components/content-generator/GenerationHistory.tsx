@@ -109,14 +109,4 @@ const GenerationHistory = ({ autoGenHistory, isLoading, error }: GenerationHisto
 };
 
 export default GenerationHistory;
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-};
-
-export default GenerationHistory;
+// Removed extraneous closing tags that were here

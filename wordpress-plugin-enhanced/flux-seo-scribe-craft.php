@@ -22,13 +22,13 @@ define('FLUX_SEO_PLUGIN_VERSION', '2.0.0');
 class FluxSeoScribeCraft {
     
     public function __construct() {
-        add_action('init', array($this, 'init'));
-        add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
-        add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
-        add_shortcode('flux_seo_app', array($this, 'render_app_shortcode'));
-        add_action('wp_ajax_flux_seo_api', array($this, 'handle_ajax_request'));
-        add_action('wp_ajax_nopriv_flux_seo_api', array($this, 'handle_ajax_request'));
-        add_action('admin_menu', array($this, 'add_admin_menu'));
+        // add_action('init', array($this, 'init')); // Neutralized
+        // add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts')); // Neutralized
+        // add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts')); // Neutralized
+        // add_shortcode('flux_seo_app', array($this, 'render_app_shortcode')); // Neutralized
+        // add_action('wp_ajax_flux_seo_api', array($this, 'handle_ajax_request')); // Neutralized
+        // add_action('wp_ajax_nopriv_flux_seo_api', array($this, 'handle_ajax_request')); // Neutralized
+        // add_action('admin_menu', array($this, 'add_admin_menu')); // Neutralized
     }
     
     public function init() {
@@ -801,7 +801,7 @@ Please format as JSON:
 }
 
 // Initialize the plugin
-new FluxSeoScribeCraft();
+// new FluxSeoScribeCraft(); // Neutralized
 
 // Activation hook
 register_activation_hook(__FILE__, 'flux_seo_activate');

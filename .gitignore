@@ -9,6 +9,8 @@ lerna-debug.log*
 
 node_modules
 dist
+# Ensure the WordPress plugin's dist directory is NOT ignored for packaging
+!wordpress-plugin-v2-enhanced/dist/
 dist-ssr
 *.local
 

@@ -28,15 +28,15 @@ const SEOChatbot: React.FC = () => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   // const { toast } = useToast(); // Replaced by sonnerToast
 
-  // System instruction is not currently passed to backend with new geminiService
+  // System instruction and chat history formatting are not currently passed to backend with new geminiService.
+  // If these features are re-enabled, ensure the backend supports them.
   // const getSystemInstruction = (): string => {
-    if (language === 'th') {
-      return "You are an expert SEO assistant. Please respond in Thai. Provide helpful, concise, and accurate advice on SEO topics. If you don't know an answer, say so. Keep responses relatively short and easy to read in a chat interface.";
-    }
-    return "You are an expert SEO assistant. Provide helpful, concise, and accurate advice on SEO topics. If you don't know an answer, say so. Keep responses relatively short and easy to read in a chat interface.";
-  };
-
-  // const formatChatHistory = (msgs: Message[]): ChatHistoryMessage[] => { ... } // History not sent
+  //   if (language === 'th') {
+  //     return "You are an expert SEO assistant. Please respond in Thai. Provide helpful, concise, and accurate advice on SEO topics. If you don't know an answer, say so. Keep responses relatively short and easy to read in a chat interface.";
+  //   }
+  //   return "You are an expert SEO assistant. Provide helpful, concise, and accurate advice on SEO topics. If you don't know an answer, say so. Keep responses relatively short and easy to read in a chat interface.";
+  // };
+  // const formatChatHistory = (msgs: Message[]): ChatHistoryMessage[] => { ... }
 
   const chatMutation = useMutation<
     string, // Expecting string response (bot's message)

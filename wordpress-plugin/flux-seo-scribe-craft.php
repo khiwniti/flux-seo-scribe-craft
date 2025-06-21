@@ -23,18 +23,18 @@ define('FLUX_SEO_PLUGIN_VERSION', '1.0.0');
 class FluxSEOScribeCraft {
     
     public function __construct() {
-        add_action('init', array($this, 'init'));
-        add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
-        add_action('admin_menu', array($this, 'add_admin_menu'));
-        add_shortcode('flux_seo_scribe_craft', array($this, 'shortcode_handler'));
+        // add_action('init', array($this, 'init')); // Neutralized
+        // add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts')); // Neutralized
+        // add_action('admin_menu', array($this, 'add_admin_menu')); // Neutralized
+        // add_shortcode('flux_seo_scribe_craft', array($this, 'shortcode_handler')); // Neutralized
         
         // AJAX handlers for the React app
-        add_action('wp_ajax_flux_seo_proxy', array($this, 'ajax_proxy_handler'));
-        add_action('wp_ajax_nopriv_flux_seo_proxy', array($this, 'ajax_proxy_handler'));
+        // add_action('wp_ajax_flux_seo_proxy', array($this, 'ajax_proxy_handler')); // Neutralized
+        // add_action('wp_ajax_nopriv_flux_seo_proxy', array($this, 'ajax_proxy_handler')); // Neutralized
 
         // Settings page hooks
-        add_action('admin_init', array($this, 'flux_seo_register_settings'));
-        add_action('admin_menu', array($this, 'flux_seo_add_settings_page'));
+        // add_action('admin_init', array($this, 'flux_seo_register_settings')); // Neutralized
+        // add_action('admin_menu', array($this, 'flux_seo_add_settings_page')); // Neutralized
     }
     
     public function init() {
@@ -507,7 +507,7 @@ class FluxSEOScribeCraft {
 }
 
 // Initialize the plugin
-new FluxSEOScribeCraft();
+// new FluxSEOScribeCraft(); // Neutralized
 
 // Activation hook
 register_activation_hook(__FILE__, 'flux_seo_activate');
