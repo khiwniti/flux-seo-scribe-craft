@@ -57,7 +57,8 @@ const IntegratedContentGenerator = () => {
     generateAutoContent,
     toggleAutoGeneration,
     copyToClipboard,
-    downloadImage
+    downloadImage,
+    error // Destructure error from the hook
   } = useContentGeneration();
 
   return (
@@ -108,9 +109,10 @@ const IntegratedContentGenerator = () => {
             setContentTemplate={setContentTemplate}
             isGenerating={isGenerating}
             onGenerate={generateContent}
+            error={error} // Pass error to the form
           />
 
-          {generatedContent && (
+          {generatedContent && !error && ( // Only show generated content if no error
             <GeneratedContentDisplay
               generatedContent={generatedContent}
               generatedImages={generatedImages || []}

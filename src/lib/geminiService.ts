@@ -1,116 +1,133 @@
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
+// import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 
-const MODEL_NAME = "gemini-pro"; // Or specific model as needed
-const API_KEY_STORAGE_KEY = 'geminiApiKey';
+// This file is modified to use the WordPress REST API proxy instead of direct calls to GoogleGenerativeAI
+
+const DEFAULT_MODEL_NAME = "gemini-pro";
 
 interface GeminiServiceError extends Error {
   status?: number;
-  isApiKeyInvalid?: boolean;
+  isApiKeyInvalid?: boolean; // Indicates if the error is due to missing/invalid API key in WP settings
+  details?: any; // To store additional error details from the proxy
 }
 
-function getApiKey(): string | null {
-  const storedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
-  if (storedKey) {
-    return storedKey;
+// Access WordPress localized data
+// Ensure fluxSeoAppData is available globally when this script runs in WordPress
+declare global {
+  interface Window {
+    fluxSeoAppData: {
+      rest_url: string;
+      nonce: string;
+      proxy_endpoint: string;
+    };
   }
-  // Ensure this environment variable is correctly set up in your build process (e.g., Vite, Create React App)
-  // For CRA, it must be REACT_APP_... For Vite, it's import.meta.env.VITE_...
-  // This example assumes REACT_APP_ for broader compatibility, but adjust if needed.
-  const envKey = process.env.REACT_APP_GEMINI_API_KEY;
-  if (envKey) {
-    return envKey;
-  }
-  return null;
 }
 
-export async function generateBlogContent(prompt: string, apiKeyOverride?: string): Promise<string> {
-  const apiKeyToUse = apiKeyOverride || getApiKey();
-
-  if (!apiKeyToUse) {
-    const error = new Error("API key is missing. Please set it in Settings or as REACT_APP_GEMINI_API_KEY.") as GeminiServiceError;
-    error.isApiKeyInvalid = true; // Treat as invalid if completely missing
-    throw error;
+const getProxyEndpoint = (): string => {
+  if (window.fluxSeoAppData && window.fluxSeoAppData.proxy_endpoint) {
+    return window.fluxSeoAppData.proxy_endpoint;
   }
+  // Fallback or error if not defined, though it should be by wp_localize_script
+  console.error("Flux SEO: WordPress proxy endpoint not defined in fluxSeoAppData.");
+  return "/wp-json/flux-seo/v1/gemini-proxy"; // Should not happen
+};
+
+const getWordPressNonce = (): string => {
+  if (window.fluxSeoAppData && window.fluxSeoAppData.nonce) {
+    return window.fluxSeoAppData.nonce;
+  }
+  console.error("Flux SEO: WordPress REST API nonce not defined in fluxSeoAppData.");
+  return ""; // Should not happen
+};
+
+async function callWordPressProxy(payload: object): Promise<any> {
+  const endpoint = getProxyEndpoint();
+  const nonce = getWordPressNonce();
 
   try {
-    const genAI = new GoogleGenerativeAI(apiKeyToUse);
-    const model = genAI.getGenerativeModel({ model: MODEL_NAME });
-
-    const generationConfig = {
-      temperature: 0.9, // Controls randomness. Higher is more creative.
-      topK: 1, // For next-token selection strategy.
-      topP: 1, // For next-token selection strategy.
-      maxOutputTokens: 2048, // Adjust as needed for blog post length
-    };
-
-    // Safety settings to minimize blocking of harmless content
-    // Adjust these based on requirements and testing
-    const safetySettings = [
-      {
-        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-WP-Nonce': nonce, // WordPress REST API Nonce
       },
-      {
-        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-      },
-      {
-        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-      },
-      {
-        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-      },
-    ];
+      body: JSON.stringify(payload),
+    });
 
-    const result = await model.generateContent(
-        prompt
-        // { // If sending parts instead of a single prompt string
-        // generationConfig,
-        // safetySettings,
-        // }
-    );
+    const responseData = await response.json();
 
-    // Older versions of the API might have response.text() directly
-    // Newer versions (v0.1.0-alpha.3 and later) have a more structured response
-    if (result.response && typeof result.response.text === 'function') {
-        const text = result.response.text();
-        if (text) {
-            return text;
-        } else {
-            // This case might happen if the content was blocked due to safety settings
-            // or if the response is empty for other reasons.
-            const blockReason = result.response.promptFeedback?.blockReason;
-            if (blockReason) {
-                throw new Error(`Content generation blocked. Reason: ${blockReason}. Adjust safety settings or prompt if necessary.`);
-            }
-            const finishReason = result.response.candidates?.[0]?.finishReason;
-             if (finishReason && finishReason !== "STOP") {
-                throw new Error(`Content generation stopped. Reason: ${finishReason}.`);
-            }
-            throw new Error("Received empty response from Gemini API or content was blocked.");
-        }
-    } else {
-        // Fallback for potentially different response structures or if text() is not available.
-        // This part might need adjustment based on the exact API version and response object.
-        // console.warn("Gemini API response structure might have changed. Check geminiService.ts.");
-        // If response.candidates exists and has text
-        if (result.response?.candidates?.[0]?.content?.parts?.[0]?.text) {
-            return result.response.candidates[0].content.parts[0].text;
-        }
-        throw new Error("Could not extract text from Gemini API response. The response structure might be unexpected.");
+    if (!response.ok) {
+      const error = new Error(responseData.message || `HTTP error! status: ${response.status}`) as GeminiServiceError;
+      error.status = response.status;
+      error.details = responseData.data || responseData; // Store additional details if provided by WP_Error
+      if (responseData.code === 'missing_api_key' || response.status === 401 || response.status === 403) {
+        error.isApiKeyInvalid = true;
+      }
+      throw error;
     }
+    return responseData; // This is the response from the Gemini API, proxied through WP
 
   } catch (error: any) {
-    console.error("Error calling Gemini API (generateBlogContent):", error);
-    const serviceError = new Error(`Gemini API Error: ${error.message || 'Unknown error'}`) as GeminiServiceError;
-    if (error.message && (error.message.includes("API key not valid") || error.message.includes("API key invalid"))) {
-      serviceError.isApiKeyInvalid = true;
-    }
-    // You might want to check for specific error codes or types if the SDK provides them
-    // e.g., if (error.status === 400) { ... }
+    console.error("Error calling WordPress Gemini Proxy:", error);
+    // Re-throw as a GeminiServiceError or a more specific error type
+    const serviceError = new Error(`WordPress Proxy Error: ${error.message || 'Unknown error'}`) as GeminiServiceError;
+    if (error.isApiKeyInvalid) serviceError.isApiKeyInvalid = true;
+    if (error.status) serviceError.status = error.status;
+    if (error.details) serviceError.details = error.details;
     throw serviceError;
+  }
+}
+
+
+export async function generateBlogContent(prompt: string, _apiKeyOverride?: string): Promise<string> {
+  // apiKeyOverride is no longer used as the key is handled server-side by WordPress
+  const payload = {
+    model: DEFAULT_MODEL_NAME, // The proxy can decide which model or this can be passed
+    prompt: prompt, // Kept for simplicity, proxy will structure it into 'contents'
+    // Or structure it directly here if the proxy expects full 'contents' format:
+    // contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: {
+      temperature: 0.9,
+      topK: 1,
+      topP: 1,
+      maxOutputTokens: 2048,
+    },
+    // Safety settings could be passed to the proxy if it's designed to handle them,
+    // or the proxy applies default safety settings. For now, assuming proxy handles defaults.
+  };
+
+  try {
+    const proxyResponse = await callWordPressProxy(payload);
+    // Assuming the proxy returns the Gemini API's structure,
+    // we need to extract the text similarly to how it was done before.
+    if (proxyResponse?.candidates?.[0]?.content?.parts?.[0]?.text) {
+      return proxyResponse.candidates[0].content.parts[0].text;
+    } else if (proxyResponse?.text) { // Simpler direct text response from proxy (less likely for full Gemini structure)
+        return proxyResponse.text;
+    }
+    // Handle cases where content might be blocked or response structure is different
+    const blockReason = proxyResponse?.promptFeedback?.blockReason;
+    if (blockReason) {
+        throw new Error(`Content generation blocked via proxy. Reason: ${blockReason}.`);
+    }
+    const finishReason = proxyResponse?.candidates?.[0]?.finishReason;
+    if (finishReason && finishReason !== "STOP") {
+       throw new Error(`Content generation stopped via proxy. Reason: ${finishReason}.`);
+    }
+    throw new Error("Could not extract text from proxied Gemini API response.");
+
+  } catch (error: any) {
+    // The error from callWordPressProxy should already be a GeminiServiceError
+    // but ensure it's propagated correctly.
+    console.error("Error in generateBlogContent via proxy:", error);
+    if (error instanceof Error) { // Check if it's an error object
+        const serviceError = error as GeminiServiceError;
+        // If not already a GeminiServiceError, wrap it
+        if (!serviceError.isApiKeyInvalid && (serviceError.message.includes("API key") || serviceError.message.includes("Unauthenticated"))) {
+            serviceError.isApiKeyInvalid = true;
+        }
+        throw serviceError;
+    }
+    throw new Error(`Unknown error in generateBlogContent: ${error}`);
   }
 }
 
@@ -119,148 +136,104 @@ interface ChatMessagePart {
     text: string;
 }
 export interface ChatHistoryMessage {
-    role: "user" | "model"; // "model" is used for bot's responses
+    role: "user" | "model";
     parts: ChatMessagePart[];
 }
 
 export async function getChatbotResponse(
     userPrompt: string,
     chatHistory: ChatHistoryMessage[],
-    apiKeyOverride?: string
+    _apiKeyOverride?: string // No longer used
 ): Promise<string> {
-    const apiKeyToUse = apiKeyOverride || getApiKey();
-
-    if (!apiKeyToUse) {
-        const error = new Error("API key is missing for chatbot. Please set it in Settings or as REACT_APP_GEMINI_API_KEY.") as GeminiServiceError;
-        error.isApiKeyInvalid = true;
-        throw error;
-    }
+    const payload = {
+        model: "gemini-pro", // Or a chat-specific model if preferred
+        contents: [ // Construct the full 'contents' array including history and new prompt
+            ...chatHistory,
+            { role: "user", parts: [{ text: userPrompt }] }
+        ],
+        generationConfig: {
+            maxOutputTokens: 1000,
+            temperature: 0.7,
+        },
+        // Safety settings: Assuming proxy handles or applies defaults
+    };
 
     try {
-        const genAI = new GoogleGenerativeAI(apiKeyToUse);
-        // Default to gemini-pro, but consider gemini-1.5-flash for chat if available and suitable for faster responses
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+        const proxyResponse = await callWordPressProxy(payload);
 
-        const chat = model.startChat({
-            history: chatHistory,
-            // Safety settings can be configured here as well, similar to generateContent
-            safetySettings: [
-                { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-                { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-                { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-                { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-            ],
-            generationConfig: {
-                maxOutputTokens: 1000, // Adjust as needed for chat response length
-                temperature: 0.7, // Slightly lower temperature for more focused chat responses
-            }
-        });
-
-        const result = await chat.sendMessage(userPrompt);
-
-        if (result.response && typeof result.response.text === 'function') {
-            const text = result.response.text();
-            if (text) {
-                return text;
-            } else {
-                const blockReason = result.response.promptFeedback?.blockReason;
-                if (blockReason) {
-                    throw new Error(`Chatbot response blocked. Reason: ${blockReason}.`);
-                }
-                const finishReason = result.response.candidates?.[0]?.finishReason;
-                if (finishReason && finishReason !== "STOP") {
-                   throw new Error(`Chatbot response stopped. Reason: ${finishReason}.`);
-               }
-               throw new Error("Received empty response from Gemini API for chatbot or content was blocked.");
-            }
-        } else if (result.response?.candidates?.[0]?.content?.parts?.[0]?.text) {
-            return result.response.candidates[0].content.parts[0].text;
+        if (proxyResponse?.candidates?.[0]?.content?.parts?.[0]?.text) {
+            return proxyResponse.candidates[0].content.parts[0].text;
         }
-
-        throw new Error("Could not extract text for chatbot response from Gemini API.");
+        const blockReason = proxyResponse?.promptFeedback?.blockReason;
+        if (blockReason) {
+            throw new Error(`Chatbot response blocked via proxy. Reason: ${blockReason}.`);
+        }
+        const finishReason = proxyResponse?.candidates?.[0]?.finishReason;
+        if (finishReason && finishReason !== "STOP") {
+           throw new Error(`Chatbot response stopped via proxy. Reason: ${finishReason}.`);
+       }
+       throw new Error("Could not extract text for chatbot response from proxied Gemini API.");
 
     } catch (error: any) {
-        console.error("Error calling Gemini API (getChatbotResponse):", error);
-        const serviceError = new Error(`Gemini Chatbot Error: ${error.message || 'Unknown error'}`) as GeminiServiceError;
-        if (error.message && (error.message.includes("API key not valid") || error.message.includes("API key invalid") || error.message.includes("API key is missing"))) {
-            serviceError.isApiKeyInvalid = true;
+        console.error("Error in getChatbotResponse via proxy:", error);
+        if (error instanceof Error) {
+            const serviceError = error as GeminiServiceError;
+            if (!serviceError.isApiKeyInvalid && (serviceError.message.includes("API key") || serviceError.message.includes("Unauthenticated"))) {
+                serviceError.isApiKeyInvalid = true;
+            }
+            throw serviceError;
         }
-        throw serviceError;
+        throw new Error(`Unknown error in getChatbotResponse: ${error}`);
     }
 }
 
-export async function generateImagePromptForText(textInput: string, apiKeyOverride?: string): Promise<string> {
-  const apiKeyToUse = apiKeyOverride || getApiKey();
-
-  if (!apiKeyToUse) {
-    const error = new Error("API key is missing for image prompt generation. Please set it in Settings or as REACT_APP_GEMINI_API_KEY.") as GeminiServiceError;
-    error.isApiKeyInvalid = true;
-    throw error;
-  }
-
-  try {
-    const genAI = new GoogleGenerativeAI(apiKeyToUse);
-    const model = genAI.getGenerativeModel({ model: MODEL_NAME }); // Using gemini-pro
-
-    const fullPrompt = `Based on the following text, generate a detailed and creative prompt for a text-to-image generation model.
+export async function generateImagePromptForText(textInput: string, _apiKeyOverride?: string): Promise<string> {
+    const fullPromptForImage = `Based on the following text, generate a detailed and creative prompt for a text-to-image generation model.
 The image prompt should be descriptive, specifying the subject, style (e.g., photorealistic, watercolor, cartoonish, abstract), mood (e.g., inspiring, serene, energetic, mysterious), composition, and any key elements or colors that would make the image compelling and relevant to the text.
 
 Input Text:
 ---
 ${textInput.substring(0, 1500)}
 ---
-Generated Image Prompt:`; // Added substring to limit input length for safety
+Generated Image Prompt:`;
 
-    const generationConfig = {
-      temperature: 0.8, // Slightly lower for more focused prompt generation
-      topK: 1,
-      topP: 1,
-      maxOutputTokens: 200, // Image prompts are usually shorter
+    const payload = {
+        model: DEFAULT_MODEL_NAME,
+        // The proxy expects 'prompt' or 'contents'. Let's use 'contents' for consistency.
+        contents: [{ parts: [{ text: fullPromptForImage }] }],
+        generationConfig: {
+            temperature: 0.8,
+            topK: 1,
+            topP: 1,
+            maxOutputTokens: 200,
+        },
     };
 
-    // Safety settings can be reused or adjusted
-    const safetySettings = [
-      { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-      { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-      { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-      { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-    ];
+    try {
+        const proxyResponse = await callWordPressProxy(payload);
 
-    const result = await model.generateContent(
-        fullPrompt
-        // { // If sending parts
-        //   generationConfig,
-        //   safetySettings
-        // }
-    );
-
-    if (result.response && typeof result.response.text === 'function') {
-      const text = result.response.text();
-      if (text) {
-        return text.replace("Generated Image Prompt:", "").trim(); // Clean up prefix if model includes it
-      } else {
-        const blockReason = result.response.promptFeedback?.blockReason;
+        if (proxyResponse?.candidates?.[0]?.content?.parts?.[0]?.text) {
+            return proxyResponse.candidates[0].content.parts[0].text.replace("Generated Image Prompt:", "").trim();
+        }
+        const blockReason = proxyResponse?.promptFeedback?.blockReason;
         if (blockReason) {
-            throw new Error(`Image prompt generation blocked. Reason: ${blockReason}.`);
+            throw new Error(`Image prompt generation blocked via proxy. Reason: ${blockReason}.`);
         }
-        const finishReason = result.response.candidates?.[0]?.finishReason;
-         if (finishReason && finishReason !== "STOP") {
-            throw new Error(`Image prompt generation stopped. Reason: ${finishReason}.`);
+        const finishReason = proxyResponse?.candidates?.[0]?.finishReason;
+        if (finishReason && finishReason !== "STOP") {
+           throw new Error(`Image prompt generation stopped via proxy. Reason: ${finishReason}.`);
         }
-        throw new Error("Received empty response from Gemini API for image prompt or content was blocked.");
-      }
-    } else if (result.response?.candidates?.[0]?.content?.parts?.[0]?.text) {
-        return result.response.candidates[0].content.parts[0].text.replace("Generated Image Prompt:", "").trim();
-    }
+        throw new Error("Could not extract text for image prompt from proxied Gemini API response.");
 
-    throw new Error("Could not extract text for image prompt from Gemini API response.");
-
-  } catch (error: any) {
-    console.error("Error calling Gemini API (generateImagePromptForText):", error);
-    const serviceError = new Error(`Gemini API Error for Image Prompt: ${error.message || 'Unknown error'}`) as GeminiServiceError;
-    if (error.message && (error.message.includes("API key not valid") || error.message.includes("API key invalid"))) {
-      serviceError.isApiKeyInvalid = true;
+    } catch (error: any) {
+        console.error("Error in generateImagePromptForText via proxy:", error);
+         if (error instanceof Error) {
+            const serviceError = error as GeminiServiceError;
+            if (!serviceError.isApiKeyInvalid && (serviceError.message.includes("API key") || serviceError.message.includes("Unauthenticated"))) {
+                serviceError.isApiKeyInvalid = true;
+            }
+            throw serviceError;
+        }
+        throw new Error(`Unknown error in generateImagePromptForText: ${error}`);
     }
-    throw serviceError;
-  }
 }
