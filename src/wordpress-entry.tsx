@@ -1,8 +1,4 @@
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { Toaster } from "@/components/ui/toaster";
@@ -11,7 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import SEODashboard from './components/SEODashboard';
 import './index.css';
-import { LanguageProvider } from './contexts/LanguageContext'; // Import LanguageProvider
+import { LanguageProvider } from './contexts/LanguageContext';
 
 // Disable service workers in WordPress environment
 console.log('🔧 FluxSEO: Checking for service workers to disable...');
@@ -46,7 +42,7 @@ const queryClient = new QueryClient({
 
 // WordPress-compatible App component (no BrowserRouter)
 const WordPressApp = () => (
-  <LanguageProvider> {/* Added LanguageProvider wrapper */}
+  <LanguageProvider>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
