@@ -6,21 +6,85 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Wand2, Copy, Check, Globe, Sparkles, CheckCircle, AlertTriangle as AlertTriangleIcon } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { generateBlogContent as callGeminiApi } from '@/lib/geminiService';
-import { useLanguage, Language } from '@/contexts/LanguageContext'; // Import useLanguage
+import { toast as sonnerToast } from 'sonner';
+import { generateBlogContent, GeminiServiceError, GeneratedContentResponse } from '@/lib/geminiService';
+import { useLanguage, Language } from '@/contexts/LanguageContext';
+import { useMutation } from '@tanstack/react-query';
 
 const MetaTagsManager = () => {
-  const { language, setLanguage: setGlobalLanguage } = useLanguage(); // Consume global language context
+  const { language, setLanguage: setGlobalLanguage } = useLanguage();
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [keywords, setKeywords] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
+  // const [isGenerating, setIsGenerating] = useState(false); // To be replaced by mutation.isPending
   const [copied, setCopied] = useState(false);
   const [autoEnhanced, setAutoEnhanced] = useState(false);
   const [apiKeyError, setApiKeyError] = useState<string | null>(null);
-  const { toast } = useToast();
+  // const { toast } = useToast(); // Replaced by sonnerToast
+
+  const metaTagMutation = useMutation<
+    GeneratedContentResponse, // Expecting the service to return this structure
+    GeminiServiceError,
+    { currentContent: string; currentLanguage: Language }
+  >({
+    mutationFn: async (vars) => {
+      const promptForMetaTags = `Based on the following content in ${vars.currentLanguage === 'th' ? 'Thai' : 'English'}, generate SEO-friendly meta tags.
+
+Content:
+---
+${vars.currentContent.substring(0, 2000)}
+---
+
+Please generate the following, ensuring each is on a new line and clearly labeled:
+1.  Title: An SEO-friendly title, around ${vars.currentLanguage === 'th' ? 65 : 60} characters.
+2.  Description: A compelling meta description, around ${vars.currentLanguage === 'th' ? 150 : 160} characters.
+3.  Keywords: 5-7 relevant keywords, comma-separated.
+
+Output format example:
+Title: [Generated Title Here]
+Description: [Generated Meta Description Here]
+Keywords: [keyword1, keyword2, keyword3, keyword4, keyword5]
+
+Generate the meta tags in ${vars.currentLanguage === 'th' ? 'Thai' : 'English'}.`;
+
+      // We use generateBlogContent and rely on the PHP backend to use the 'meta_tags_generation' contentType
+      // The 'topic' will be the prompt itself, and 'keywords' can be empty or context if needed.
+      // However, the service function generateBlogContent expects topic, lang, contentType, keywords.
+      // For meta tags, the content itself is the primary input.
+      return generateBlogContent(
+        vars.currentContent, // Main content as "topic" for the service
+        vars.currentLanguage,
+        'meta_tags_generation', // Specific content type for backend to handle
+        "" // No separate keywords needed if content is rich enough
+      );
+    },
+    onMutate: () => {
+      setApiKeyError(null);
+      setAutoEnhanced(false);
+      sonnerToast.info(language === 'th' ? "กำลังสร้าง Meta Tags..." : "Generating meta tags...");
+    },
+    onSuccess: (data) => {
+      // data.content should contain the raw text from Gemini with Title:, Description:, Keywords:
+      const { title: genTitle, description: genDescription, keywords: genKeywords } = parseMetaTagResponse(data.content || "");
+      setTitle(genTitle);
+      setDescription(genDescription);
+      setKeywords(genKeywords);
+      setAutoEnhanced(true);
+      sonnerToast.success(language === 'th' ? "สร้าง Meta Tags สำเร็จ!" : "Smart Meta Tags Generated!");
+    },
+    onError: (error: GeminiServiceError) => {
+      console.error("Error generating meta tags:", error);
+      let errorDesc = language === 'th' ? "เกิดข้อผิดพลาดขณะสร้าง Meta Tags" : "An error occurred while generating meta tags.";
+      if (error.isApiKeyInvalid) {
+        errorDesc = language === 'th' ? "API Key ไม่ถูกต้องหรือหายไป กรุณาตรวจสอบการตั้งค่า" : "The Gemini API key is invalid or missing. Please go to Settings to add it.";
+        setApiKeyError(errorDesc);
+      } else if (error.message) {
+        errorDesc = error.message;
+      }
+      sonnerToast.error(language === 'th' ? "การสร้าง Meta Tag ล้มเหลว" : "Meta Tag Generation Failed", { description: errorDesc });
+    }
+  });
 
   // Auto-generate when content changes and length is sufficient
   useEffect(() => {
@@ -63,72 +127,18 @@ const MetaTagsManager = () => {
     return { title: genTitle, description: genDescription, keywords: genKeywords };
   };
 
-  const generateMetaTags = async () => {
+  const generateMetaTags = () => {
     if (!content.trim()) {
-      toast({
-        title: language === 'th' ? "กรุณาใส่เนื้อหา" : "Please enter content",
-        description: language === 'th' ? "ใส่เนื้อหาเพื่อสร้าง Meta Tags อัตโนมัติ" : "Enter content to generate meta tags automatically",
-        variant: "destructive",
-      });
+      sonnerToast.error(
+        language === 'th' ? "กรุณาใส่เนื้อหา" : "Please enter content",
+        { description: language === 'th' ? "ใส่เนื้อหาเพื่อสร้าง Meta Tags อัตโนมัติ" : "Enter content to generate meta tags automatically" }
+      );
       return;
     }
-    setApiKeyError(null); // Clear previous API key error
-    setIsGenerating(true);
-    setAutoEnhanced(false); // Reset this flag before generation
-
-    const langInstruction = language === 'th' ? 'Thai' : 'English';
-    const titleCharLimit = language === 'th' ? 65 : 60; // Thai titles can sometimes be a bit longer due to script
-    const descCharLimit = language === 'th' ? 150 : 160;
-
-    const prompt = `Based on the following content in ${langInstruction}, generate SEO-friendly meta tags.
-
-Content:
----
-${content.substring(0, 2000)}
----
-
-Please generate the following, ensuring each is on a new line and clearly labeled:
-1.  Title: An SEO-friendly title, around ${titleCharLimit} characters.
-2.  Description: A compelling meta description, around ${descCharLimit} characters.
-3.  Keywords: 5-7 relevant keywords, comma-separated.
-
-Output format example:
-Title: [Generated Title Here]
-Description: [Generated Meta Description Here]
-Keywords: [keyword1, keyword2, keyword3, keyword4, keyword5]
-
-Generate the meta tags in ${langInstruction}.`;
-
-    try {
-      const response = await callGeminiApi(prompt); // API key is now handled by the service
-      const { title: genTitle, description: genDescription, keywords: genKeywords } = parseMetaTagResponse(response);
-      
-      setTitle(genTitle);
-      setDescription(genDescription);
-      setKeywords(genKeywords);
-      setAutoEnhanced(true);
-      
-      toast({
-        title: language === 'th' ? "สร้าง Meta Tags สำเร็จ!" : "Smart Meta Tags Generated!",
-        description: language === 'th' ? "AI สร้าง Meta Tags ที่เหมาะสมแล้ว" : "AI has generated optimized meta tags."
-      });
-
-    } catch (error: any) {
-      console.error("Error generating meta tags with Gemini:", error);
-      let errorDesc = "An error occurred while generating meta tags.";
-      if (error.isApiKeyInvalid) {
-        errorDesc = "The Gemini API key is invalid or missing. Please go to Settings to add it.";
-        setApiKeyError(errorDesc);
-      } else if (error.message) {
-        errorDesc = error.message;
-      }
-      toast({ title: "Meta Tag Generation Failed", description: errorDesc, variant: "destructive" });
-    } finally {
-      setIsGenerating(false);
-    }
+    metaTagMutation.mutate({ currentContent: content, currentLanguage: language });
   };
 
-  // Remove extractKeyPhrases, generateSmartDescription, extractSmartKeywords as they are replaced by Gemini
+  // Removed old API call logic and manual isGenerating flags
 
   const copyToClipboard = () => {
     const metaHtml = `<title>${title}</title>
@@ -199,13 +209,20 @@ Generate the meta tags in ${langInstruction}.`;
           </div>
           
           {!autoEnhanced && content && (
-            <Button onClick={generateMetaTags} disabled={isGenerating} className="w-full">
+            <Button onClick={generateMetaTags} disabled={metaTagMutation.isPending} className="w-full">
               <Wand2 className="h-4 w-4 mr-2" />
-              {isGenerating 
+              {metaTagMutation.isPending
                 ? (language === 'th' ? 'กำลังสร้าง...' : 'Generating...') 
                 : (language === 'th' ? 'สร้าง Meta Tags ด้วย AI' : 'Generate Meta Tags with AI')
               }
             </Button>
+          )}
+
+          {apiKeyError && (
+            <div className="mt-2 p-2 text-xs bg-red-100 border border-red-300 text-red-700 rounded-md flex items-center gap-1">
+              <AlertTriangleIcon className="h-4 w-4 flex-shrink-0" />
+              {apiKeyError}
+            </div>
           )}
           
           {autoEnhanced && (

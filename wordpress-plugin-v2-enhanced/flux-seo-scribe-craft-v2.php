@@ -616,6 +616,23 @@ class FluxSEOScribeCraftV2 {
             }
             // The existing call_gemini_api will return a fallback structure like {'title': 'Generated...', 'content': actual_gemini_text, ...}
             // if Gemini doesn't return JSON. This is acceptable as React side for these uses data.content.
+        } else if ($content_type === 'meta_tags_generation') {
+            // $topic contains the main content/text to generate meta tags from
+            // $keywords might be unused or could provide additional context if needed
+            $lang_instruction = ($language === 'th') ? 'Thai' : 'English';
+            $title_char_limit = ($language === 'th') ? 65 : 60;
+            $desc_char_limit = ($language === 'th') ? 150 : 160;
+
+            $prompt = "Generate an SEO-optimized title, meta description, and relevant keywords based on the following text content. The language for the meta tags should be {$lang_instruction}.\n\n";
+            $prompt .= "Text Content:\n---\n" . substr($topic, 0, 4000) . "\n---\n\n"; // Limit input length
+            $prompt .= "Format your response with each item on a new line, like this:\n";
+            $prompt .= "Title: [Generated Title Here]\n";
+            $prompt .= "Description: [Generated Meta Description Here]\n";
+            $prompt .= "Keywords: [Keyword1, Keyword2, Keyword3, Keyword4, Keyword5]\n\n";
+            $prompt .= "Ensure the generated Title is around {$title_char_limit} characters and the Description is around {$desc_char_limit} characters.\n";
+            $prompt .= "Return only this structured text output, do not add any other conversational text or JSON formatting.";
+            // MetaTagsManager.tsx's parseMetaTagResponse expects this text format.
+            // call_gemini_api's fallback will place this text into the 'content' field of the response to React.
         } else {
             // Default: Existing logic for blog generation, etc.
             $prompt = "Create a comprehensive {$content_type} article about '{$topic}' in {$language} language. ";

@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Code, Copy, Check, Zap } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner'; // Changed from useToast
 
 const SchemaMarkupGenerator = () => {
   const [language, setLanguage] = useState('en');
@@ -19,7 +19,7 @@ const SchemaMarkupGenerator = () => {
   const [address, setAddress] = useState('');
   const [generatedSchema, setGeneratedSchema] = useState('');
   const [copied, setCopied] = useState(false);
-  const { toast } = useToast();
+  // const { toast } = useToast(); // Replaced
 
   const schemaTypes = [
     { value: 'organization', label: language === 'th' ? 'องค์กร/บริษัท' : 'Organization/Company' },
@@ -33,10 +33,8 @@ const SchemaMarkupGenerator = () => {
 
   const generateSchema = () => {
     if (!schemaType || !businessName) {
-      toast({
-        title: language === 'th' ? "กรุณาใส่ข้อมูลที่จำเป็น" : "Please fill required fields",
+      sonnerToast.error(language === 'th' ? "กรุณาใส่ข้อมูลที่จำเป็น" : "Please fill required fields", {
         description: language === 'th' ? "เลือกประเภท Schema และใส่ชื่อธุรกิจ" : "Select schema type and enter business name",
-        variant: "destructive"
       });
       return;
     }
@@ -124,8 +122,7 @@ const SchemaMarkupGenerator = () => {
 
     setGeneratedSchema(JSON.stringify(cleanSchema, null, 2));
     
-    toast({
-      title: language === 'th' ? "สร้าง Schema สำเร็จ!" : "Schema Generated!",
+    sonnerToast.success(language === 'th' ? "สร้าง Schema สำเร็จ!" : "Schema Generated!", {
       description: language === 'th' ? "Schema Markup ถูกสร้างแล้ว" : "Schema markup has been generated"
     });
   };
@@ -139,8 +136,7 @@ ${generatedSchema}
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     
-    toast({
-      title: language === 'th' ? "คัดลอกแล้ว!" : "Copied!",
+    sonnerToast.success(language === 'th' ? "คัดลอกแล้ว!" : "Copied!", {
       description: language === 'th' ? "Schema markup ถูกคัดลอกไปยังคลิปบอร์ดแล้ว" : "Schema markup copied to clipboard"
     });
   };
