@@ -7,7 +7,7 @@ import AutoGenerationSettings from './content-generator/AutoGenerationSettings';
 import GenerationHistory from './content-generator/GenerationHistory';
 import GeneratedContentDisplay from './content-generator/GeneratedContentDisplay';
 import AnalyticsBasedGenerator from './content-generator/AnalyticsBasedGenerator';
-import { useContentGeneration } from './content-generator/useContentGeneration';
+import { useContentGeneration } from './content-generator/hooks/useContentGeneration';
 
 const IntegratedContentGenerator = () => {
   const {
