@@ -467,9 +467,120 @@ class FluxSEOScribeCraftV2 {
             case 'get_setting_value':
                 $this->handle_get_setting_value($data);
                 break;
+            case 'load_seo_analytics_goals':
+                $this->handle_load_seo_analytics_goals();
+                break;
+            case 'save_seo_analytics_goals':
+                $this->handle_save_seo_analytics_goals($data);
+                break;
+            case 'load_seo_analytics_keywords':
+                $this->handle_load_seo_analytics_keywords();
+                break;
+            case 'save_seo_analytics_keywords':
+                $this->handle_save_seo_analytics_keywords($data);
+                break;
             default:
                 wp_send_json_error('Invalid action: ' . $action);
         }
+    }
+
+    private function handle_load_seo_analytics_keywords() {
+        $keywords_data = get_option('flux_seo_analytics_keywords', array());
+        if (!is_array($keywords_data)) { // Ensure it's an array, could be corrupted option
+            $keywords_data = array();
+        }
+        wp_send_json_success($keywords_data);
+    }
+
+    private function handle_save_seo_analytics_keywords($data_json) {
+        $input_keywords_array = null;
+        if (is_string($data_json)) {
+            $input_keywords_array = json_decode($data_json, true);
+        } elseif (is_array($data_json)) {
+            $input_keywords_array = $data_json;
+        }
+
+        if (!is_array($input_keywords_array)) {
+            wp_send_json_error('Invalid keywords data format. Expected an array.');
+            return;
+        }
+
+        $sanitized_keywords_array = array();
+        $allowed_intent_values = array('informational', 'navigational', 'transactional', '');
+
+        foreach ($input_keywords_array as $row) {
+            if (!is_array($row)) continue; // Skip if a row is not an array
+
+            $sanitized_row = array();
+            $sanitized_row['id'] = isset($row['id']) ? sanitize_text_field($row['id']) : uniqid('kw_');
+            $sanitized_row['keyword'] = isset($row['keyword']) ? sanitize_text_field($row['keyword']) : '';
+
+            // For potentially numeric fields, sanitize as text first, then optionally cast/validate if needed.
+            // Client-side handles them as string | number, so text sanitization is a safe base.
+            $sanitized_row['searchVolume'] = isset($row['searchVolume']) ? sanitize_text_field($row['searchVolume']) : '';
+            $sanitized_row['keywordDifficulty'] = isset($row['keywordDifficulty']) ? sanitize_text_field($row['keywordDifficulty']) : '';
+            $sanitized_row['relevance'] = isset($row['relevance']) ? sanitize_text_field($row['relevance']) : '';
+            $sanitized_row['currentRanking'] = isset($row['currentRanking']) ? sanitize_text_field($row['currentRanking']) : '';
+            $sanitized_row['cpc'] = isset($row['cpc']) ? sanitize_text_field($row['cpc']) : '';
+            $sanitized_row['score'] = isset($row['score']) ? sanitize_text_field($row['score']) : '0'; // Default score if not set
+
+            $intent = isset($row['intent']) ? sanitize_text_field($row['intent']) : '';
+            $sanitized_row['intent'] = in_array($intent, $allowed_intent_values, true) ? $intent : '';
+
+            $sanitized_row['targetPage'] = isset($row['targetPage']) ? esc_url_raw($row['targetPage']) : ''; // Use esc_url_raw for URLs
+
+            $sanitized_keywords_array[] = $sanitized_row;
+        }
+
+        update_option('flux_seo_analytics_keywords', $sanitized_keywords_array);
+        wp_send_json_success(array('message' => 'Keywords saved successfully.'));
+    }
+
+    private function handle_load_seo_analytics_goals() {
+        $goals_data = get_option('flux_seo_analytics_goals', array());
+        // Ensure default structure if needed, though React state usually handles initialization
+        $defaults = array(
+            'campaignObjective' => '',
+            'targetAudience' => '',
+            'businessObjectives' => '',
+            'kpis' => array(),
+            'timeline' => '',
+        );
+        $goals_data = wp_parse_args($goals_data, $defaults);
+        wp_send_json_success($goals_data);
+    }
+
+    private function handle_save_seo_analytics_goals($data_json) {
+        $input_data = null;
+        if (is_string($data_json)) {
+            $input_data = json_decode($data_json, true);
+        } elseif (is_array($data_json)) {
+            $input_data = $data_json; // Should not happen if client sends JSON string for 'data'
+        }
+
+        if (!is_array($input_data)) {
+            wp_send_json_error('Invalid goals data format.');
+            return;
+        }
+
+        // Assuming the top-level key in $input_data is 'goals' containing the actual goal fields
+        // If $input_data *is* the goals object directly, then adjust accordingly.
+        // Based on React's setGoals(goals_object), $input_data will be the goals_object.
+
+        $sanitized_goals = array();
+        $sanitized_goals['campaignObjective'] = isset($input_data['campaignObjective']) ? sanitize_textarea_field($input_data['campaignObjective']) : '';
+        $sanitized_goals['targetAudience'] = isset($input_data['targetAudience']) ? sanitize_textarea_field($input_data['targetAudience']) : '';
+        $sanitized_goals['businessObjectives'] = isset($input_data['businessObjectives']) ? sanitize_textarea_field($input_data['businessObjectives']) : '';
+        $sanitized_goals['timeline'] = isset($input_data['timeline']) ? sanitize_text_field($input_data['timeline']) : '';
+
+        if (isset($input_data['kpis']) && is_array($input_data['kpis'])) {
+            $sanitized_goals['kpis'] = array_map('sanitize_text_field', $input_data['kpis']);
+        } else {
+            $sanitized_goals['kpis'] = array();
+        }
+
+        update_option('flux_seo_analytics_goals', $sanitized_goals);
+        wp_send_json_success(array('message' => 'Goals saved successfully.'));
     }
 
     private function handle_get_setting_value($data_json) {

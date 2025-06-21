@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Added useEffect
 import {
   Accordion,
   AccordionContent,
@@ -26,8 +26,11 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'; // Added for Intent
-import { Trash2 } from 'lucide-react'; // For delete keyword button
+} from '@/components/ui/select';
+import { Trash2, Save } from 'lucide-react'; // Added Save icon
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { makeWpAjaxRequest, WpAjaxError } from '@/lib/wpApiService';
+import { toast as sonnerToast } from 'sonner';
 
 // State for Goals and Scope
 interface GoalsState {
@@ -53,6 +56,8 @@ interface KeywordRow {
 }
 
 const AdvancedSEOAnalytics: React.FC = () => {
+  const queryClient = useQueryClient();
+
   const [goals, setGoals] = useState<GoalsState>({
     campaignObjective: '',
     targetAudience: '',
@@ -63,6 +68,51 @@ const AdvancedSEOAnalytics: React.FC = () => {
 
   const [keywordsInput, setKeywordsInput] = useState<string>('');
   const [keywordRows, setKeywordRows] = useState<KeywordRow[]>([]);
+
+
+  const { isLoading: isLoadingKeywords, error: loadingKeywordsError } = useQuery<KeywordRow[], WpAjaxError>({
+    queryKey: ['seoAnalyticsKeywords'],
+    queryFn: async () => {
+      const data = await makeWpAjaxRequest<KeywordRow[]>({
+        wpAjaxAction: 'flux_seo_proxy',
+        action: 'load_seo_analytics_keywords',
+        method: 'POST',
+      });
+      return Array.isArray(data) ? data : []; // Ensure it's an array
+    },
+    onSuccess: (data) => {
+      if (data) {
+        // Data already set by query's default state or cache, but explicit setKeywordRows if needed for transformations
+        setKeywordRows(data.map(kw => ({...kw, score: calculateKeywordScore(kw) }))); // Recalculate scores on load
+        sonnerToast.success("Keyword list loaded successfully.");
+      }
+    },
+    onError: (error) => {
+      sonnerToast.error(`Failed to load keywords: ${error.message}`);
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  const saveKeywordsMutation = useMutation<any, WpAjaxError, KeywordRow[]>({
+    mutationFn: async (keywordsDataToSave) => {
+      return makeWpAjaxRequest({
+        wpAjaxAction: 'flux_seo_proxy',
+        action: 'save_seo_analytics_keywords',
+        data: keywordsDataToSave,
+      });
+    },
+    onSuccess: () => {
+      sonnerToast.success("Keyword list saved successfully!");
+      queryClient.invalidateQueries(['seoAnalyticsKeywords']);
+    },
+    onError: (error) => {
+      sonnerToast.error(`Failed to save keywords: ${error.message}`);
+    }
+  });
+
+  const handleSaveKeywords = () => {
+    saveKeywordsMutation.mutate(keywordRows);
+  };
 
   const handleGoalInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -78,11 +128,56 @@ const AdvancedSEOAnalytics: React.FC = () => {
 
   const availableKpis = ['organic traffic', 'keyword rankings', 'ctr', 'bounce rate', 'conversions', 'impressions'];
 
+  const { isLoading: isLoadingGoals, error: loadingGoalsError } = useQuery<GoalsState, WpAjaxError>({
+    queryKey: ['seoAnalyticsGoals'],
+    queryFn: async () => {
+      return makeWpAjaxRequest<GoalsState>({
+        wpAjaxAction: 'flux_seo_proxy',
+        action: 'load_seo_analytics_goals',
+        method: 'POST', // Or GET, matching PHP if it matters for empty $_POST['data']
+      });
+    },
+    onSuccess: (data) => {
+      if (data) {
+        setGoals(data);
+        sonnerToast.success("Goals loaded successfully.");
+      }
+    },
+    onError: (error) => {
+      sonnerToast.error(`Failed to load goals: ${error.message}`);
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  const saveGoalsMutation = useMutation<any, WpAjaxError, GoalsState>({
+    mutationFn: async (goalsDataToSave) => {
+      return makeWpAjaxRequest({
+        wpAjaxAction: 'flux_seo_proxy',
+        action: 'save_seo_analytics_goals',
+        data: goalsDataToSave, // Send the goals object directly
+      });
+    },
+    onSuccess: () => {
+      sonnerToast.success("Goals saved successfully!");
+      queryClient.invalidateQueries(['seoAnalyticsGoals']); // Refetch after save
+    },
+    onError: (error) => {
+      sonnerToast.error(`Failed to save goals: ${error.message}`);
+    }
+  });
+
   const handleSaveGoals = () => {
-    console.log('Goals Saved:', goals);
-    // Here you would typically send this data to a backend or state management solution
-    alert('Goals saved! (Check console for data)');
+    saveGoalsMutation.mutate(goals);
   };
+
+  // useEffect to update local state if query data changes externally (e.g. after invalidation)
+  // This might be redundant if setGoals in onSuccess of useQuery is sufficient
+  // useEffect(() => {
+  //   if (loadedGoalsData) {
+  //     setGoals(loadedGoalsData);
+  //   }
+  // }, [loadedGoalsData]);
+
 
   const calculateKeywordScore = (row: KeywordRow): number => {
     // Normalize inputs (assuming KD is 0-100, others 1-10 or similar user input)
@@ -258,10 +353,27 @@ const AdvancedSEOAnalytics: React.FC = () => {
                 />
               </div>
               <div className="text-right">
-                <Button onClick={handleSaveGoals} size="lg">
-                  Save Goals & Strategy
+                <Button
+                  onClick={handleSaveGoals}
+                  size="lg"
+                  disabled={saveGoalsMutation.isPending || isLoadingGoals}
+                >
+                  {saveGoalsMutation.isPending ? (
+                    <>
+                      <Save className="h-4 w-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Save Goals & Strategy
+                    </>
+                  )}
                 </Button>
               </div>
+              {loadingGoalsError && (
+                <p className="text-sm text-red-600 mt-2">Error loading goals: {loadingGoalsError.message}</p>
+              )}
             </div>
           </AccordionContent>
         </AccordionItem>
@@ -405,7 +517,27 @@ const AdvancedSEOAnalytics: React.FC = () => {
                       </TableBody>
                     </Table>
                   </div>
-                  <Button onClick={addNewKeywordRow} className="mt-4">Add New Keyword</Button>
+                  <Button onClick={addNewKeywordRow} className="mt-4 mr-2">Add New Keyword</Button>
+                  <Button
+                    onClick={handleSaveKeywords}
+                    className="mt-4"
+                    disabled={saveKeywordsMutation.isPending || isLoadingKeywords}
+                  >
+                    {saveKeywordsMutation.isPending ? (
+                      <>
+                        <Save className="h-4 w-4 mr-2 animate-spin" />
+                        Saving Keywords...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4 mr-2" />
+                        Save Keyword List
+                      </>
+                    )}
+                  </Button>
+                  {loadingKeywordsError && (
+                    <p className="text-sm text-red-600 mt-2">Error loading keywords: {loadingKeywordsError.message}</p>
+                  )}
                 </CardContent>
               </Card>
             </div>

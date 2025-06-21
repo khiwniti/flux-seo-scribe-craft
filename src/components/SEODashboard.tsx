@@ -128,39 +128,39 @@ const SEODashboard = () => {
           </div>
 
           <div className="space-y-6">
-            <TabsContent value="analyzer" className="mt-0">
+            <TabsContent value="analyzer" className="mt-0" forceMount={true}>
               <ContentAnalyzer />
             </TabsContent>
 
-            <TabsContent value="generator" className="mt-0">
+            <TabsContent value="generator" className="mt-0" forceMount={true}>
               <IntegratedContentGenerator />
             </TabsContent>
 
-            <TabsContent value="analytics" className="mt-0">
+            <TabsContent value="analytics" className="mt-0" forceMount={true}>
               <AdvancedSEOAnalytics />
             </TabsContent>
 
-            <TabsContent value="keywords" className="mt-0">
+            <TabsContent value="keywords" className="mt-0" forceMount={true}>
               <SmartKeywordResearch />
             </TabsContent>
 
-            <TabsContent value="meta" className="mt-0">
+            <TabsContent value="meta" className="mt-0" forceMount={true}>
               <MetaTagsManager />
             </TabsContent>
 
-            <TabsContent value="schema" className="mt-0">
+            <TabsContent value="schema" className="mt-0" forceMount={true}>
               <SchemaMarkupGenerator />
             </TabsContent>
 
-            <TabsContent value="technical" className="mt-0">
+            <TabsContent value="technical" className="mt-0" forceMount={true}>
               <TechnicalSEOAudit />
             </TabsContent>
 
-            <TabsContent value="settings" className="mt-0">
+            <TabsContent value="settings" className="mt-0" forceMount={true}>
               <SettingsTab />
             </TabsContent>
 
-            <TabsContent value="chatbot" className="mt-0">
+            <TabsContent value="chatbot" className="mt-0" forceMount={true}>
               <SEOChatbot />
             </TabsContent>
           </div>
