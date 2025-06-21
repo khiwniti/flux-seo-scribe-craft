@@ -97,7 +97,7 @@ export const useAnalyticsData = () => {
           potentialTraffic: Math.floor(gap.opportunity * 100),
           contentType: 'How-to Guide',
           wordCount: data.performanceMetrics.bestPerformingLength,
-          priority: gap.opportunity > 85 ? 'high' : 'medium',
+          priority: (gap.opportunity > 85 ? 'high' : 'medium') as 'high' | 'medium' | 'low',
           reasoning: `High opportunity score (${gap.opportunity}) with ${gap.competition} competition`
         })),
         
@@ -110,7 +110,7 @@ export const useAnalyticsData = () => {
           potentialTraffic: Math.floor(trend.growth * 50),
           contentType: 'Trend Analysis',
           wordCount: 1800,
-          priority: 'high' as const,
+          priority: 'high' as 'high' | 'medium' | 'low',
           reasoning: `Trending topic with ${trend.growth}% growth and ${trend.relevance}% relevance`
         })),
         
@@ -123,7 +123,7 @@ export const useAnalyticsData = () => {
           potentialTraffic: Math.floor(keyword.volume * 0.3),
           contentType: 'Strategy Guide',
           wordCount: 2500,
-          priority: keyword.position > 15 ? 'high' : 'medium',
+          priority: (keyword.position > 15 ? 'high' : 'medium') as 'high' | 'medium' | 'low',
           reasoning: `Currently ranking at position ${keyword.position} with potential to improve`
         }))
       ];

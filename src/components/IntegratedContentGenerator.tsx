@@ -113,13 +113,13 @@ const IntegratedContentGenerator = () => {
           {generatedContent && (
             <GeneratedContentDisplay
               generatedContent={generatedContent}
-              generatedImages={generatedImages}
+              generatedImages={generatedImages || []}
               contentQuality={contentQuality}
               seoScore={seoScore}
               readabilityScore={readabilityScore}
-              smartKeywords={smartKeywords}
-              contentInsights={contentInsights}
-              onCopyToClipboard={copyToClipboard}
+              smartKeywords={smartKeywords || []}
+              contentInsights={contentInsights || {}}
+              onCopyToClipboard={() => copyToClipboard(generatedContent)}
               onDownloadImage={downloadImage}
             />
           )}

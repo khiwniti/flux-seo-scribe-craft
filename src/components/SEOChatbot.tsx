@@ -65,7 +65,7 @@ const SEOChatbot: React.FC = () => {
 
     let promptForApi = currentInput;
     if (messages.length === 0) { // First user message in the session
-        promptForApi = `${systemInstruction}\n\nMy first question is: ${currentInput}`;
+        promptForApi = `${getSystemInstruction()}\n\nMy first question is: ${currentInput}`;
     }
 
 
