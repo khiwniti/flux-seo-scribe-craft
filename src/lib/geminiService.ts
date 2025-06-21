@@ -1,265 +1,181 @@
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
+import { makeWpAjaxRequest, WpAjaxError } from './wpApiService';
 
-const MODEL_NAME = "gemini-pro"; // Or specific model as needed
-const API_KEY_STORAGE_KEY = 'geminiApiKey';
+// Interfaces for the data structures if needed by calling components
+// but the service itself will now primarily deal with what the WP AJAX expects.
 
-interface GeminiServiceError extends Error {
-  status?: number;
-  isApiKeyInvalid?: boolean;
+export interface GeminiServiceError extends WpAjaxError {
+  isApiKeyInvalid?: boolean; // This might become less relevant if WP always handles key issues
 }
 
-function getApiKey(): string | null {
-  const storedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
-  if (storedKey) {
-    return storedKey;
-  }
-  // Ensure this environment variable is correctly set up in your build process (e.g., Vite, Create React App)
-  // For CRA, it must be REACT_APP_... For Vite, it's import.meta.env.VITE_...
-  // This example assumes REACT_APP_ for broader compatibility, but adjust if needed.
-  const envKey = process.env.REACT_APP_GEMINI_API_KEY;
-  if (envKey) {
-    return envKey;
-  }
-  return null;
+// Interface for the expected response from the backend for content generation
+// (Matches the structure returned by call_gemini_api in PHP)
+export interface GeneratedContentResponse {
+  title: string;
+  content: string; // HTML content
+  meta_description: string;
+  keywords: string; // Comma-separated
+  seo_score: number;
 }
 
-export async function generateBlogContent(prompt: string, apiKeyOverride?: string): Promise<string> {
-  const apiKeyToUse = apiKeyOverride || getApiKey();
+// Interface for the expected response from the backend for content analysis
+export interface ContentAnalysisResponse {
+  seo_score: number;
+  justification: string;
+  readability_assessment: string;
+  keyword_analysis: string;
+  suggestions_list: string[];
+  // Potentially other fields Gemini might be prompted to return
+}
 
-  if (!apiKeyToUse) {
-    const error = new Error("API key is missing. Please set it in Settings or as REACT_APP_GEMINI_API_KEY.") as GeminiServiceError;
-    error.isApiKeyInvalid = true; // Treat as invalid if completely missing
-    throw error;
-  }
-
+/**
+ * Generates blog content by calling the WordPress backend.
+ * The backend's 'flux_seo_generate_content' action will call the Gemini API.
+ *
+ * @param topic - The main topic for the content.
+ * @param language - Language code (e.g., 'en').
+ * @param contentType - Type of content (e.g., 'blog', 'article').
+ * @param keywords - Comma-separated keywords.
+ * @returns The generated content object.
+ */
+export async function generateBlogContent(
+  topic: string,
+  language: string,
+  contentType: string, // e.g., 'blog', 'article'
+  keywords: string
+): Promise<GeneratedContentResponse> {
   try {
-    const genAI = new GoogleGenerativeAI(apiKeyToUse);
-    const model = genAI.getGenerativeModel({ model: MODEL_NAME });
-
-    const generationConfig = {
-      temperature: 0.9, // Controls randomness. Higher is more creative.
-      topK: 1, // For next-token selection strategy.
-      topP: 1, // For next-token selection strategy.
-      maxOutputTokens: 2048, // Adjust as needed for blog post length
-    };
-
-    // Safety settings to minimize blocking of harmless content
-    // Adjust these based on requirements and testing
-    const safetySettings = [
-      {
-        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-      },
-      {
-        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-      },
-      {
-        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-      },
-      {
-        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-      },
-    ];
-
-    const result = await model.generateContent(
-        prompt
-        // { // If sending parts instead of a single prompt string
-        // generationConfig,
-        // safetySettings,
-        // }
-    );
-
-    // Older versions of the API might have response.text() directly
-    // Newer versions (v0.1.0-alpha.3 and later) have a more structured response
-    if (result.response && typeof result.response.text === 'function') {
-        const text = result.response.text();
-        if (text) {
-            return text;
-        } else {
-            // This case might happen if the content was blocked due to safety settings
-            // or if the response is empty for other reasons.
-            const blockReason = result.response.promptFeedback?.blockReason;
-            if (blockReason) {
-                throw new Error(`Content generation blocked. Reason: ${blockReason}. Adjust safety settings or prompt if necessary.`);
-            }
-            const finishReason = result.response.candidates?.[0]?.finishReason;
-             if (finishReason && finishReason !== "STOP") {
-                throw new Error(`Content generation stopped. Reason: ${finishReason}.`);
-            }
-            throw new Error("Received empty response from Gemini API or content was blocked.");
-        }
-    } else {
-        // Fallback for potentially different response structures or if text() is not available.
-        // This part might need adjustment based on the exact API version and response object.
-        // console.warn("Gemini API response structure might have changed. Check geminiService.ts.");
-        // If response.candidates exists and has text
-        if (result.response?.candidates?.[0]?.content?.parts?.[0]?.text) {
-            return result.response.candidates[0].content.parts[0].text;
-        }
-        throw new Error("Could not extract text from Gemini API response. The response structure might be unexpected.");
+    // This function is now specifically for content types that expect GeneratedContentResponse structure
+    if (contentType === 'content_analysis') {
+      // Should not happen if called correctly, but as a safeguard:
+      console.error("generateBlogContent called with contentType 'content_analysis'. Use analyzeContentWithGemini instead.");
+      throw new Error("Misdirected API call: Use analyzeContentWithGemini for analysis.");
     }
-
+    const responseData = await makeWpAjaxRequest<GeneratedContentResponse>({
+      wpAjaxAction: 'flux_seo_generate_content',
+      data: { topic, language, content_type: contentType, keywords },
+    });
+    return responseData;
   } catch (error: any) {
-    console.error("Error calling Gemini API (generateBlogContent):", error);
-    const serviceError = new Error(`Gemini API Error: ${error.message || 'Unknown error'}`) as GeminiServiceError;
-    if (error.message && (error.message.includes("API key not valid") || error.message.includes("API key invalid"))) {
-      serviceError.isApiKeyInvalid = true;
+    console.error(`Error in generateBlogContent for contentType '${contentType}':`, error);
+    // Enhance or re-throw the error if needed
+    const serviceError = error as GeminiServiceError;
+    // The backend now checks for API key validity. If wpSuccess is false and response indicates API key issue.
+    if (error.wpSuccess === false && typeof error.response === 'string' && error.response.includes("API key not configured")) {
+        serviceError.isApiKeyInvalid = true;
     }
-    // You might want to check for specific error codes or types if the SDK provides them
-    // e.g., if (error.status === 400) { ... }
     throw serviceError;
   }
 }
 
-// For SEOChatbot
-interface ChatMessagePart {
-    text: string;
-}
-export interface ChatHistoryMessage {
-    role: "user" | "model"; // "model" is used for bot's responses
-    parts: ChatMessagePart[];
+/**
+ * Performs content analysis by calling the WordPress backend.
+ * The backend's 'flux_seo_generate_content' action (with contentType 'content_analysis')
+ * will call the Gemini API.
+ *
+ * @param contentToAnalyze - The main text content to analyze.
+ * @param language - Language code (e.g., 'en').
+ * @param analysisContext - Optional context (e.g., title, existing keywords) for more accurate analysis.
+ * @returns The analysis result object.
+ */
+export async function analyzeContentWithGemini(
+  contentToAnalyze: string,
+  language: string,
+  analysisContext: string // Pass concatenated title, meta, keywords here
+): Promise<ContentAnalysisResponse> {
+  try {
+    const responseData = await makeWpAjaxRequest<ContentAnalysisResponse>({
+      wpAjaxAction: 'flux_seo_generate_content',
+      data: {
+        topic: contentToAnalyze, // The content itself is the 'topic' for this mode
+        language,
+        content_type: 'content_analysis',
+        keywords: analysisContext, // Contextual keywords, title, meta
+      },
+    });
+    return responseData;
+  } catch (error: any) {
+    console.error("Error calling WordPress backend for content analysis:", error);
+    const serviceError = error as GeminiServiceError;
+    if (error.wpSuccess === false && typeof error.response === 'string' && error.response.includes("API key not configured")) {
+        serviceError.isApiKeyInvalid = true;
+    }
+    throw serviceError;
+  }
 }
 
+// For SEOChatbot - simplified to align with current backend
+export interface ChatHistoryMessage {
+    role: "user" | "model";
+    parts: { text: string }[];
+}
+
+/**
+ * Gets a chatbot response by calling the WordPress backend.
+ * Note: Current backend 'flux_seo_generate_content' is not designed for chat history.
+ * This function sends the userPrompt as the 'topic' and a specific 'content_type'.
+ * Chat history is NOT currently passed to the backend.
+ *
+ * @param userPrompt - The user's message to the chatbot.
+ * @param chatHistory - The current chat history (currently ignored by backend).
+ * @returns The chatbot's response text (as part of GeneratedContentResponse.content).
+ */
 export async function getChatbotResponse(
     userPrompt: string,
-    chatHistory: ChatHistoryMessage[],
-    apiKeyOverride?: string
+    // chatHistory: ChatHistoryMessage[] // chatHistory is not used by current backend endpoint
 ): Promise<string> {
-    const apiKeyToUse = apiKeyOverride || getApiKey();
-
-    if (!apiKeyToUse) {
-        const error = new Error("API key is missing for chatbot. Please set it in Settings or as REACT_APP_GEMINI_API_KEY.") as GeminiServiceError;
-        error.isApiKeyInvalid = true;
-        throw error;
-    }
-
     try {
-        const genAI = new GoogleGenerativeAI(apiKeyToUse);
-        // Default to gemini-pro, but consider gemini-1.5-flash for chat if available and suitable for faster responses
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
-        const chat = model.startChat({
-            history: chatHistory,
-            // Safety settings can be configured here as well, similar to generateContent
-            safetySettings: [
-                { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-                { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-                { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-                { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-            ],
-            generationConfig: {
-                maxOutputTokens: 1000, // Adjust as needed for chat response length
-                temperature: 0.7, // Slightly lower temperature for more focused chat responses
-            }
+        // Adapting to the existing 'flux_seo_generate_content' endpoint
+        // The backend will treat userPrompt as the main 'topic' for content generation
+        const responseData = await makeWpAjaxRequest<GeneratedContentResponse>({
+            wpAjaxAction: 'flux_seo_generate_content',
+            data: {
+                topic: userPrompt,
+                language: 'en', // Or make this configurable if needed for chatbot
+                content_type: 'chatbot_response', // Special type for backend to potentially handle differently
+                keywords: '', // Keywords might not be relevant for a direct chat response
+            },
         });
-
-        const result = await chat.sendMessage(userPrompt);
-
-        if (result.response && typeof result.response.text === 'function') {
-            const text = result.response.text();
-            if (text) {
-                return text;
-            } else {
-                const blockReason = result.response.promptFeedback?.blockReason;
-                if (blockReason) {
-                    throw new Error(`Chatbot response blocked. Reason: ${blockReason}.`);
-                }
-                const finishReason = result.response.candidates?.[0]?.finishReason;
-                if (finishReason && finishReason !== "STOP") {
-                   throw new Error(`Chatbot response stopped. Reason: ${finishReason}.`);
-               }
-               throw new Error("Received empty response from Gemini API for chatbot or content was blocked.");
-            }
-        } else if (result.response?.candidates?.[0]?.content?.parts?.[0]?.text) {
-            return result.response.candidates[0].content.parts[0].text;
-        }
-
-        throw new Error("Could not extract text for chatbot response from Gemini API.");
-
+        // The backend's GeneratedContentResponse has a 'content' field.
+        // We assume this 'content' field will hold the chatbot's text response.
+        return responseData.content;
     } catch (error: any) {
-        console.error("Error calling Gemini API (getChatbotResponse):", error);
-        const serviceError = new Error(`Gemini Chatbot Error: ${error.message || 'Unknown error'}`) as GeminiServiceError;
-        if (error.message && (error.message.includes("API key not valid") || error.message.includes("API key invalid") || error.message.includes("API key is missing"))) {
+        console.error("Error calling WordPress backend for chatbot response:", error);
+        const serviceError = error as GeminiServiceError;
+        if (error.wpSuccess === false && typeof error.response === 'string' && error.response.includes("API key not configured")) {
             serviceError.isApiKeyInvalid = true;
         }
         throw serviceError;
     }
 }
 
-export async function generateImagePromptForText(textInput: string, apiKeyOverride?: string): Promise<string> {
-  const apiKeyToUse = apiKeyOverride || getApiKey();
 
-  if (!apiKeyToUse) {
-    const error = new Error("API key is missing for image prompt generation. Please set it in Settings or as REACT_APP_GEMINI_API_KEY.") as GeminiServiceError;
-    error.isApiKeyInvalid = true;
-    throw error;
-  }
-
+/**
+ * Generates an image prompt by calling the WordPress backend.
+ * The backend's 'flux_seo_generate_content' action will be used,
+ * with a specific content_type to indicate image prompt generation.
+ *
+ * @param textInput - The text based on which an image prompt should be generated.
+ * @returns The generated image prompt string (as part of GeneratedContentResponse.content).
+ */
+export async function generateImagePromptForText(textInput: string): Promise<string> {
   try {
-    const genAI = new GoogleGenerativeAI(apiKeyToUse);
-    const model = genAI.getGenerativeModel({ model: MODEL_NAME }); // Using gemini-pro
-
-    const fullPrompt = `Based on the following text, generate a detailed and creative prompt for a text-to-image generation model.
-The image prompt should be descriptive, specifying the subject, style (e.g., photorealistic, watercolor, cartoonish, abstract), mood (e.g., inspiring, serene, energetic, mysterious), composition, and any key elements or colors that would make the image compelling and relevant to the text.
-
-Input Text:
----
-${textInput.substring(0, 1500)}
----
-Generated Image Prompt:`; // Added substring to limit input length for safety
-
-    const generationConfig = {
-      temperature: 0.8, // Slightly lower for more focused prompt generation
-      topK: 1,
-      topP: 1,
-      maxOutputTokens: 200, // Image prompts are usually shorter
-    };
-
-    // Safety settings can be reused or adjusted
-    const safetySettings = [
-      { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-      { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-      { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-      { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-    ];
-
-    const result = await model.generateContent(
-        fullPrompt
-        // { // If sending parts
-        //   generationConfig,
-        //   safetySettings
-        // }
-    );
-
-    if (result.response && typeof result.response.text === 'function') {
-      const text = result.response.text();
-      if (text) {
-        return text.replace("Generated Image Prompt:", "").trim(); // Clean up prefix if model includes it
-      } else {
-        const blockReason = result.response.promptFeedback?.blockReason;
-        if (blockReason) {
-            throw new Error(`Image prompt generation blocked. Reason: ${blockReason}.`);
-        }
-        const finishReason = result.response.candidates?.[0]?.finishReason;
-         if (finishReason && finishReason !== "STOP") {
-            throw new Error(`Image prompt generation stopped. Reason: ${finishReason}.`);
-        }
-        throw new Error("Received empty response from Gemini API for image prompt or content was blocked.");
-      }
-    } else if (result.response?.candidates?.[0]?.content?.parts?.[0]?.text) {
-        return result.response.candidates[0].content.parts[0].text.replace("Generated Image Prompt:", "").trim();
-    }
-
-    throw new Error("Could not extract text for image prompt from Gemini API response.");
-
+    // Adapting to the existing 'flux_seo_generate_content' endpoint
+    const responseData = await makeWpAjaxRequest<GeneratedContentResponse>({
+      wpAjaxAction: 'flux_seo_generate_content',
+      data: {
+        topic: textInput, // The input text will be the basis for the prompt generation
+        language: 'en', // Assuming image prompts are typically generated in English
+        content_type: 'image_prompt_generation', // Special type for backend
+        keywords: '', // Not typically relevant for this task
+      },
+    });
+    // We assume the 'content' field of the response will contain the generated image prompt.
+    return responseData.content;
   } catch (error: any) {
-    console.error("Error calling Gemini API (generateImagePromptForText):", error);
-    const serviceError = new Error(`Gemini API Error for Image Prompt: ${error.message || 'Unknown error'}`) as GeminiServiceError;
-    if (error.message && (error.message.includes("API key not valid") || error.message.includes("API key invalid"))) {
-      serviceError.isApiKeyInvalid = true;
+    console.error("Error calling WordPress backend for image prompt generation:", error);
+    const serviceError = error as GeminiServiceError;
+    if (error.wpSuccess === false && typeof error.response === 'string' && error.response.includes("API key not configured")) {
+        serviceError.isApiKeyInvalid = true;
     }
     throw serviceError;
   }

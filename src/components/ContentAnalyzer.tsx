@@ -7,17 +7,20 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { AlertCircle, CheckCircle, Target, TrendingUp, AlertTriangle as AlertTriangleIcon } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { generateBlogContent as callGeminiApi } from '@/lib/geminiService';
-import { useLanguage } from '@/contexts/LanguageContext'; // Import useLanguage
+import { toast as sonnerToast } from 'sonner'; // Using sonner directly
+import { analyzeContentWithGemini, GeminiServiceError, ContentAnalysisResponse } from '@/lib/geminiService'; // Changed import
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useMutation } from '@tanstack/react-query';
 
-interface AnalysisResults {
+// This interface now directly matches ContentAnalysisResponse for simplicity,
+// plus the locally calculated wordCount.
+interface DisplayableAnalysisResults {
   wordCount: number;
-  readabilityScore: number | string; // Can be qualitative like "Good" or a score
-  seoScore: number;
-  suggestions: string[];
-  keywordDensity?: string; // Optional: Gemini might provide this as text
-  justification?: string; // Justification for SEO score
+  seo_score: number;
+  justification: string;
+  readability_assessment: string;
+  keyword_analysis: string;
+  suggestions_list: string[];
 }
 
 const ContentAnalyzer = () => {
@@ -25,107 +28,44 @@ const ContentAnalyzer = () => {
   const [keywords, setKeywords] = useState('');
   const [title, setTitle] = useState('');
   const [metaDescription, setMetaDescription] = useState('');
-  const [analysis, setAnalysis] = useState<AnalysisResults | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysis, setAnalysis] = useState<DisplayableAnalysisResults | null>(null);
   const [apiKeyError, setApiKeyError] = useState<string | null>(null);
-  const { language } = useLanguage(); // Consume global language context
-  const { toast } = useToast();
+  const { language } = useLanguage();
 
-  const parseGeminiResponse = (responseText: string): Partial<AnalysisResults> => {
-    const results: Partial<AnalysisResults> = { suggestions: [] };
-    const lines = responseText.split('\n');
+  const analysisMutation = useMutation<
+    ContentAnalysisResponse, // Expecting the direct analysis object
+    GeminiServiceError,
+    { currentContent: string; currentTitle: string; currentMeta: string; currentKeywords: string; currentLanguage: string }
+  >({
+    mutationFn: async (vars) => {
+      let analysisContextKeywords = vars.currentKeywords;
+      if (vars.currentTitle) analysisContextKeywords = `Title: ${vars.currentTitle}\nMeta: ${vars.currentMeta}\nKeywords: ${vars.currentKeywords}`;
 
-    lines.forEach(line => {
-      if (line.match(/Overall SEO Score: (\d+)/i)) {
-        results.seoScore = parseInt(RegExp.$1, 10);
-      } else if (line.match(/Justification: (.*)/i)) {
-        results.justification = RegExp.$1;
-      } else if (line.match(/Readability: (.*)/i)) {
-        const readabilityValue = RegExp.$1;
-        results.readabilityScore = isNaN(parseFloat(readabilityValue)) ? readabilityValue : parseFloat(readabilityValue);
-      } else if (line.match(/Keyword Density: (.*)/i)) {
-        results.keywordDensity = RegExp.$1;
-      } else if (line.match(/Suggestion \d+: (.*)/i) || line.match(/- (.*)/i) || line.match(/\* (.*)/i) ) {
-         // Try to capture suggestions prefixed with "Suggestion X:", "-", or "*"
-        if (RegExp.$1.trim()) results.suggestions?.push(RegExp.$1.trim());
-      }
-    });
-     // If no specific suggestion format matched, but we have lines that aren't other fields, treat them as suggestions.
-    if (results.suggestions?.length === 0) {
-        const potentialSuggestions = lines.filter(
-            line => !line.startsWith("Overall SEO Score:") &&
-                    !line.startsWith("Justification:") &&
-                    !line.startsWith("Readability:") &&
-                    !line.startsWith("Keyword Density:") &&
-                    line.trim().length > 10 // Avoid empty or very short lines
-        );
-        if (potentialSuggestions.length > 0 && potentialSuggestions.length <= 7) { // Heuristic: if few lines left, might be suggestions
-             results.suggestions = potentialSuggestions;
-        }
-    }
-
-
-    // Fallback if parsing fails for some fields
-    if (results.seoScore === undefined) results.seoScore = 0; // Default if not found
-    if (results.readabilityScore === undefined) results.readabilityScore = "N/A";
-    if (!results.suggestions || results.suggestions.length === 0) {
-        results.suggestions = ["No specific suggestions extracted. Review the raw Gemini output if provided."];
-    }
-    return results;
-  };
-
-
-  const analyzeContent = async () => {
-    if (!content.trim()) {
-      toast({
-        title: "Content Required",
-        description: "Please enter content to analyze.",
-        variant: "destructive",
-      });
-      return;
-    }
-    setApiKeyError(null); // Clear previous API key error
-    setIsAnalyzing(true);
-    setAnalysis(null);
-
-    let prompt = `Analyze the following content for SEO quality. Provide the output with clear headings for each section.
-
-Content to Analyze:
----
-${content}
----
-`;
-
-    if (title) prompt += `\nPage Title: "${title}"`;
-    if (metaDescription) prompt += `\nMeta Description: "${metaDescription}"`;
-    if (keywords) prompt += `\nFocus Keywords: "${keywords}"`;
-
-    prompt += `
-
-Analysis Required (please provide your entire response in ${language === 'th' ? 'Thai' : 'English'}):
-1.  Overall SEO Score: (Provide a score from 0 to 100)
-2.  Justification: (Briefly explain the score)
-3.  Readability: (Assess readability, e.g., Flesch-Kincaid score, or qualitative like 'Good', 'Difficult to read')
-4.  Keyword Density: (Analyze usage of focus keywords if provided, otherwise general keyword cloudiness)
-5.  Suggestions: (Provide 3-5 actionable SEO suggestions to improve the content. Each suggestion should start with "Suggestion X:" or be a bullet point like "-" or "*")
-
-Format the response clearly.`;
-
-    try {
-      const rawResponse = await callGeminiApi(prompt);
-      const parsedAnalysis = parseGeminiResponse(rawResponse);
-
+      return analyzeContentWithGemini( // Use the new service function
+        vars.currentContent,
+        vars.currentLanguage,
+        analysisContextKeywords
+      );
+    },
+    onMutate: () => {
+      setAnalysis(null);
+      setApiKeyError(null);
+      sonnerToast.info("Analyzing content...");
+    },
+    onSuccess: (data) => {
+      // Data is now the direct JSON object from Gemini/PHP
       setAnalysis({
-        wordCount: content.split(/\s+/).filter(Boolean).length, // Calculate locally
-        readabilityScore: parsedAnalysis.readabilityScore || "N/A",
-        seoScore: parsedAnalysis.seoScore || 0,
-        suggestions: parsedAnalysis.suggestions && parsedAnalysis.suggestions.length > 0 ? parsedAnalysis.suggestions : ["Gemini did not provide specific suggestions in the expected format."],
-        keywordDensity: parsedAnalysis.keywordDensity || "N/A",
-        justification: parsedAnalysis.justification || "No justification provided.",
+        wordCount: content.split(/\s+/).filter(Boolean).length, // content is from component state
+        seo_score: data.seo_score || 0,
+        justification: data.justification || "No justification provided.",
+        readability_assessment: data.readability_assessment || "N/A",
+        keyword_analysis: data.keyword_analysis || "N/A",
+        suggestions_list: data.suggestions_list && data.suggestions_list.length > 0 ? data.suggestions_list : ["No specific suggestions provided."],
       });
-
-    } catch (error: any) {
-      console.error("Error analyzing content with Gemini:", error);
+      sonnerToast.success("Analysis complete!");
+    },
+    onError: (error: GeminiServiceError) => {
+      console.error("Error analyzing content:", error);
       let errorDesc = "An error occurred during content analysis.";
       if (error.isApiKeyInvalid) {
         errorDesc = "The Gemini API key is invalid or missing. Please go to Settings to add it.";
@@ -133,17 +73,35 @@ Format the response clearly.`;
       } else if (error.message) {
         errorDesc = error.message;
       }
-      toast({ title: "Analysis Failed", description: errorDesc, variant: "destructive" });
-      setAnalysis({ // Provide some feedback in the analysis area
+      sonnerToast.error("Analysis Failed", { description: errorDesc });
+      // Optionally set some error state in 'analysis' for UI display
+      setAnalysis({
         wordCount: content.split(/\s+/).filter(Boolean).length,
-        readabilityScore: "Error",
-        seoScore: 0,
-        suggestions: [errorDesc],
-        justification: "Analysis failed."
+        seo_score: 0,
+        justification: "Analysis failed.",
+        readability_assessment: "Error",
+        keyword_analysis: "Error",
+        suggestions_list: [errorDesc],
       });
-    } finally {
-      setIsAnalyzing(false);
     }
+  });
+
+  // parseGeminiResponse is no longer needed if backend sends structured JSON directly matching ContentAnalysisResponse.
+  // const parseGeminiResponse = (responseText: string): Partial<DisplayableAnalysisResults> => { ... } // Keep old type for reference if needed
+
+
+  const analyzeContent = () => {
+    if (!content.trim()) {
+      sonnerToast.error("Content Required", { description: "Please enter content to analyze." });
+      return;
+    }
+    analysisMutation.mutate({
+      currentContent: content,
+      currentTitle: title,
+      currentMeta: metaDescription,
+      currentKeywords: keywords,
+      currentLanguage: language,
+    });
   };
 
   const getScoreColor = (score: number | string) => {
@@ -217,12 +175,18 @@ Format the response clearly.`;
           </div>
 
           <Button 
-            onClick={analyzeContent} 
+            onClick={analyzeContent}
             className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-            disabled={isAnalyzing}
+            disabled={analysisMutation.isPending}
           >
-            {isAnalyzing ? 'Analyzing...' : 'Analyze Content'}
+            {analysisMutation.isPending ? 'Analyzing...' : 'Analyze Content'}
           </Button>
+          {apiKeyError && (
+             <div className="mt-2 p-2 text-xs bg-red-100 border border-red-300 text-red-700 rounded-md flex items-center gap-1">
+               <AlertTriangleIcon className="h-4 w-4 flex-shrink-0" />
+               {apiKeyError}
+             </div>
+          )}
         </CardContent>
       </Card>
 
@@ -242,18 +206,18 @@ Format the response clearly.`;
             <div className="space-y-6">
               {/* Overall SEO Score */}
               <div className="text-center p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
-                <div className={`text-4xl font-bold ${getScoreColor(analysis.seoScore)}`}>
-                  {analysis.seoScore}%
+                <div className={`text-4xl font-bold ${getScoreColor(analysis.seo_score)}`}>
+                  {analysis.seo_score}%
                 </div>
                 <div className="mt-2">
                   <Badge 
-                    variant={getScoreBadge(analysis.seoScore).variant}
-                    className={getScoreBadge(analysis.seoScore).className}
+                    variant={getScoreBadge(analysis.seo_score).variant}
+                    className={getScoreBadge(analysis.seo_score).className}
                   >
-                    {getScoreBadge(analysis.seoScore).text}
+                    {getScoreBadge(analysis.seo_score).text}
                   </Badge>
                 </div>
-                <Progress value={analysis.seoScore} className="mt-3" />
+                <Progress value={analysis.seo_score} className="mt-3" />
               </div>
 
               {/* Metrics */}
@@ -264,8 +228,18 @@ Format the response clearly.`;
                 </div>
                 <div className="p-3 bg-green-50 rounded-lg">
                   <div className="text-sm text-gray-600">Readability</div>
-                  <div className="text-2xl font-bold text-green-600">{analysis.readabilityScore}%</div>
+                  <div className="text-2xl font-bold text-green-600">{analysis.readability_assessment}</div>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-semibold">Justification</h4>
+                <p className="text-sm text-gray-700 bg-gray-50 p-2 rounded">{analysis.justification}</p>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-semibold">Keyword Analysis</h4>
+                <p className="text-sm text-gray-700 bg-gray-50 p-2 rounded">{analysis.keyword_analysis}</p>
               </div>
 
               {/* Suggestions */}
@@ -274,7 +248,7 @@ Format the response clearly.`;
                   <AlertCircle className="h-4 w-4 text-orange-500" />
                   Optimization Suggestions
                 </h4>
-                {analysis.suggestions.map((suggestion, index) => (
+                {analysis.suggestions_list.map((suggestion, index) => (
                   <div key={index} className="flex items-start gap-2 p-2 bg-orange-50 rounded-lg">
                     <CheckCircle className="h-4 w-4 text-orange-500 mt-0.5 flex-shrink-0" />
                     <span className="text-sm text-gray-700">{suggestion}</span>
@@ -285,7 +259,7 @@ Format the response clearly.`;
           ) : (
             <div className="text-center py-12 text-gray-500">
               <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Enter content above and click "Analyze Content" to see results</p>
+              <p>Enter content above and click "Analyze Content" to see results</p> {/* Ensure apiKeyError is shown if relevant */}
             </div>
           )}
         </CardContent>

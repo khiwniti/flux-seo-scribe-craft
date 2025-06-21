@@ -11,7 +11,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: "wordpress-plugin/dist",
+    outDir: "wordpress-plugin-v2-enhanced/dist",
     emptyOutDir: true,
     rollupOptions: {
       input: {
@@ -34,7 +34,7 @@ export default defineConfig({
       },
       external: ['react', 'react-dom']
     },
-    minify: false, // Keep unminified for debugging
+    minify: true,
     cssCodeSplit: false, // Bundle all CSS into one file
   },
   define: {

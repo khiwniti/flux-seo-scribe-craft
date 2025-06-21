@@ -1,17 +1,34 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { generateBlogContent, GeneratedContentResponse, GeminiServiceError } from '@/lib/geminiService'; // Adjusted path
+import { makeWpAjaxRequest, WpAjaxError } from '@/lib/wpApiService';
+
+// Define structure for history items from backend
+interface HistoryItem {
+  id: number;
+  title: string;
+  // content: string; // if needed
+  meta_description: string;
+  language: string;
+  seo_score: number;
+  status: string;
+  created_at: string;
+}
 
 export const useContentGeneration = () => {
   // Form states
   const [topic, setTopic] = useState('');
   const [keywords, setKeywords] = useState('');
-  const [tone, setTone] = useState('');
-  const [wordCount, setWordCount] = useState('');
-  
+  const [tone, setTone] = useState(''); // Keep for now, though not directly used by generateBlogContent
+  const [wordCount, setWordCount] = useState(''); // Keep for now, not directly used
+  const [language, setLanguage] = useState('en'); // Added language state
+
   // Generated content
   const [generatedContent, setGeneratedContent] = useState('');
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
-  const [isGenerating, setIsGenerating] = useState(false);
+  // isGenerating will be derived from mutation.isPending
   
   // Auto-generation states
   const [autoGenEnabled, setAutoGenEnabled] = useState(false);
@@ -20,8 +37,23 @@ export const useContentGeneration = () => {
   const [autoGenDay, setAutoGenDay] = useState('monday');
   const [autoGenTopics, setAutoGenTopics] = useState('');
   const [autoGenKeywords, setAutoGenKeywords] = useState('');
-  const [autoGenHistory, setAutoGenHistory] = useState<any[]>([]);
+  // const [autoGenHistory, setAutoGenHistory] = useState<any[]>([]); // To be replaced by useQuery
   const [nextScheduledRun, setNextScheduledRun] = useState<Date | null>(null);
+
+  const { data: autoGenHistory = [], isLoading: isLoadingHistory, error: historyError } = useQuery<HistoryItem[], WpAjaxError>({
+    queryKey: ['contentGenerationHistory'],
+    queryFn: async () => {
+      return makeWpAjaxRequest<HistoryItem[]>({
+        wpAjaxAction: 'flux_seo_proxy',
+        action: 'get_content_list', // PHP action to fetch history
+      });
+    },
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    onError: (err) => {
+      toast.error("Failed to load generation history: " + err.message);
+    }
+  });
   
   // Intelligence states
   const [contentQuality, setContentQuality] = useState(0);
@@ -119,51 +151,63 @@ export const useContentGeneration = () => {
     return 'blog';
   };
 
-  const generateContent = async () => {
-    setIsGenerating(true);
-    
-    // Simulate AI content generation with analytics enhancement
-    setTimeout(() => {
-      const content = `# ${topic}
+  const mutation = useMutation<
+    GeneratedContentResponse,
+    GeminiServiceError,
+    { currentTopic: string; currentLanguage: string; currentContentType: string; currentKeywords: string }
+  >({
+    mutationFn: async (variables) => {
+      const { currentTopic, currentLanguage, currentContentType, currentKeywords } = variables;
+      if (!currentTopic.trim()) {
+        throw new Error("Topic cannot be empty."); // Simple validation
+      }
+      return generateBlogContent(currentTopic, currentLanguage, currentContentType, currentKeywords);
+    },
+    onMutate: () => {
+      setGeneratedContent(''); // Clear previous content
+      // setIsGenerating(true) is handled by mutation.isPending
+      toast.info("Generating AI content, please wait...");
+    },
+    onSuccess: (data) => {
+      setGeneratedContent(data.content); // Assuming 'content' has the main text
+      setSeoScore(data.seo_score || 0); // Update from actual response
+      // setContentQuality, setReadabilityScore if available in 'data'
+      // setSmartKeywords if available
+      toast.success("Content generated successfully!");
+    },
+    onError: (error) => {
+      console.error("Error generating content:", error);
+      if (error.isApiKeyInvalid) {
+        toast.error("API Key is invalid or missing. Please check plugin settings.");
+      } else {
+        toast.error(`Error generating content: ${error.message}`);
+      }
+    },
+    // onSettled: () => { // Handled by mutation.isPending for isGenerating state }
+  });
 
-## Introduction
+  const generateContent = useCallback(() => {
+    // Basic validation before calling mutation
+    if (!topic.trim()) {
+      toast.error("Please enter a topic to generate content.");
+      return;
+    }
+    if (!contentType.trim()){
+      toast.error("Please select a content type.");
+      return;
+    }
+    // Language is defaulted to 'en', keywords can be empty
+    mutation.mutate({
+      currentTopic: topic,
+      currentLanguage: language,
+      currentContentType: contentType,
+      currentKeywords: keywords
+    });
+  }, [topic, language, contentType, keywords, mutation]);
 
-${generateIntroduction()}
-
-## Key Points
-
-${generateKeyPoints()}
-
-## SEO-Optimized Content
-
-${generateSEOContent()}
-
-## Conclusion
-
-${generateConclusion()}
-
----
-
-**Content Quality Score**: ${Math.floor(Math.random() * 20 + 80)}%
-**SEO Score**: ${Math.floor(Math.random() * 15 + 85)}%
-**Readability Score**: ${Math.floor(Math.random() * 10 + 90)}%`;
-      
-      setGeneratedContent(content);
-      setContentQuality(Math.floor(Math.random() * 20 + 80));
-      setSeoScore(Math.floor(Math.random() * 15 + 85));
-      setReadabilityScore(Math.floor(Math.random() * 10 + 90));
-      setSmartKeywords(extractKeywordsFromTopic(topic));
-      setContentInsights([
-        'Content is optimized for target keywords',
-        'Reading level is appropriate for target audience',
-        'Structure follows SEO best practices',
-        'Content length is optimal for topic depth'
-      ]);
-      
-      setIsGenerating(false);
-    }, 3000);
-  };
-
+  // These are placeholder/simulated functions from the original hook
+  // They are not directly used by the new generateContent logic but kept for structure
+  // In a real scenario, these might be replaced or removed if not needed.
   const generateIntroduction = (): string => {
     return `In today's digital landscape, understanding ${topic.toLowerCase()} has become increasingly important. This comprehensive guide will explore the key aspects of ${topic.toLowerCase()} and provide you with actionable insights to improve your results.`;
   };
@@ -267,11 +311,13 @@ ${generateConclusion()}
     setTone,
     wordCount,
     setWordCount,
+    language,
+    setLanguage,
     
     // Generated content
     generatedContent,
-    generatedImages,
-    isGenerating,
+    generatedImages, // Keep for now, though image generation isn't wired up via this mutation
+    isGenerating: mutation.isPending, // Use mutation's pending state
     
     // Auto-generation states
     autoGenEnabled,

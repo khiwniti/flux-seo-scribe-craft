@@ -21,6 +21,20 @@ define('FLUX_SEO_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('FLUX_SEO_PLUGIN_VERSION', '2.0.1');
 
 class FluxSEOScribeCraftV2 {
+
+    private $allowed_settings_keys = array(
+        'gemini_api_key',
+        'default_language',
+        'auto_seo_optimization',
+        'content_generation_model',
+        'max_content_length'
+    );
+
+    private $allowed_settings_to_fetch = array(
+        'gemini_api_key',
+        'default_language',
+        // Add other keys here if they are safe to be fetched by client
+    );
     
     public function __construct() {
         add_action('init', array($this, 'init'));
@@ -126,22 +140,9 @@ class FluxSEOScribeCraftV2 {
     }
     
     private function enqueue_app_assets() {
-        // Enqueue React and ReactDOM from CDN first
-        wp_enqueue_script(
-            'react',
-            'https://unpkg.com/react@18/umd/react.production.min.js',
-            array(),
-            '18.3.1',
-            false
-        );
-        
-        wp_enqueue_script(
-            'react-dom',
-            'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',
-            array('react'),
-            '18.3.1',
-            false
-        );
+        // React and ReactDOM are provided by 'wp-element',
+        // which is a dependency of 'flux-seo-wordpress-app'.
+        // No need to enqueue them separately from a CDN.
         
         // Enqueue main CSS from v2.0
         wp_enqueue_style(
@@ -155,22 +156,13 @@ class FluxSEOScribeCraftV2 {
         wp_enqueue_script(
             'flux-seo-wordpress-app',
             FLUX_SEO_PLUGIN_URL . 'dist/flux-seo-wordpress-app.js',
-            array('react', 'react-dom'),
-            FLUX_SEO_PLUGIN_VERSION,
-            true
-        );
-        
-        // Enqueue React loader (initializes the app)
-        wp_enqueue_script(
-            'flux-seo-react-loader',
-            FLUX_SEO_PLUGIN_URL . 'dist/flux-seo-react-loader.js',
-            array('flux-seo-wordpress-app'),
+            array('wp-element'),
             FLUX_SEO_PLUGIN_VERSION,
             true
         );
         
         // Localize script for AJAX
-        wp_localize_script('flux-seo-react-loader', 'fluxSeoAjax', array(
+        wp_localize_script('flux-seo-wordpress-app', 'fluxSeoAjax', array(
             'ajaxurl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('flux_seo_nonce'),
             'pluginUrl' => FLUX_SEO_PLUGIN_URL,
@@ -178,8 +170,7 @@ class FluxSEOScribeCraftV2 {
             'siteUrl' => get_site_url(),
             'currentUser' => wp_get_current_user()->ID,
             'isAdmin' => current_user_can('manage_options'),
-            'geminiApiKey' => $this->get_setting('gemini_api_key'),
-            'defaultLanguage' => $this->get_setting('default_language', 'en')
+            'defaultLanguage' => sanitize_text_field($this->get_setting('default_language', 'en'))
         ));
     }
     
@@ -473,8 +464,53 @@ class FluxSEOScribeCraftV2 {
             case 'get_content_list':
                 $this->handle_get_content_list();
                 break;
+            case 'get_setting_value':
+                $this->handle_get_setting_value($data);
+                break;
             default:
                 wp_send_json_error('Invalid action: ' . $action);
+        }
+    }
+
+    private function handle_get_setting_value($data_json) {
+        // $data_json is expected to be a JSON string from makeWpAjaxRequest if action is 'flux_seo_proxy'
+        // It might also be already decoded if other actions pass it as an array.
+        // Let's ensure it's an array.
+        $input_data = null;
+        if (is_string($data_json)) {
+            $input_data = json_decode($data_json, true);
+        } elseif (is_array($data_json)) {
+            $input_data = $data_json;
+        }
+
+        if (!is_array($input_data) || !isset($input_data['setting_key'])) {
+            wp_send_json_error('Setting key not provided or invalid data format.');
+            return;
+        }
+
+        $requested_key = sanitize_text_field($input_data['setting_key']);
+
+        if (empty($requested_key)) {
+            wp_send_json_error('Setting key cannot be empty.');
+            return;
+        }
+
+        if (in_array($requested_key, $this->allowed_settings_to_fetch, true)) {
+            // Check against the more general allowed_settings_keys as well for consistency,
+            // though allowed_settings_to_fetch should be a subset of allowed_settings_keys.
+            if (in_array($requested_key, $this->allowed_settings_keys, true)) {
+                $value = $this->get_setting($requested_key);
+                // For security, explicitly return only the value, not the key,
+                // as the React side already knows the key it requested.
+                // Or, return both if the client expects {key: value} structure.
+                // The useQuery in SettingsTab.tsx expects direct string: makeWpAjaxRequest<string>(...)
+                wp_send_json_success($value);
+            } else {
+                 // This case should ideally not be hit if lists are managed properly
+                wp_send_json_error('Setting key definition mismatch.');
+            }
+        } else {
+            wp_send_json_error('Invalid or disallowed setting key for fetching.');
         }
     }
     
@@ -498,48 +534,102 @@ class FluxSEOScribeCraftV2 {
         $generated_content = $this->call_gemini_api($api_key, $prompt);
         
         if ($generated_content) {
-            // Save to database
-            global $wpdb;
-            $table_name = $wpdb->prefix . 'flux_seo_content';
-            
-            $wpdb->insert($table_name, array(
-                'title' => $generated_content['title'],
-                'content' => $generated_content['content'],
-                'meta_description' => $generated_content['meta_description'],
-                'keywords' => $generated_content['keywords'],
-                'language' => $language,
-                'seo_score' => $generated_content['seo_score'],
-                'status' => 'generated'
-            ));
-            
-            wp_send_json_success($generated_content);
+            if ($content_type === 'content_analysis') {
+                // For analysis, the $generated_content is already the direct JSON parsed response from Gemini
+                // No separate sanitization per field here, assuming Gemini returns the requested JSON structure.
+                // Also, skipping database insertion for analysis results for now.
+                wp_send_json_success($generated_content);
+            } else {
+                // Existing logic for blog posts and other content types that are saved
+                global $wpdb;
+                $table_name = $wpdb->prefix . 'flux_seo_content';
+
+                // Sanitize content received from API before inserting into DB
+                // This part assumes a structure like {title, content, meta_description, keywords, seo_score}
+                // which is what the 'blog' content_type and fallbacks from call_gemini_api provide.
+                $sane_title = isset($generated_content['title']) ? sanitize_text_field($generated_content['title']) : 'Untitled';
+                $sane_content = isset($generated_content['content']) ? wp_kses_post($generated_content['content']) : '';
+                $sane_meta_description = isset($generated_content['meta_description']) ? sanitize_text_field($generated_content['meta_description']) : '';
+                $sane_keywords = isset($generated_content['keywords']) ? sanitize_text_field($generated_content['keywords']) : '';
+                $sane_seo_score = isset($generated_content['seo_score']) ? intval($generated_content['seo_score']) : 0;
+
+                // For chatbot_response and image_prompt_generation, title, meta, keywords might be less relevant
+                // but the fallback structure from call_gemini_api provides them, so saving is harmless.
+                // The main payload is in $sane_content.
+                if ($content_type === 'chatbot_response' || $content_type === 'image_prompt_generation') {
+                    $sane_title = $topic; // Use the original topic/prompt as title
+                }
+
+
+                $wpdb->insert($table_name, array(
+                    'title' => $sane_title,
+                    'content' => $sane_content, // For chatbot/image_prompt, this is the actual response
+                    'meta_description' => $sane_meta_description,
+                    'keywords' => $sane_keywords,
+                    'language' => $language, // Already sanitized
+                    'seo_score' => $sane_seo_score,
+                    'status' => 'generated'
+                                // Consider different status for 'chatbot_response' or 'image_prompt' if needed
+                ));
+
+                $response_to_client = array(
+                    'title' => $sane_title,
+                    'content' => $sane_content,
+                    'meta_description' => $sane_meta_description,
+                    'keywords' => $sane_keywords,
+                    'language' => $language,
+                    'seo_score' => $sane_seo_score,
+                );
+                wp_send_json_success($response_to_client);
+            }
         } else {
             wp_send_json_error('Failed to generate content with Gemini AI');
         }
     }
     
     private function build_content_prompt($topic, $language, $content_type, $keywords) {
-        $prompt = "Create a comprehensive {$content_type} article about '{$topic}' in {$language} language. ";
-        
-        if (!empty($keywords)) {
-            $prompt .= "Include these keywords naturally: {$keywords}. ";
+        $prompt = "";
+
+        if ($content_type === 'content_analysis') {
+            // $topic IS the content to analyze
+            // $keywords might be "Title: ...\nMeta: ...\nKeywords: ..."
+            $prompt = "Perform an SEO analysis of the following content. The content's contextual information (like title, meta description, and focus keywords, if provided) is: '{$keywords}'.\n\n";
+            $prompt .= "Content to Analyze:\n---\n{$topic}\n---\n\n";
+            $prompt .= "Analyze the content in {$language} language.\n";
+            $prompt .= "Your response MUST be a JSON object. Do not include any text before or after the JSON object.\n";
+            $prompt .= "The JSON object should have the following keys:\n";
+            $prompt .= "- \"seo_score\": A numerical SEO score between 0 and 100.\n";
+            $prompt .= "- \"justification\": A brief text explaining the main reasons for the seo_score.\n";
+            $prompt .= "- \"readability_assessment\": A qualitative assessment of readability (e.g., 'Good', 'Difficult to read', 'Okay').\n";
+            $prompt .= "- \"keyword_analysis\": A brief text describing how well focus keywords (if provided in context) are used, or general keyword observations.\n";
+            $prompt .= "- \"suggestions_list\": An array of 3-5 actionable string suggestions to improve the content's SEO.\n";
+            $prompt .= "Example of a suggestion: \"Consider adding internal links to related articles.\"";
+
+        } else if ($content_type === 'chatbot_response' || $content_type === 'image_prompt_generation') {
+            // For chatbot or image prompt, we want a more direct text response, not necessarily structured JSON for title/meta etc.
+            // $topic contains the user prompt or text for image prompt generation.
+            // $keywords are likely empty or not as relevant here.
+            if ($content_type === 'image_prompt_generation') {
+                 $prompt = "Based on the following text, generate a detailed and creative prompt for a text-to-image generation model. The image prompt should be descriptive, specifying the subject, style, mood, composition, and any key elements or colors.\n\nInput Text:\n---\n{$topic}\n---\nGenerated Image Prompt (Return only the prompt text itself):";
+            } else { // chatbot_response
+                 $prompt = "You are an SEO chatbot. Respond to the following user query in {$language} language. User Query: {$topic}";
+            }
+            // The existing call_gemini_api will return a fallback structure like {'title': 'Generated...', 'content': actual_gemini_text, ...}
+            // if Gemini doesn't return JSON. This is acceptable as React side for these uses data.content.
+        } else {
+            // Default: Existing logic for blog generation, etc.
+            $prompt = "Create a comprehensive {$content_type} article about '{$topic}' in {$language} language. ";
+            if (!empty($keywords)) {
+                $prompt .= "Include these keywords naturally: {$keywords}. ";
+            }
+            $prompt .= "Please provide your response as a JSON object with these fields:\n";
+            $prompt .= "- \"title\": The SEO-optimized title (string).\n";
+            $prompt .= "- \"content\": The full article content with HTML formatting (string).\n";
+            $prompt .= "- \"meta_description\": A compelling meta description, 150-160 characters (string).\n";
+            $prompt .= "- \"keywords\": Comma-separated list of relevant keywords (string).\n";
+            $prompt .= "- \"seo_score\": Estimated SEO score from 1-100 (number).\n";
+            $prompt .= "Ensure the entire output is a single valid JSON object.";
         }
-        
-        $prompt .= "Please provide:
-1. An SEO-optimized title
-2. A compelling meta description (150-160 characters)
-3. Well-structured content with headings (H2, H3)
-4. Natural keyword integration
-5. Engaging introduction and conclusion
-6. Actionable insights for readers
-
-Format the response as JSON with these fields:
-- title: The SEO-optimized title
-- content: The full article content with HTML formatting
-- meta_description: The meta description
-- keywords: Comma-separated list of relevant keywords
-- seo_score: Estimated SEO score (1-100)";
-
         return $prompt;
     }
     
@@ -707,33 +797,82 @@ Format the response as JSON with these fields:
         
         $settings = json_decode(stripslashes($_POST['settings']), true);
         
-        foreach ($settings as $key => $value) {
-            $this->save_setting($key, $value);
+        if (is_array($settings)) {
+            foreach ($settings as $key => $value) {
+                if (in_array($key, $this->allowed_settings_keys, true)) {
+                    $this->save_setting($key, $value);
+                } else {
+                    // Optionally log or send an error about disallowed key
+                    error_log("Flux SEO: Disallowed setting key attempted: " . $key);
+                }
+            }
+            wp_send_json_success('Settings saved successfully.');
+        } else {
+            wp_send_json_error('Invalid settings format.');
         }
-        
-        wp_send_json_success('Settings saved successfully');
     }
     
     private function get_setting($key, $default = '') {
         global $wpdb;
         $table_name = $wpdb->prefix . 'flux_seo_settings';
+        $cache_key = 'flux_seo_setting_' . $key;
+        $cached_value = wp_cache_get($cache_key, 'flux_seo_settings');
+
+        if (false !== $cached_value) {
+            return $cached_value;
+        }
         
         $result = $wpdb->get_var($wpdb->prepare(
             "SELECT setting_value FROM $table_name WHERE setting_key = %s",
             $key
         ));
         
-        return $result !== null ? $result : $default;
+        $value_to_cache = $result !== null ? $result : $default;
+        wp_cache_set($cache_key, $value_to_cache, 'flux_seo_settings');
+
+        return $value_to_cache;
     }
     
     private function save_setting($key, $value) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'flux_seo_settings';
+        $cache_key = 'flux_seo_setting_' . $key;
+
+        // Sanitize value based on key
+        $sanitized_value = '';
+        switch ($key) {
+            case 'gemini_api_key':
+                // API keys can sometimes have special characters, but often are more restricted.
+                // Using sanitize_text_field is a safe default. If issues arise,
+                // a more specific regex or less strict sanitization might be needed.
+                $sanitized_value = sanitize_text_field($value);
+                break;
+            case 'default_language':
+                $sanitized_value = sanitize_text_field($value); // Or sanitize_locale if it's a locale code
+                break;
+            case 'auto_seo_optimization':
+                $sanitized_value = ($value === '1' || $value === true || $value === 'true') ? '1' : '0';
+                break;
+            case 'content_generation_model':
+                $sanitized_value = sanitize_text_field($value);
+                break;
+            case 'max_content_length':
+                $sanitized_value = intval($value);
+                break;
+            default:
+                // This should not be reached if $key is in allowed_settings_keys
+                // but as a fallback:
+                $sanitized_value = sanitize_text_field($value);
+                break;
+        }
         
         $wpdb->replace($table_name, array(
-            'setting_key' => $key,
-            'setting_value' => $value
+            'setting_key' => $key, // Key is already validated against allowlist
+            'setting_value' => $sanitized_value
         ));
+
+        // Invalidate the cache for this specific setting
+        wp_cache_delete($cache_key, 'flux_seo_settings');
     }
     
     private function handle_content_analysis($data_json) {

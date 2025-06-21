@@ -57,7 +57,10 @@ const IntegratedContentGenerator = () => {
     generateAutoContent,
     toggleAutoGeneration,
     copyToClipboard,
-    downloadImage
+    downloadImage,
+    // History related props from useContentGeneration
+    isLoadingHistory,
+    historyError
   } = useContentGeneration();
 
   return (
@@ -156,7 +159,11 @@ const IntegratedContentGenerator = () => {
         </TabsContent>
 
         <TabsContent value="history" className="space-y-6">
-          <GenerationHistory autoGenHistory={autoGenHistory} />
+          <GenerationHistory
+            autoGenHistory={autoGenHistory}
+            isLoading={isLoadingHistory}
+            error={historyError}
+          />
         </TabsContent>
       </Tabs>
     </div>

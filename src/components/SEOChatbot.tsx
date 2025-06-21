@@ -1,13 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Bot, User, SendHorizonal, AlertTriangle } from 'lucide-react';
-import { getChatbotResponse, ChatHistoryMessage } from '@/lib/geminiService';
-import { useToast } from '@/hooks/use-toast';
-import { useLanguage } from '@/contexts/LanguageContext'; // Import useLanguage
+import { getChatbotResponse, GeminiServiceError } from '@/lib/geminiService'; // ChatHistoryMessage removed
+// import { useToast } from '@/hooks/use-toast'; // Using sonner directly
+import { toast as sonnerToast } from 'sonner';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useMutation } from '@tanstack/react-query';
 
 
 interface Message {
@@ -21,56 +23,32 @@ const SEOChatbot: React.FC = () => {
   const { language } = useLanguage(); // Consume global language context
   const [messages, setMessages] = useState<Message[]>([]);
   const [userInput, setUserInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false); // Replaced by mutation.isPending
   const [apiKeyError, setApiKeyError] = useState<string | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const { toast } = useToast();
+  // const { toast } = useToast(); // Replaced by sonnerToast
 
-  const getSystemInstruction = (): string => {
+  // System instruction is not currently passed to backend with new geminiService
+  // const getSystemInstruction = (): string => {
     if (language === 'th') {
       return "You are an expert SEO assistant. Please respond in Thai. Provide helpful, concise, and accurate advice on SEO topics. If you don't know an answer, say so. Keep responses relatively short and easy to read in a chat interface.";
     }
     return "You are an expert SEO assistant. Provide helpful, concise, and accurate advice on SEO topics. If you don't know an answer, say so. Keep responses relatively short and easy to read in a chat interface.";
   };
 
-  const formatChatHistory = (msgs: Message[]): ChatHistoryMessage[] => {
-    const recentMessages = msgs.slice(-10);
-    return recentMessages.map(msg => ({
-      role: msg.sender === 'user' ? 'user' : 'model',
-      parts: [{ text: msg.text }],
-    }));
-  };
+  // const formatChatHistory = (msgs: Message[]): ChatHistoryMessage[] => { ... } // History not sent
 
-  const handleSendMessage = async () => {
-    if (userInput.trim() === '') return;
-
-    const newUserMessage: Message = {
-      id: Date.now().toString() + '-user',
-      sender: 'user',
-      text: userInput,
-      timestamp: new Date(),
-    };
-    // Use a temporary list for messages to correctly form history for API call
-    const updatedMessages = [...messages, newUserMessage];
-    setMessages(updatedMessages);
-
-    const currentInput = userInput;
-    setUserInput('');
-    setIsLoading(true);
-    setApiKeyError(null); // Clear previous API key errors
-
-    // Prepare history for Gemini
-    // The history should not include the current user message which is sent as the main prompt
-    const historyForApi = formatChatHistory(messages);
-
-    let promptForApi = currentInput;
-    if (messages.length === 0) { // First user message in the session
-        promptForApi = `${getSystemInstruction()}\n\nMy first question is: ${currentInput}`;
-    }
-
-
-    try {
-      const botResponseText = await getChatbotResponse(promptForApi, historyForApi);
+  const chatMutation = useMutation<
+    string, // Expecting string response (bot's message)
+    GeminiServiceError,
+    string // User input string
+  >({
+    mutationFn: async (userMessage) => {
+      // The refactored getChatbotResponse only takes userPrompt.
+      // History and system instructions are not passed with current backend.
+      return getChatbotResponse(userMessage);
+    },
+    onSuccess: (botResponseText) => {
       const newBotMessage: Message = {
         id: Date.now().toString() + '-bot',
         sender: 'bot',
@@ -78,7 +56,9 @@ const SEOChatbot: React.FC = () => {
         timestamp: new Date(),
       };
       setMessages(prevMessages => [...prevMessages, newBotMessage]);
-    } catch (error: any) {
+      sonnerToast.success("Response received!");
+    },
+    onError: (error: GeminiServiceError) => {
       console.error("Error getting chatbot response:", error);
       let errorText = "Sorry, I encountered an error. Please try again.";
       if (error.isApiKeyInvalid) {
@@ -94,18 +74,30 @@ const SEOChatbot: React.FC = () => {
         timestamp: new Date(),
       };
       setMessages(prevMessages => [...prevMessages, errorBotMessage]);
-      toast({
-        title: "Chatbot Error",
-        description: errorText,
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      sonnerToast.error("Chatbot Error", { description: errorText });
+    },
+  });
+
+  const handleSendMessage = useCallback(() => {
+    if (userInput.trim() === '') return;
+
+    const newUserMessage: Message = {
+      id: Date.now().toString() + '-user',
+      sender: 'user',
+      text: userInput,
+      timestamp: new Date(),
+    };
+    setMessages(prevMessages => [...prevMessages, newUserMessage]);
+
+    // Call mutation
+    chatMutation.mutate(userInput);
+
+    setUserInput('');
+    setApiKeyError(null); // Clear previous API key errors
+  }, [userInput, chatMutation]);
 
   const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter' && !isLoading) {
+    if (event.key === 'Enter' && !chatMutation.isPending) {
       handleSendMessage();
     }
   };
@@ -162,7 +154,7 @@ const SEOChatbot: React.FC = () => {
                 )}
               </div>
             ))}
-            {isLoading && (
+            {chatMutation.isPending && (
               <div className="flex items-end gap-2">
                 <Avatar className="h-8 w-8">
                   <AvatarFallback><Bot className="h-4 w-4" /></AvatarFallback>
@@ -188,10 +180,10 @@ const SEOChatbot: React.FC = () => {
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            disabled={isLoading}
+            disabled={chatMutation.isPending} // Use mutation's pending state
             className="flex-grow"
           />
-          <Button onClick={handleSendMessage} disabled={isLoading || userInput.trim() === ''}>
+          <Button onClick={handleSendMessage} disabled={chatMutation.isPending || userInput.trim() === ''}>
             <SendHorizonal className="h-4 w-4" />
             <span className="sr-only">Send</span>
           </Button>

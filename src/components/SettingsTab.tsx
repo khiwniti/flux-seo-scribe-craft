@@ -3,46 +3,86 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff, KeyRound, AlertTriangle } from 'lucide-react';
+import { Eye, EyeOff, KeyRound, AlertTriangle, Save } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { makeWpAjaxRequest, WpAjaxError } from '@/lib/wpApiService';
+import { toast as sonnerToast } from 'sonner';
 
-const API_KEY_STORAGE_KEY = 'geminiApiKey';
+// const API_KEY_STORAGE_KEY = 'geminiApiKey'; // No longer using localStorage
+
+const SETTING_KEY_GEMINI_API = 'gemini_api_key';
 
 const SettingsTab: React.FC = () => {
   const [apiKey, setApiKey] = useState('');
   const [showApiKey, setShowApiKey] = useState(false);
-  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Fetch the API key from WordPress backend
+  const { data: initialApiKey, isLoading: isLoadingApiKey } = useQuery<string, WpAjaxError>({
+    queryKey: ['setting', SETTING_KEY_GEMINI_API],
+    queryFn: async () => {
+      // This requires a new PHP AJAX action or an addition to the proxy
+      // Assuming 'get_setting_value' action in 'flux_seo_proxy'
+      return makeWpAjaxRequest<string>({
+        wpAjaxAction: 'flux_seo_proxy',
+        action: 'get_setting_value', // Custom action for the proxy to handle
+        data: { setting_key: SETTING_KEY_GEMINI_API },
+        method: 'POST', // Or GET if preferred for fetching
+      });
+    },
+    enabled: true, // Fetch on component mount
+    refetchOnWindowFocus: false,
+    onSuccess: (data) => {
+      if (data) {
+        setApiKey(data);
+      }
+    },
+    onError: (error) => {
+      sonnerToast.error(`Failed to load API key: ${error.message}`);
+    }
+  });
 
   useEffect(() => {
-    const storedApiKey = localStorage.getItem(API_KEY_STORAGE_KEY);
-    if (storedApiKey) {
-      setApiKey(storedApiKey);
+    if (initialApiKey) {
+      setApiKey(initialApiKey);
     }
-  }, []);
+  }, [initialApiKey]);
+
+  const saveSettingsMutation = useMutation<
+    any, // Expecting generic success response data
+    WpAjaxError,
+    Record<string, string> // Settings object {key: value}
+  >({
+    mutationFn: async (settingsToSave) => {
+      return makeWpAjaxRequest({
+        wpAjaxAction: 'flux_seo_save_settings', // Main WordPress AJAX action
+        data: { settings: JSON.stringify(settingsToSave) }, // Payload expected by handle_save_settings in PHP
+      });
+    },
+    onSuccess: (data, variables) => {
+      sonnerToast.success('Settings saved successfully!');
+      // Invalidate the query for the specific setting to refetch if needed,
+      // or update the query cache directly.
+      Object.keys(variables).forEach(key => {
+        queryClient.invalidateQueries({ queryKey: ['setting', key] });
+        // Optionally, update the cache directly if the response confirms the new value
+        queryClient.setQueryData(['setting', key], variables[key]);
+      });
+    },
+    onError: (error) => {
+      sonnerToast.error(`Failed to save settings: ${error.message}`);
+    }
+  });
 
   const handleSaveApiKey = () => {
-    if (!apiKey.trim()) {
-      toast({
-        title: 'API Key Empty',
-        description: 'Please enter an API key before saving.',
-        variant: 'destructive',
-      });
-      return;
-    }
-    localStorage.setItem(API_KEY_STORAGE_KEY, apiKey);
-    toast({
-      title: 'API Key Saved',
-      description: 'Your Google Gemini API Key has been saved locally.',
-    });
+    // No trim check needed if we allow saving an empty key to clear it.
+    // The PHP side will save it as an empty string.
+    saveSettingsMutation.mutate({ [SETTING_KEY_GEMINI_API]: apiKey });
   };
 
   const handleClearApiKey = () => {
-    localStorage.removeItem(API_KEY_STORAGE_KEY);
-    setApiKey('');
-    toast({
-      title: 'API Key Cleared',
-      description: 'Your Google Gemini API Key has been removed from local storage.',
-    });
+    setApiKey(''); // Clear local state
+    saveSettingsMutation.mutate({ [SETTING_KEY_GEMINI_API]: '' }); // Save empty string to backend
   };
 
   return (
@@ -53,7 +93,7 @@ const SettingsTab: React.FC = () => {
           API Key Management
         </CardTitle>
         <CardDescription>
-          Manage your Google Gemini API Key. This key is required for AI features to function.
+          Manage your Google Gemini API Key. This key is required for AI features to function and is stored securely on your server.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -63,10 +103,11 @@ const SettingsTab: React.FC = () => {
             <Input
               id="gemini-api-key"
               type={showApiKey ? 'text' : 'password'}
-              placeholder="Enter your API key here"
+              placeholder={isLoadingApiKey ? "Loading API Key..." : "Enter your API key here"}
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               className="flex-grow"
+              disabled={isLoadingApiKey || saveSettingsMutation.isPending}
             />
             <Button
               variant="outline"
@@ -80,19 +121,38 @@ const SettingsTab: React.FC = () => {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
-          <Button onClick={handleSaveApiKey} className="flex-1">
-            Save API Key
+          <Button
+            onClick={handleSaveApiKey}
+            className="flex-1"
+            disabled={saveSettingsMutation.isPending || isLoadingApiKey}
+          >
+            {saveSettingsMutation.isPending ? (
+              <>
+                <Save className="h-4 w-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                Save API Key
+              </>
+            )}
           </Button>
-          <Button onClick={handleClearApiKey} variant="outline" className="flex-1">
+          <Button
+            onClick={handleClearApiKey}
+            variant="outline"
+            className="flex-1"
+            disabled={saveSettingsMutation.isPending || isLoadingApiKey}
+          >
             Clear API Key
           </Button>
         </div>
 
-        <div className="p-3 bg-yellow-50 border border-yellow-200 text-yellow-700 rounded-md text-sm flex items-start gap-2">
-          <AlertTriangle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+        <div className="p-3 bg-blue-50 border border-blue-200 text-blue-700 rounded-md text-sm flex items-start gap-2">
+          <AlertTriangle className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-600" />
           <div>
-            <strong>Security Note:</strong> Your API key is stored locally in your browser's local storage.
-            While convenient, be cautious if using this on a shared computer. For optimal security, consider environment variables for development or server-side key management for production applications.
+            <strong>Security Note:</strong> Your API key is stored securely on your server via WordPress options.
+            It is not exposed directly to the client-side application after being saved.
           </div>
         </div>
 
