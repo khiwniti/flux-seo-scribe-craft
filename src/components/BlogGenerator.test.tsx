@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -5,8 +6,7 @@ import '@testing-library/jest-dom';
 import BlogGenerator from './BlogGenerator';
 import { useToast } from '@/hooks/use-toast';
 import * as geminiService from '@/lib/geminiService';
-import { LanguageProvider, Language } from '@/contexts/LanguageContext'; // Import LanguageProvider
-import React from 'react'; // Ensure React is in scope for JSX
+import { LanguageProvider, Language } from '@/contexts/LanguageContext';
 
 // Mock lucide-react icons
 jest.mock('lucide-react', () => ({
@@ -264,7 +264,7 @@ describe('BlogGenerator Component', () => {
 
       await waitFor(() => expect(mockGenerateBlogContent).toHaveBeenCalled());
       await waitFor(() => {
-        expect(screen.getByDisplayValue(new RegExp(apiKeyErrorImg.message.replace(/[.*+?^${}()|[\]\ल्या/g, '\\$&')))).toBeInTheDocument();
+        expect(screen.getByDisplayValue(new RegExp(apiKeyErrorImg.message.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))).toBeInTheDocument();
         expect(mockToastFn).toHaveBeenCalledWith(expect.objectContaining({
           title: "Image Prompt Generation Failed",
           description: apiKeyErrorImg.message,

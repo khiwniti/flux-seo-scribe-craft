@@ -5,174 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { Wand2, Sparkles, Brain } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-import { TfIdf, PorterStemmer, SentimentAnalyzer, WordTokenizer } from 'natural';
-
-interface EnhancementSuggestion {
-  value: string | string[];
-  explanation: string;
-}
-
-interface SmartFieldEnhancerProps {
-  content: string;
-  onEnhance: (enhancements: {
-    suggestedTitle?: EnhancementSuggestion;
-    suggestedKeywords?: EnhancementSuggestion;
-    suggestedTone?: EnhancementSuggestion;
-    suggestedAudience?: EnhancementSuggestion;
-    suggestedIndustry?: EnhancementSuggestion;
-    suggestedTemplate?: EnhancementSuggestion;
-  }) => void;
-}
-
-export const SmartFieldEnhancer = ({ content, onEnhance }: SmartFieldEnhancerProps) => {
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [suggestions, setSuggestions] = useState<{
-    suggestedTitle?: EnhancementSuggestion;
-    suggestedKeywords?: EnhancementSuggestion;
-    suggestedTone?: EnhancementSuggestion;
-    suggestedAudience?: EnhancementSuggestion;
-    suggestedIndustry?: EnhancementSuggestion;
-    suggestedTemplate?: EnhancementSuggestion;
-  } | null>(null);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    if (content && content.length > 50) {
-      analyzeContent();
-    }
-  }, [content]);
-
-  const analyzeContent = async () => {
-    if (content.length < 20) return;
-    
-    setIsAnalyzing(true);
-    
-    // Simulate AI analysis based on content
-    // We will replace this timeout with actual NLP processing
-    // For now, we keep the timeout to avoid blocking the UI thread during development
-    setTimeout(() => {
-      const enhancements = {
-        suggestedTitle: extractTitle(content),
-        suggestedKeywords: extractKeywords(content),
-        suggestedTone: detectTone(content),
-        suggestedAudience: detectAudience(content), // Keep existing logic for now
-        suggestedIndustry: detectIndustry(content), // Keep existing logic for now
-        suggestedTemplate: detectTemplate(content) // Keep existing logic for now
-      };
-      
-      setSuggestions(enhancements);
-      setIsAnalyzing(false);
-      
-      toast({
-        title: "Smart Analysis Complete!",
-        description: "AI has analyzed your content and generated suggestions"
-      });
-    }, 100); // Reduced timeout for faster feedback during dev
-  };
-
-  const extractTitle = (text: string): EnhancementSuggestion => {
-    const tfidf = new TfIdf();
-    tfidf.addDocument(text);
-
-    const sentences = text.split('. ');
-    if (sentences.length === 0) {
-      return { value: '', explanation: 'No sentences found to extract a title.' };
-    }
-
-    let bestSentence = '';
-    let highestScore = -1;
-
-    sentences.forEach(sentence => {
-      if (sentence.trim().length === 0) return;
-      let score = 0;
-      const terms = new WordTokenizer().tokenize(sentence.toLowerCase());
-      if (!terms) return;
-      terms.forEach(term => {
-        score += tfidf.tfidf(term, 0);
-      });
-      if (score > highestScore) {
-        highestScore = score;
-        bestSentence = sentence.trim();
-      }
-    });
-
-    if (bestSentence) {
-      return { value: bestSentence, explanation: 'This title was identified as the most relevant sentence based on TF-IDF analysis.' };
-    }
-    // Fallback to original logic if TF-IDF fails
-    const firstLine = text.split('\n')[0];
-    if (firstLine.length > 10 && firstLine.length < 80) {
-      return { value: firstLine.replace(/[^\w\s]/gi, ''), explanation: 'Used the first line as a fallback title.'};
-    }
-    const words = text.split(' ').slice(0, 8).join(' ');
-    return { value: words.charAt(0).toUpperCase() + words.slice(1), explanation: 'Used the first few words as a fallback title.' };
-  };
-
-  const extractKeywords = (text: string): EnhancementSuggestion => {
-    const tfidf = new TfIdf();
-    tfidf.addDocument(text.toLowerCase());
-    const keywords: string[] = [];
-    const explanationLines: string[] = [];
-
-    tfidf.listTerms(0).slice(0, 5).forEach(term => {
-      keywords.push(term.term);
-      explanationLines.push(`"${term.term}" (TF-IDF score: ${term.tfidf.toFixed(2)})`);
-    });
-
-    if (keywords.length > 0) {
-      return { value: keywords, explanation: `Keywords identified based on TF-IDF scores: ${explanationLines.join(', ')}.` };
-    }
-    // Fallback to original logic
-    const commonWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'a', 'an', 'this', 'that', 'these', 'those'];
-    const words = text.toLowerCase().split(/\s+/)
-      .map(word => word.replace(/[^\w]/g, '').toLowerCase())
-      .filter(word => word.length > 3 && !commonWords.includes(word));
-    const frequency: { [key: string]: number } = {};
-    words.forEach(word => {
-      frequency[word] = (frequency[word] || 0) + 1;
-    });
-    const fallbackKeywords = Object.entries(frequency)
-      .sort(([,a], [,b]) => b - a)
-      .slice(0, 5)
-      .map(([word]) => word);
-    return { value: fallbackKeywords, explanation: 'Used frequency analysis as a fallback for keyword extraction.'};
-  };
-
-  const detectTone = (text: string): EnhancementSuggestion => {
-    const analyzer = new SentimentAnalyzer('English', PorterStemmer, 'afinn');
-    const tokens = new WordTokenizer().tokenize(text.toLowerCase());
-    if (!tokens) {
-      return { value: 'conversational', explanation: 'Could not tokenize text to determine tone. Defaulted to conversational.' };
-    }
-    const sentimentScore = analyzer.getSentiment(tokens);
-
-    let tone = 'conversational'; // Default tone
-    let explanation = `Sentiment score: ${sentimentScore.toFixed(2)}. `;
-
-    if (sentimentScore > 0.33) {
-      tone = 'Positive';
-      explanation += 'The text has a predominantly positive sentiment.';
-    } else if (sentimentScore < -0.33) {
-      tone = 'Negative';
-      explanation += 'The text has a predominantly negative sentiment.';
-    } else {
-      tone = 'Neutral';
-      explanation += 'The text has a relatively neutral sentiment.';
-    }
-    // More specific tone detection (simplified, can be improved)
-    if (text.toLowerCase().includes('expert') || text.toLowerCase().includes('professional') || text.toLowerCase().includes('research')) {
-      tone = 'authoritative';
-      explanation = 'The text contains words like "expert", "professional", or "research", suggesting an authoritative tone.';
-    } else if (text.toLowerCase().includes('easy') || text.toLowerCase().includes('simple') || text.toLowerCase().includes('beginner')) {
-      tone = 'casual';
-      explanation = 'The text contains words like "easy", "simple", or "beginner", suggesting a casual tone.';
-    } else if (text.toLowerCase().includes('business') || text.toLowerCase().includes('corporate') || text.toLowerCase().includes('enterprise')) {
-      tone = 'professional';
-      explanation = 'The text contains words like "business", "corporate", or "enterprise", suggesting a professional tone.';
-    }
-    return { value: tone, explanation };
-  };
-
 import { TfIdf, PorterStemmer, SentimentAnalyzer, WordTokenizer, NGrams } from 'natural';
 
 interface EnhancementSuggestion {
@@ -183,12 +15,12 @@ interface EnhancementSuggestion {
 interface SmartFieldEnhancerProps {
   content: string;
   onEnhance: (enhancements: {
-    suggestedTitle?: EnhancementSuggestion;
-    suggestedKeywords?: EnhancementSuggestion;
-    suggestedTone?: EnhancementSuggestion;
-    suggestedAudience?: EnhancementSuggestion;
-    suggestedIndustry?: EnhancementSuggestion;
-    suggestedTemplate?: EnhancementSuggestion;
+    suggestedTitle?: string;
+    suggestedKeywords?: string;
+    suggestedTone?: string;
+    suggestedAudience?: string;
+    suggestedIndustry?: string;
+    suggestedTemplate?: string;
   }) => void;
 }
 
@@ -441,13 +273,9 @@ export const SmartFieldEnhancer = ({ content, onEnhance }: SmartFieldEnhancerPro
     }
     // News-like characteristics
     const newsKeywords = ['breaking news', 'reports', 'according to', 'sources say', 'investigation'];
-    if (newsKeywords.some(kw => lowerText.includes(kw)) || (tokens.length > 100 && sentimentScore !== 0 /* from detectTone, ideally passed or re-calculated */)) {
-        // A more complex heuristic might be needed here, potentially involving date/time mentions or specific source citations.
-        // For now, just a keyword check.
-        if (newsKeywords.some(kw => lowerText.includes(kw)))
-          return { value: 'news-article', explanation: 'Contains keywords common in news reporting.'};
+    if (newsKeywords.some(kw => lowerText.includes(kw))) {
+        return { value: 'news-article', explanation: 'Contains keywords common in news reporting.'};
     }
-
 
     return { value: 'standard', explanation: 'The content does not strongly match a specific template type (e.g., How-to, Listicle, Comparison, FAQ), defaulting to Standard.' };
   };
