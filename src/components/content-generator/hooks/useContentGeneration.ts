@@ -3,13 +3,11 @@ import { useState } from 'react';
 import { useFormStates } from './useFormStates';
 import { useAutoGeneration } from './useAutoGeneration';
 import { useContentIntelligence } from './useContentIntelligence';
-import { useContentAnalysis } from './useContentAnalysis';
-import { useImageGeneration } from './useImageGeneration';
-import { useTopicAnalysis } from './useTopicAnalysis';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { LanguageAwareContentGenerator } from '../LanguageAwareContentGenerator';
+
 
 export const useContentGeneration = () => {
+  const { language } = useLanguage(); // Consume language context
+  const { toast } = useToast(); // Get toast function
   const formStates = useFormStates();
   const autoGenStates = useAutoGeneration();
   const intelligenceStates = useContentIntelligence(formStates.topic);
@@ -23,6 +21,25 @@ export const useContentGeneration = () => {
   
   // Analytics-based states
   const [analyticsData, setAnalyticsData] = useState<any>(null);
+
+  const t = (enText: string, thText: string): string => {
+    return language === 'th' ? thText : enText;
+  };
+
+  // Translations for toasts
+  const T_Toasts = {
+    contentGeneratedTitle: t("Content Generated", "สร้างเนื้อหาสำเร็จ"),
+    contentGeneratedDesc: t("AI content has been successfully generated and analyzed.", "AI สร้างและวิเคราะห์เนื้อหาเรียบร้อยแล้ว"),
+    generationFailedTitle: t("Generation Failed", "การสร้างล้มเหลว"),
+    autoContentGeneratedTitle: t("Auto Content Generated", "สร้างเนื้อหาอัตโนมัติสำเร็จ"),
+    autoContentGeneratedDesc: t("New content generated automatically.", "เนื้อหาใหม่ถูกสร้างขึ้นอัตโนมัติแล้ว"),
+    autoGenerationFailedTitle: t("Auto-generation Failed", "การสร้างอัตโนมัติล้มเหลว"),
+    autoGenerationErrorTitle: t("Auto-generation Error", "ข้อผิดพลาดการสร้างอัตโนมัติ"),
+    autoGenerationErrorDesc: t("Topics and keywords must be set for auto-generation.", "ต้องตั้งค่าหัวข้อและคีย์เวิร์ดสำหรับการสร้างอัตโนมัติ"),
+    // API key error message is already handled by components that call this hook if error.isApiKeyInvalid
+    apiKeyErrorForToast: t("API Key is invalid or missing. Please configure it in Settings.", "คีย์ API ไม่ถูกต้องหรือขาดหายไป กรุณาตั้งค่าในส่วนการตั้งค่า"),
+    defaultErrorForToast: t("An unknown error occurred.", "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ"),
+  };
   const [blogSuggestions, setBlogSuggestions] = useState<any[]>([]);
   const [selectedAnalyticsSuggestion, setSelectedAnalyticsSuggestion] = useState<any>(null);
 
@@ -63,21 +80,12 @@ export const useContentGeneration = () => {
       
       setGeneratedContent(content);
       
-      // Analyze content quality
-      contentAnalysis.analyzeContent(content, formStates.keywords, language);
-      
-      // Extract keywords and generate images
-      const smartKeywords = intelligenceStates.extractKeywordsFromTopic(content);
-      contentAnalysis.setSmartKeywords(smartKeywords);
-      imageGeneration.generateImages(formStates.topic, formStates.tone, language);
+
       
     } catch (err: any) {
       console.error("Error generating content:", err);
       const errorMessage = err.isApiKeyInvalid
-        ? (language === 'th' ? "API Key ไม่ถูกต้องหรือไม่พบ กรุณาตั้งค่าในหน้า Settings" : "API Key is invalid or missing. Please configure it in Settings.")
-        : err.message || (language === 'th' ? "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุในการสร้างเนื้อหา" : "An unknown error occurred during content generation.");
-      setError(errorMessage);
-      setGeneratedContent('');
+
     } finally {
       setIsGenerating(false);
     }
@@ -85,7 +93,7 @@ export const useContentGeneration = () => {
 
   const generateAutoContent = async () => {
     if (!autoGenStates.autoGenTopics.trim()) {
-        setError(language === 'th' ? "กรุณาระบุหัวข้อสำหรับการสร้างอัตโนมัติ" : "Auto-generation topics cannot be empty.");
+
         return;
     }
     setIsGenerating(true);
@@ -122,13 +130,21 @@ export const useContentGeneration = () => {
       };
       
       autoGenStates.setAutoGenHistory(prev => [newEntry, ...prev.slice(0, 9)]);
+      toast({
+        title: T_Toasts.autoContentGeneratedTitle,
+        description: T_Toasts.autoContentGeneratedDesc,
+      });
 
     } catch (err: any) {
       console.error("Error during auto-generation:", err);
       const errorMessage = err.isApiKeyInvalid
-        ? (language === 'th' ? "API Key ไม่ถูกต้องหรือไม่พบ กรุณาตั้งค่าในหน้า Settings" : "API Key is invalid or missing for auto-generation. Please configure it in Settings.")
-        : err.message || (language === 'th' ? "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุในการสร้างอัตโนมัติ" : "An unknown error occurred during auto-generation.");
+
       setError(errorMessage);
+      toast({
+        title: T_Toasts.autoGenerationFailedTitle,
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       formStates.setTopic(originalTopic);
       setIsGenerating(false);

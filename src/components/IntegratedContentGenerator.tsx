@@ -8,8 +8,10 @@ import GenerationHistory from './content-generator/GenerationHistory';
 import GeneratedContentDisplay from './content-generator/GeneratedContentDisplay';
 import AnalyticsBasedGenerator from './content-generator/AnalyticsBasedGenerator';
 import { useContentGeneration } from './content-generator/hooks/useContentGeneration';
+import { useLanguage } from '@/contexts/LanguageContext'; // Import useLanguage
 
 const IntegratedContentGenerator = () => {
+  const { language } = useLanguage(); // Consume language context
   const {
     // Form states
     topic,
@@ -61,25 +63,36 @@ const IntegratedContentGenerator = () => {
     error // Destructure error from the hook
   } = useContentGeneration();
 
+  const t = (enText: string, thText: string): string => {
+    return language === 'th' ? thText : enText;
+  };
+
+  const T = {
+    analyticsGeneration: t("Analytics Generation", "สร้างจากข้อมูลวิเคราะห์"),
+    manualGeneration: t("Manual Generation", "สร้างด้วยตนเอง"),
+    autoGeneration: t("Auto Generation", "สร้างอัตโนมัติ"),
+    generationHistory: t("Generation History", "ประวัติการสร้าง"),
+  };
+
   return (
     <div className="space-y-6">
       <Tabs defaultValue="analytics" className="w-full">
         <TabsList className="grid w-full grid-cols-4 mb-6">
           <TabsTrigger value="analytics" className="flex items-center gap-2">
             <BarChart className="h-4 w-4" />
-            Analytics Generation
+            {T.analyticsGeneration}
           </TabsTrigger>
           <TabsTrigger value="manual" className="flex items-center gap-2">
             <Wand2 className="h-4 w-4" />
-            Manual Generation
+            {T.manualGeneration}
           </TabsTrigger>
           <TabsTrigger value="auto" className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
-            Auto Generation
+            {T.autoGeneration}
           </TabsTrigger>
           <TabsTrigger value="history" className="flex items-center gap-2">
             <Clock className="h-4 w-4" />
-            Generation History
+            {T.generationHistory}
           </TabsTrigger>
         </TabsList>
 

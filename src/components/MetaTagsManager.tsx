@@ -11,7 +11,7 @@ import { generateBlogContent as callGeminiApi } from '@/lib/geminiService';
 import { useLanguage, Language } from '@/contexts/LanguageContext'; // Import useLanguage
 
 const MetaTagsManager = () => {
-  const { language, setLanguage: setGlobalLanguage } = useLanguage(); // Consume global language context
+  const { language } = useLanguage(); // Removed setGlobalLanguage as it's not used here
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -22,14 +22,69 @@ const MetaTagsManager = () => {
   const [apiKeyError, setApiKeyError] = useState<string | null>(null);
   const { toast } = useToast();
 
+  const t = (enText: string, thText: string): string => {
+    return language === 'th' ? thText : enText;
+  };
+
+  const T = {
+    // Card
+    cardTitle: t("Smart Meta Tags Manager", "จัดการ Meta Tags อัจฉริยะ"),
+    cardDescription: t("AI automatically generates meta tags for your content.", "AI สร้าง Meta Tags อัตโนมัติสำหรับเนื้อหาของคุณ"),
+    // Content Input
+    mainContentLabel: t("Main Content (AI will auto-analyze)", "เนื้อหาหลัก (AI จะวิเคราะห์อัตโนมัติ)"),
+    mainContentPlaceholder: t("Paste your content here and AI will automatically generate meta tags...", "วางเนื้อหาของคุณที่นี่ AI จะสร้าง Meta Tags ให้อัตโนมัติ..."),
+    analyzingHelperText: t("AI analyzing {count} words of content...", "AI กำลังวิเคราะห์เนื้อหา {count} คำ..."),
+    // Generate Button
+    generatingButton: t("Generating...", "กำลังสร้าง..."),
+    generateButton: t("Generate Meta Tags with AI", "สร้าง Meta Tags ด้วย AI"),
+    // AI Enhanced Notification
+    aiEnhancedTitle: t("AI Enhanced!", "AI เพิ่มประสิทธิภาพแล้ว!"),
+    aiEnhancedDescription: t("Meta tags automatically generated from content analysis", "Meta Tags ถูกสร้างอัตโนมัติจากการวิเคราะห์เนื้อหา"),
+    // Tabs
+    tabBasic: t("Meta Tags (Auto-Enhanced)", "Meta Tags (ปรับปรุงอัตโนมัติ)"),
+    tabSocial: t("Social Media (Auto-Generated)", "โซเชียลมีเดีย (สร้างอัตโนมัติ)"),
+    // Basic Tab Fields
+    pageTitleLabel: t("Page Title (Auto-Generated)", "ชื่อหน้าเว็บ (สร้างอัตโนมัติ)"),
+    pageTitlePlaceholder: t("AI will generate title automatically...", "AI จะสร้างหัวข้อให้อัตโนมัติ..."),
+    metaDescriptionLabel: t("Meta Description (Auto-Generated)", "คำอธิบายเมตา (สร้างอัตโนมัติ)"),
+    metaDescriptionPlaceholder: t("AI will generate description automatically...", "AI จะสร้างคำอธิบายให้อัตโนมัติ..."),
+    keywordsLabel: t("Keywords (Auto-Extracted)", "คีย์เวิร์ด (ดึงข้อมูลอัตโนมัติ)"),
+    keywordsPlaceholder: t("AI will extract keywords automatically...", "AI จะดึงคำสำคัญให้อัตโนมัติ..."),
+    // Character Count & Badges
+    charactersSuffix: t("characters", "ตัวอักษร"),
+    badgeTooLong: t("Too long", "ยาวเกินไป"),
+    badgePerfect: t("Perfect", "ดี"),
+    badgeCanAddMore: t("Can add more", "สามารถเพิ่มได้"),
+    // Social Tab
+    ogTitle: t("Open Graph (Facebook)", "Open Graph (Facebook)"),
+    twitterTitle: t("Twitter Cards", "Twitter Cards"),
+    noTitleFallback: t("No title", "ไม่มีหัวข้อ"),
+    noDescriptionFallback: t("No description", "ไม่มีคำอธิบาย"),
+    // Copy Button
+    copyButtonCopied: t("Copied!", "คัดลอกแล้ว!"),
+    copyButtonDefault: t("Copy HTML Meta Tags", "คัดลอก HTML Meta Tags"),
+    // Toasts
+    toastContentRequiredTitle: t("Please enter content", "กรุณาใส่เนื้อหา"),
+    toastContentRequiredDesc: t("Enter content to generate meta tags automatically", "ใส่เนื้อหาเพื่อสร้าง Meta Tags อัตโนมัติ"),
+    toastGeneratedTitle: t("Smart Meta Tags Generated!", "สร้าง Meta Tags สำเร็จ!"),
+    toastGeneratedDesc: t("AI has generated optimized meta tags.", "AI สร้าง Meta Tags ที่เหมาะสมแล้ว"),
+    toastFailedTitle: t("Meta Tag Generation Failed", "การสร้าง Meta Tag ล้มเหลว"),
+    toastFailedDescDefault: t("An error occurred while generating meta tags.", "เกิดข้อผิดพลาดขณะสร้าง Meta Tags"),
+    toastFailedApiKey: t("The Gemini API key is invalid or missing. Please go to Settings to add it.", "คีย์ Gemini API ไม่ถูกต้องหรือขาดหายไป กรุณาไปที่การตั้งค่าเพื่อเพิ่มคีย์"),
+    toastCopiedTitle: t("Copied!", "คัดลอกแล้ว!"),
+    toastCopiedDesc: t("Meta tags copied to clipboard", "Meta Tags ถูกคัดลอกไปยังคลิปบอร์ดแล้ว"),
+    // Fallback parsing
+    fallbackNoTitle: t("Could not extract title", "ไม่สามารถดึงข้อมูลชื่อเรื่องได้"),
+    fallbackNoDescription: t("Could not extract description", "ไม่สามารถดึงข้อมูลคำอธิบายได้"),
+    fallbackNoKeywords: t("Could not extract keywords", "ไม่สามารถดึงข้อมูลคีย์เวิร์ดได้"),
+  };
+
   // Auto-generate when content changes and length is sufficient
   useEffect(() => {
     if (content && content.length > 100 && !autoEnhanced && !isGenerating) {
-      // Debounce or make this user-initiated if it causes too many API calls on fast typing.
-      // For now, direct call.
       generateMetaTags();
     }
-  }, [content, autoEnhanced, isGenerating, language]); // Added language to dependencies
+  }, [content, autoEnhanced, isGenerating, language]);
 
   const parseMetaTagResponse = (text: string): { title: string; description: string; keywords: string } => {
     let genTitle = '';
@@ -54,9 +109,9 @@ const MetaTagsManager = () => {
         genDescription = lines[1] || '';
         genKeywords = lines[2] || '';
     } else {
-        if (!genTitle) genTitle = "Could not extract title";
-        if (!genDescription) genDescription = "Could not extract description";
-        if (!genKeywords) genKeywords = "Could not extract keywords";
+        if (!genTitle) genTitle = T.fallbackNoTitle;
+        if (!genDescription) genDescription = T.fallbackNoDescription;
+        if (!genKeywords) genKeywords = T.fallbackNoKeywords;
     }
 
 
@@ -66,18 +121,18 @@ const MetaTagsManager = () => {
   const generateMetaTags = async () => {
     if (!content.trim()) {
       toast({
-        title: language === 'th' ? "กรุณาใส่เนื้อหา" : "Please enter content",
-        description: language === 'th' ? "ใส่เนื้อหาเพื่อสร้าง Meta Tags อัตโนมัติ" : "Enter content to generate meta tags automatically",
+        title: T.toastContentRequiredTitle,
+        description: T.toastContentRequiredDesc,
         variant: "destructive",
       });
       return;
     }
-    setApiKeyError(null); // Clear previous API key error
+    setApiKeyError(null);
     setIsGenerating(true);
-    setAutoEnhanced(false); // Reset this flag before generation
+    setAutoEnhanced(false);
 
     const langInstruction = language === 'th' ? 'Thai' : 'English';
-    const titleCharLimit = language === 'th' ? 65 : 60; // Thai titles can sometimes be a bit longer due to script
+    const titleCharLimit = language === 'th' ? 65 : 60;
     const descCharLimit = language === 'th' ? 150 : 160;
 
     const prompt = `Based on the following content in ${langInstruction}, generate SEO-friendly meta tags.
@@ -100,7 +155,7 @@ Keywords: [keyword1, keyword2, keyword3, keyword4, keyword5]
 Generate the meta tags in ${langInstruction}.`;
 
     try {
-      const response = await callGeminiApi(prompt); // API key is now handled by the service
+      const response = await callGeminiApi(prompt);
       const { title: genTitle, description: genDescription, keywords: genKeywords } = parseMetaTagResponse(response);
       
       setTitle(genTitle);
@@ -109,26 +164,25 @@ Generate the meta tags in ${langInstruction}.`;
       setAutoEnhanced(true);
       
       toast({
-        title: language === 'th' ? "สร้าง Meta Tags สำเร็จ!" : "Smart Meta Tags Generated!",
-        description: language === 'th' ? "AI สร้าง Meta Tags ที่เหมาะสมแล้ว" : "AI has generated optimized meta tags."
+        title: T.toastGeneratedTitle,
+        description: T.toastGeneratedDesc,
       });
 
     } catch (error: any) {
       console.error("Error generating meta tags with Gemini:", error);
-      let errorDesc = "An error occurred while generating meta tags.";
+      let errorDesc = T.toastFailedDescDefault;
       if (error.isApiKeyInvalid) {
-        errorDesc = "The Gemini API key is invalid or missing. Please go to Settings to add it.";
+        errorDesc = T.toastFailedApiKey;
         setApiKeyError(errorDesc);
       } else if (error.message) {
         errorDesc = error.message;
       }
-      toast({ title: "Meta Tag Generation Failed", description: errorDesc, variant: "destructive" });
+      toast({ title: T.toastFailedTitle, description: errorDesc, variant: "destructive" });
     } finally {
       setIsGenerating(false);
     }
   };
 
-  // Remove extractKeyPhrases, generateSmartDescription, extractSmartKeywords as they are replaced by Gemini
 
   const copyToClipboard = () => {
     const metaHtml = `<title>${title}</title>
@@ -144,8 +198,8 @@ Generate the meta tags in ${langInstruction}.`;
     setTimeout(() => setCopied(false), 2000);
     
     toast({
-      title: language === 'th' ? "คัดลอกแล้ว!" : "Copied!",
-      description: language === 'th' ? "Meta Tags ถูกคัดลอกไปยังคลิปบอร์ดแล้ว" : "Meta tags copied to clipboard"
+      title: T.toastCopiedTitle,
+      description: T.toastCopiedDesc,
     });
   };
 
@@ -156,45 +210,40 @@ Generate the meta tags in ${langInstruction}.`;
           <div>
             <CardTitle className="flex items-center gap-2">
               <Globe className="h-5 w-5" />
-              {language === 'th' ? 'จัดการ Meta Tags อัจฉริยะ' : 'Smart Meta Tags Manager'}
+              {T.cardTitle}
               <Sparkles className="h-4 w-4 text-purple-500" />
             </CardTitle>
             <CardDescription>
-              {language === 'th' 
-                ? 'AI สร้าง Meta Tags อัตโนมัติสำหรับเนื้อหาของคุณ'
-                : 'AI automatically generates meta tags for your content.'
-              }
+              {T.cardDescription}
             </CardDescription>
           </div>
-          {/* Language switcher is now global, so no local buttons here.
-              The global LanguageSwitcher component in SEODashboard handles this. */}
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-2">
-              {language === 'th' ? 'เนื้อหาหลัก (AI จะวิเคราะห์อัตโนมัติ)' : 'Main Content (AI will auto-analyze)'}
+              {T.mainContentLabel}
             </label>
             <Textarea
-              placeholder={language === 'th' 
-                ? 'วางเนื้อหาของคุณที่นี่ AI จะสร้าง Meta Tags ให้อัตโนมัติ...'
-                : 'Paste your content here and AI will automatically generate meta tags...'
-              }
+              placeholder={T.mainContentPlaceholder}
               value={content}
               onChange={(e) => {
                 setContent(e.target.value);
-                setAutoEnhanced(false); // Reset auto-enhanced flag when content changes
+                setAutoEnhanced(false);
               }}
               rows={4}
             />
             {content && content.length > 50 && (
               <div className="mt-2 text-xs text-green-600 bg-green-50 p-2 rounded">
-                🤖 {language === 'th' 
-                  ? `AI กำลังวิเคราะห์เนื้อหา ${content.split(' ').length} คำ...`
-                  : `AI analyzing ${content.split(' ').length} words of content...`
-                }
+                🤖 {T.analyzingHelperText.replace("{count}", content.split(' ').length.toString())}
               </div>
+            )}
+             {apiKeyError && (
+                <div className="mt-2 p-2 text-xs bg-red-100 border border-red-300 text-red-700 rounded-md flex items-center gap-1">
+                  <AlertTriangleIcon className="h-4 w-4 flex-shrink-0" />
+                  {apiKeyError}
+                </div>
             )}
           </div>
           
@@ -202,8 +251,8 @@ Generate the meta tags in ${langInstruction}.`;
             <Button onClick={generateMetaTags} disabled={isGenerating} className="w-full">
               <Wand2 className="h-4 w-4 mr-2" />
               {isGenerating 
-                ? (language === 'th' ? 'กำลังสร้าง...' : 'Generating...') 
-                : (language === 'th' ? 'สร้าง Meta Tags ด้วย AI' : 'Generate Meta Tags with AI')
+                ? T.generatingButton
+                : T.generateButton
               }
             </Button>
           )}
@@ -213,14 +262,11 @@ Generate the meta tags in ${langInstruction}.`;
               <div className="flex items-center gap-2 text-purple-700">
                 <CheckCircle className="h-4 w-4" />
                 <span className="text-sm font-medium">
-                  {language === 'th' ? 'AI เพิ่มประสิทธิภาพแล้ว!' : 'AI Enhanced!'}
+                  {T.aiEnhancedTitle}
                 </span>
               </div>
               <p className="text-xs text-purple-600 mt-1">
-                {language === 'th' 
-                  ? 'Meta Tags ถูกสร้างอัตโนมัติจากการวิเคราะห์เนื้อหา'
-                  : 'Meta tags automatically generated from content analysis'
-                }
+                {T.aiEnhancedDescription}
               </p>
             </div>
           )}
@@ -229,61 +275,61 @@ Generate the meta tags in ${langInstruction}.`;
         <Tabs defaultValue="basic" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="basic">
-              {language === 'th' ? 'Meta Tags (Auto-Enhanced)' : 'Meta Tags (Auto-Enhanced)'}
+              {T.tabBasic}
             </TabsTrigger>
             <TabsTrigger value="social">
-              {language === 'th' ? 'Social Media (Auto-Generated)' : 'Social Media (Auto-Generated)'}
+              {T.tabSocial}
             </TabsTrigger>
           </TabsList>
           
           <TabsContent value="basic" className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2">
-                {language === 'th' ? 'หัวข้อหน้า (Auto-Generated)' : 'Page Title (Auto-Generated)'}
+                {T.pageTitleLabel}
               </label>
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder={language === 'th' ? 'AI จะสร้างหัวข้อให้อัตโนมัติ...' : 'AI will generate title automatically...'}
+                placeholder={T.pageTitlePlaceholder}
               />
               <div className="flex justify-between text-xs text-gray-500 mt-1">
-                <span>{title.length} {language === 'th' ? 'ตัวอักษร' : 'characters'}</span>
+                <span>{title.length} {T.charactersSuffix}</span>
                 <Badge variant={title.length > 60 ? 'destructive' : title.length > 50 ? 'secondary' : 'default'}>
-                  {title.length > 60 ? (language === 'th' ? 'ยาวเกินไป' : 'Too long') : 
-                   title.length > 50 ? (language === 'th' ? 'ดี' : 'Perfect') : 
-                   (language === 'th' ? 'สามารถเพิ่มได้' : 'Can add more')}
+                  {title.length > 60 ? T.badgeTooLong :
+                   title.length > 50 ? T.badgePerfect :
+                   T.badgeCanAddMore}
                 </Badge>
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-2">
-                {language === 'th' ? 'คำอธิบาย (Auto-Generated)' : 'Meta Description (Auto-Generated)'}
+                {T.metaDescriptionLabel}
               </label>
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder={language === 'th' ? 'AI จะสร้างคำอธิบายให้อัตโนมัติ...' : 'AI will generate description automatically...'}
+                placeholder={T.metaDescriptionPlaceholder}
                 rows={3}
               />
               <div className="flex justify-between text-xs text-gray-500 mt-1">
-                <span>{description.length} {language === 'th' ? 'ตัวอักษร' : 'characters'}</span>
+                <span>{description.length} {T.charactersSuffix}</span>
                 <Badge variant={description.length > 160 ? 'destructive' : description.length > 150 ? 'secondary' : 'default'}>
-                  {description.length > 160 ? (language === 'th' ? 'ยาวเกินไป' : 'Too long') : 
-                   description.length > 150 ? (language === 'th' ? 'ดี' : 'Perfect') : 
-                   (language === 'th' ? 'สามารถเพิ่มได้' : 'Can add more')}
+                  {description.length > 160 ? T.badgeTooLong :
+                   description.length > 150 ? T.badgePerfect :
+                   T.badgeCanAddMore}
                 </Badge>
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-2">
-                {language === 'th' ? 'คำสำคัญ (Auto-Extracted)' : 'Keywords (Auto-Extracted)'}
+                {T.keywordsLabel}
               </label>
               <Input
                 value={keywords}
                 onChange={(e) => setKeywords(e.target.value)}
-                placeholder={language === 'th' ? 'AI จะดึงคำสำคัญให้อัตโนมัติ...' : 'AI will extract keywords automatically...'}
+                placeholder={T.keywordsPlaceholder}
               />
             </div>
           </TabsContent>
@@ -292,28 +338,28 @@ Generate the meta tags in ${langInstruction}.`;
             <div className="grid grid-cols-2 gap-4">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm">Open Graph (Facebook)</CardTitle>
+                  <CardTitle className="text-sm">{T.ogTitle}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div className="text-xs text-gray-600">
-                    <strong>og:title:</strong> {title || (language === 'th' ? 'ไม่มีหัวข้อ' : 'No title')}
+                    <strong>og:title:</strong> {title || T.noTitleFallback}
                   </div>
                   <div className="text-xs text-gray-600">
-                    <strong>og:description:</strong> {description || (language === 'th' ? 'ไม่มีคำอธิบาย' : 'No description')}
+                    <strong>og:description:</strong> {description || T.noDescriptionFallback}
                   </div>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm">Twitter Cards</CardTitle>
+                  <CardTitle className="text-sm">{T.twitterTitle}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div className="text-xs text-gray-600">
-                    <strong>twitter:title:</strong> {title || (language === 'th' ? 'ไม่มีหัวข้อ' : 'No title')}
+                    <strong>twitter:title:</strong> {title || T.noTitleFallback}
                   </div>
                   <div className="text-xs text-gray-600">
-                    <strong>twitter:description:</strong> {description || (language === 'th' ? 'ไม่มีคำอธิบาย' : 'No description')}
+                    <strong>twitter:description:</strong> {description || T.noDescriptionFallback}
                   </div>
                 </CardContent>
               </Card>
@@ -326,8 +372,8 @@ Generate the meta tags in ${langInstruction}.`;
             <Button onClick={copyToClipboard} className="w-full">
               {copied ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
               {copied 
-                ? (language === 'th' ? 'คัดลอกแล้ว!' : 'Copied!') 
-                : (language === 'th' ? 'คัดลอก HTML Meta Tags' : 'Copy HTML Meta Tags')
+                ? T.copyButtonCopied
+                : T.copyButtonDefault
               }
             </Button>
           </div>
