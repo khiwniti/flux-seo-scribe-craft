@@ -128,10 +128,17 @@ console.log('📦 FluxSEOApp script loaded, window.FluxSEOApp available:', !!win
 
 // Auto-initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('FluxSEOApp: DOM ready, checking for root element...');
-  const rootElement = document.getElementById('root');
+  console.log('FluxSEOApp: DOM ready, attempting to auto-initialize...');
+  // Access WordPress localized data for the root element ID
+  const containerIdFromWP = window.fluxSeoAppData?.root_element_id || 'root';
+  console.log(`FluxSEOApp: Attempting to initialize with container ID: ${containerIdFromWP}`);
+
+  const rootElement = document.getElementById(containerIdFromWP);
   if (rootElement) {
-    window.FluxSEOApp.init();
+    console.log(`FluxSEOApp: Found root element #${containerIdFromWP}, initializing.`);
+    window.FluxSEOApp.init(containerIdFromWP);
+  } else {
+    console.warn(`FluxSEOApp: Root element #${containerIdFromWP} not found on DOMContentLoaded. App will not auto-initialize unless 'fluxSeoInit' event is dispatched or FluxSEOApp.init() is called manually.`);
   }
 });
 
