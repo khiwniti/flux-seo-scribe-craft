@@ -28,8 +28,48 @@ const ContentAnalyzer = () => {
   const [analysis, setAnalysis] = useState<AnalysisResults | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [apiKeyError, setApiKeyError] = useState<string | null>(null);
-  const { language } = useLanguage(); // Consume global language context
+  const { language } = useLanguage();
   const { toast } = useToast();
+
+  const t = (enText: string, thText: string): string => {
+    return language === 'th' ? thText : enText;
+  };
+
+  // Translations
+  const T = {
+    contentInput: t("Content Input", "ข้อมูลเนื้อหา"),
+    enterContentForAnalysis: t("Enter your content and SEO parameters for analysis", "ป้อนเนื้อหาและพารามิเตอร์ SEO ของคุณเพื่อการวิเคราะห์"),
+    pageTitle: t("Page Title", "ชื่อหน้าเว็บ"),
+    enterPageTitle: t("Enter your page title...", "ป้อนชื่อหน้าเว็บของคุณ..."),
+    metaDescription: t("Meta Description", "คำอธิบายเมตา"),
+    enterMetaDescription: t("Enter meta description...", "ป้อนคำอธิบายเมตา..."),
+    targetKeywords: t("Target Keywords (comma-separated)", "คีย์เวิร์ดเป้าหมาย (คั่นด้วยจุลภาค)"),
+    keywordsPlaceholder: t("SEO, optimization, content marketing...", "SEO, การเพิ่มประสิทธิภาพ, การตลาดเนื้อหา..."),
+    content: t("Content", "เนื้อหา"),
+    pasteContentForAnalysis: t("Paste your content here for analysis...", "วางเนื้อหาของคุณที่นี่เพื่อการวิเคราะห์..."),
+    analyzing: t("Analyzing...", "กำลังวิเคราะห์..."),
+    analyzeContent: t("Analyze Content", "วิเคราะห์เนื้อหา"),
+    analysisResults: t("Analysis Results", "ผลการวิเคราะห์"),
+    seoOptimizationInsights: t("SEO optimization insights and recommendations", "ข้อมูลเชิงลึกและคำแนะนำเพื่อเพิ่มประสิทธิภาพ SEO"),
+    excellent: t("Excellent", "ยอดเยี่ยม"),
+    good: t("Good", "ดี"),
+    needsWork: t("Needs Work", "ต้องปรับปรุง"),
+    wordCount: t("Word Count", "จำนวนคำ"),
+    readability: t("Readability", "การอ่านง่าย"),
+    optimizationSuggestions: t("Optimization Suggestions", "คำแนะนำในการปรับปรุง"),
+    enterContentPrompt: t("Enter content above and click \"Analyze Content\" to see results", "ป้อนเนื้อหาด้านบนแล้วคลิก \"วิเคราะห์เนื้อหา\" เพื่อดูผลลัพธ์"),
+    toastContentRequiredTitle: t("Content Required", "จำเป็นต้องมีเนื้อหา"),
+    toastContentRequiredDesc: t("Please enter content to analyze.", "กรุณาป้อนเนื้อหาเพื่อวิเคราะห์"),
+    toastAnalysisFailedTitle: t("Analysis Failed", "การวิเคราะห์ล้มเหลว"),
+    toastAnalysisErrorDesc: t("An error occurred during content analysis.", "เกิดข้อผิดพลาดระหว่างการวิเคราะห์เนื้อหา"),
+    apiKeyErrorMsg: t("The Gemini API key is invalid or missing. Please go to Settings to add it.", "คีย์ Gemini API ไม่ถูกต้องหรือขาดหายไป กรุณาไปที่การตั้งค่าเพื่อเพิ่มคีย์"),
+    errorLabel: t("Error", "ข้อผิดพลาด"),
+    analysisFailedLabel: t("Analysis failed.", "การวิเคราะห์ล้มเหลว"),
+    noSuggestionsExtracted: t("No specific suggestions extracted. Review the raw Gemini output if provided.", "ไม่พบคำแนะนำเฉพาะ ตรวจสอบผลลัพธ์ดิบจาก Gemini หากมี"),
+    geminiNoSuggestions: t("Gemini did not provide specific suggestions in the expected format.", "Gemini ไม่ได้ให้คำแนะนำเฉพาะในรูปแบบที่คาดไว้"),
+    noJustification: t("No justification provided.", "ไม่ได้ให้เหตุผลประกอบ"),
+    notAvailable: t("N/A", "ไม่มีข้อมูล"),
+  };
 
   const parseGeminiResponse = (responseText: string): Partial<AnalysisResults> => {
     const results: Partial<AnalysisResults> = { suggestions: [] };
@@ -67,9 +107,9 @@ const ContentAnalyzer = () => {
 
     // Fallback if parsing fails for some fields
     if (results.seoScore === undefined) results.seoScore = 0; // Default if not found
-    if (results.readabilityScore === undefined) results.readabilityScore = "N/A";
+    if (results.readabilityScore === undefined) results.readabilityScore = T.notAvailable;
     if (!results.suggestions || results.suggestions.length === 0) {
-        results.suggestions = ["No specific suggestions extracted. Review the raw Gemini output if provided."];
+        results.suggestions = [T.noSuggestionsExtracted];
     }
     return results;
   };
@@ -78,13 +118,13 @@ const ContentAnalyzer = () => {
   const analyzeContent = async () => {
     if (!content.trim()) {
       toast({
-        title: "Content Required",
-        description: "Please enter content to analyze.",
+        title: T.toastContentRequiredTitle,
+        description: T.toastContentRequiredDesc,
         variant: "destructive",
       });
       return;
     }
-    setApiKeyError(null); // Clear previous API key error
+    setApiKeyError(null);
     setIsAnalyzing(true);
     setAnalysis(null);
 
@@ -116,30 +156,30 @@ Format the response clearly.`;
       const parsedAnalysis = parseGeminiResponse(rawResponse);
 
       setAnalysis({
-        wordCount: content.split(/\s+/).filter(Boolean).length, // Calculate locally
-        readabilityScore: parsedAnalysis.readabilityScore || "N/A",
+        wordCount: content.split(/\s+/).filter(Boolean).length,
+        readabilityScore: parsedAnalysis.readabilityScore || T.notAvailable,
         seoScore: parsedAnalysis.seoScore || 0,
-        suggestions: parsedAnalysis.suggestions && parsedAnalysis.suggestions.length > 0 ? parsedAnalysis.suggestions : ["Gemini did not provide specific suggestions in the expected format."],
-        keywordDensity: parsedAnalysis.keywordDensity || "N/A",
-        justification: parsedAnalysis.justification || "No justification provided.",
+        suggestions: parsedAnalysis.suggestions && parsedAnalysis.suggestions.length > 0 ? parsedAnalysis.suggestions : [T.geminiNoSuggestions],
+        keywordDensity: parsedAnalysis.keywordDensity || T.notAvailable,
+        justification: parsedAnalysis.justification || T.noJustification,
       });
 
     } catch (error: any) {
       console.error("Error analyzing content with Gemini:", error);
-      let errorDesc = "An error occurred during content analysis.";
+      let errorDesc = T.toastAnalysisErrorDesc;
       if (error.isApiKeyInvalid) {
-        errorDesc = "The Gemini API key is invalid or missing. Please go to Settings to add it.";
+        errorDesc = T.apiKeyErrorMsg;
         setApiKeyError(errorDesc);
       } else if (error.message) {
         errorDesc = error.message;
       }
-      toast({ title: "Analysis Failed", description: errorDesc, variant: "destructive" });
-      setAnalysis({ // Provide some feedback in the analysis area
+      toast({ title: T.toastAnalysisFailedTitle, description: errorDesc, variant: "destructive" });
+      setAnalysis({
         wordCount: content.split(/\s+/).filter(Boolean).length,
-        readabilityScore: "Error",
+        readabilityScore: T.errorLabel,
         seoScore: 0,
         suggestions: [errorDesc],
-        justification: "Analysis failed."
+        justification: T.analysisFailedLabel,
       });
     } finally {
       setIsAnalyzing(false);
@@ -153,12 +193,20 @@ Format the response clearly.`;
     return 'text-red-600';
   };
 
-  const getScoreBadge = (score: number | string) => {
+  const getScoreBadgeText = (score: number | string) => {
     const numScore = typeof score === 'string' ? parseFloat(score) || 0 : score;
-    if (numScore >= 80) return { variant: 'default' as const, className: 'bg-green-100 text-green-700', text: 'Excellent' };
-    if (numScore >= 60) return { variant: 'secondary' as const, className: 'bg-yellow-100 text-yellow-700', text: 'Good' };
-    return { variant: 'destructive' as const, className: 'bg-red-100 text-red-700', text: 'Needs Work' };
+    if (numScore >= 80) return T.excellent;
+    if (numScore >= 60) return T.good;
+    return T.needsWork;
+  }
+
+  const getScoreBadgeVariantClass = (score: number | string) => {
+    const numScore = typeof score === 'string' ? parseFloat(score) || 0 : score;
+    if (numScore >= 80) return { variant: 'default' as const, className: 'bg-green-100 text-green-700' };
+    if (numScore >= 60) return { variant: 'secondary' as const, className: 'bg-yellow-100 text-yellow-700' };
+    return { variant: 'destructive' as const, className: 'bg-red-100 text-red-700' };
   };
+
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
@@ -167,61 +215,70 @@ Format the response clearly.`;
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Target className="h-5 w-5 text-blue-600" />
-            Content Input
+            {T.contentInput}
           </CardTitle>
           <CardDescription>
-            Enter your content and SEO parameters for analysis
+            {T.enterContentForAnalysis}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Page Title</Label>
+            <Label htmlFor="title">{T.pageTitle}</Label>
             <Input
               id="title"
-              placeholder="Enter your page title..."
+              placeholder={T.enterPageTitle}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              disabled={isAnalyzing}
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="meta">Meta Description</Label>
+            <Label htmlFor="meta">{T.metaDescription}</Label>
             <Textarea
               id="meta"
-              placeholder="Enter meta description..."
+              placeholder={T.enterMetaDescription}
               value={metaDescription}
               onChange={(e) => setMetaDescription(e.target.value)}
               rows={2}
+              disabled={isAnalyzing}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="keywords">Target Keywords (comma-separated)</Label>
+            <Label htmlFor="keywords">{T.targetKeywords}</Label>
             <Input
               id="keywords"
-              placeholder="SEO, optimization, content marketing..."
+              placeholder={T.keywordsPlaceholder}
               value={keywords}
               onChange={(e) => setKeywords(e.target.value)}
+              disabled={isAnalyzing}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="content">Content</Label>
+            <Label htmlFor="content">{T.content}</Label>
             <Textarea
               id="content"
-              placeholder="Paste your content here for analysis..."
+              placeholder={T.pasteContentForAnalysis}
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={8}
+              disabled={isAnalyzing}
             />
           </div>
-
+           {apiKeyError && (
+            <div className="mt-2 p-2 text-xs bg-red-100 border border-red-300 text-red-700 rounded-md flex items-center gap-1">
+              <AlertTriangleIcon className="h-4 w-4 flex-shrink-0" />
+              {apiKeyError}
+            </div>
+          )}
           <Button 
             onClick={analyzeContent} 
             className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
             disabled={isAnalyzing}
           >
-            {isAnalyzing ? 'Analyzing...' : 'Analyze Content'}
+            {isAnalyzing ? T.analyzing : T.analyzeContent}
           </Button>
         </CardContent>
       </Card>
@@ -231,10 +288,10 @@ Format the response clearly.`;
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-green-600" />
-            Analysis Results
+            {T.analysisResults}
           </CardTitle>
           <CardDescription>
-            SEO optimization insights and recommendations
+            {T.seoOptimizationInsights}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -247,24 +304,26 @@ Format the response clearly.`;
                 </div>
                 <div className="mt-2">
                   <Badge 
-                    variant={getScoreBadge(analysis.seoScore).variant}
-                    className={getScoreBadge(analysis.seoScore).className}
+                    variant={getScoreBadgeVariantClass(analysis.seoScore).variant}
+                    className={getScoreBadgeVariantClass(analysis.seoScore).className}
                   >
-                    {getScoreBadge(analysis.seoScore).text}
+                    {getScoreBadgeText(analysis.seoScore)}
                   </Badge>
                 </div>
-                <Progress value={analysis.seoScore} className="mt-3" />
+                <Progress value={typeof analysis.seoScore === 'number' ? analysis.seoScore : 0} className="mt-3" />
               </div>
 
               {/* Metrics */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-3 bg-blue-50 rounded-lg">
-                  <div className="text-sm text-gray-600">Word Count</div>
+                  <div className="text-sm text-gray-600">{T.wordCount}</div>
                   <div className="text-2xl font-bold text-blue-600">{analysis.wordCount}</div>
                 </div>
                 <div className="p-3 bg-green-50 rounded-lg">
-                  <div className="text-sm text-gray-600">Readability</div>
-                  <div className="text-2xl font-bold text-green-600">{analysis.readabilityScore}%</div>
+                  <div className="text-sm text-gray-600">{T.readability}</div>
+                  <div className="text-2xl font-bold text-green-600">
+                    {typeof analysis.readabilityScore === 'number' ? `${analysis.readabilityScore}%` : analysis.readabilityScore}
+                  </div>
                 </div>
               </div>
 
@@ -272,7 +331,7 @@ Format the response clearly.`;
               <div className="space-y-3">
                 <h4 className="font-semibold flex items-center gap-2">
                   <AlertCircle className="h-4 w-4 text-orange-500" />
-                  Optimization Suggestions
+                  {T.optimizationSuggestions}
                 </h4>
                 {analysis.suggestions.map((suggestion, index) => (
                   <div key={index} className="flex items-start gap-2 p-2 bg-orange-50 rounded-lg">
@@ -285,7 +344,7 @@ Format the response clearly.`;
           ) : (
             <div className="text-center py-12 text-gray-500">
               <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Enter content above and click "Analyze Content" to see results</p>
+              <p>{T.enterContentPrompt}</p>
             </div>
           )}
         </CardContent>

@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Target, TrendingUp, Lightbulb, Search, Sparkles, Brain } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '@/contexts/LanguageContext'; // Import useLanguage
 
 interface Keyword {
   keyword: string;
@@ -16,7 +17,7 @@ interface Keyword {
 }
 
 const SmartKeywordResearch = () => {
-  const [language, setLanguage] = useState('en');
+  const { language } = useLanguage(); // Use global language context
   const [seedKeyword, setSeedKeyword] = useState('');
   const [isResearching, setIsResearching] = useState(false);
   const [keywords, setKeywords] = useState<Keyword[]>([]);
@@ -25,6 +26,58 @@ const SmartKeywordResearch = () => {
   const [autoSuggestions, setAutoSuggestions] = useState<string[]>([]);
   const { toast } = useToast();
 
+  const t = (enText: string, thText: string): string => {
+    return language === 'th' ? thText : enText;
+  };
+
+  const T = {
+    cardTitle: t("Intelligent Keyword Research", "วิจัยคำสำคัญอัจฉริยะ"),
+    cardDescription: t("AI analyzes and suggests keywords automatically - minimal manual input required", "AI วิเคราะห์และแนะนำคำสำคัญอัตโนมัติ - ลดการกรอกข้อมูลด้วยมือ"),
+    inputPlaceholder: t('Enter seed keyword e.g. "digital marketing"', 'ใส่คำสำคัญหลัก เช่น "การตลาดออนไลน์"'),
+    researchingButton: t("Researching...", "กำลังวิจัย..."),
+    researchButton: t("Smart Research", "วิจัยอัจฉริยะ"),
+    autoSuggestionsLabel: t("Auto Suggestions", "คำแนะนำอัตโนมัติ"),
+    tabMainKeywords: t("Main Keywords", "คำสำคัญหลัก"),
+    tabLongTail: t("Long-tail Keywords", "คำสำคัญยาว"),
+    tabContentIdeas: t("Content Ideas", "ไอเดียเนื้อหา"),
+    difficultyEasy: t("Easy", "ง่าย"),
+    difficultyMedium: t("Medium", "ปานกลาง"),
+    difficultyHard: t("Hard", "ยาก"),
+    searchVolumeLabel: t("Search Volume:", "ปริมาณการค้นหา:"),
+    perMonthSuffix: t("/month", "/เดือน"),
+    difficultyLabel: t("Difficulty:", "ความยาก:"),
+    cpcLabel: t("CPC:", "CPC:"),
+    badgeRecommended: t("Recommended", "แนะนำ"),
+    contentIdeaDesc: t("AI-recommended content to boost organic traffic", "เนื้อหาที่แนะนำจาก AI สำหรับเพิ่ม organic traffic"),
+    toastKeywordRequiredTitle: t("Please enter a keyword", "กรุณาใส่คำสำคัญ"),
+    toastKeywordRequiredDesc: t("Enter a seed keyword to start research", "ใส่คำสำคัญหลักเพื่อเริ่มการวิจัย"),
+    toastResearchCompleteTitle: t("Smart Keyword Research Complete!", "วิจัยคำสำคัญเสร็จสิ้น!"),
+    toastResearchCompleteDesc: t("Found {count} keywords with deep insights", "พบคำสำคัญ {count} คำ พร้อมข้อมูลเชิงลึก"),
+    // For mock data generation
+    mockSuffixGuide: t("guide", "คู่มือ"),
+    mockSuffixHowTo: t("how to", "วิธีทำ"),
+    mockSuffixYear: t("2024", "ปี 2024"),
+    mockSuffixTips: t("tips", "เทคนิค"),
+    mockSuffixBenefits: t("benefits", "ข้อดี"),
+    mockSuffixExamples: t("examples", "ตัวอย่าง"),
+    mockSuffixTools: t("tools", "เครื่องมือ"),
+    mockLongTailPrefix1: t("how to choose the best", "วิธีเลือก"),
+    mockLongTailSuffix1: t("for beginners", "ที่ดีที่สุด"),
+    mockLongTailSuffix2: t("beginner guide 2024", "สำหรับมือใหม่ 2024"),
+    mockLongTailPrefix3: t("pros and cons of", "ข้อดีข้อเสียของ"),
+    mockLongTailInfix4: t("vs competitors comparison", "vs คู่แข่ง เปรียบเทียบ"),
+    mockLongTailPrefix5: t("common mistakes with", "ปัญหาที่พบบ่อยกับ"),
+    mockLongTailPrefix6: t("future trends of", "แนวโน้มของ"),
+    mockLongTailSuffix6: t("in 2024", "ในปี 2024"),
+    mockIdeaPrefix1: t("Complete guide to", "คู่มือสมบูรณ์สำหรับ"),
+    mockIdeaPrefix2: t("10 advanced techniques for", "10 เทคนิคการใช้"),
+    mockIdeaInfix3: t("vs alternatives: detailed comparison", "vs คู่แข่ง: การเปรียบเทียบแบบละเอียด"),
+    mockIdeaPrefix4: t("Common pitfalls to avoid with", "ข้อผิดพลาดที่ควรหลีกเลี่ยงเมื่อใช้"),
+    mockIdeaPrefix5: t("Future of", "อนาคตของ"),
+    mockIdeaSuffix5: t("in 2024-2025", "ในปี 2024-2025"),
+  };
+
+
   // Auto-suggest related keywords as user types
   React.useEffect(() => {
     if (seedKeyword && seedKeyword.length > 2) {
@@ -32,17 +85,16 @@ const SmartKeywordResearch = () => {
     } else {
       setAutoSuggestions([]);
     }
-  }, [seedKeyword]);
+  }, [seedKeyword, language]); // Added language to re-generate suggestions if lang changes
 
   const generateAutoSuggestions = () => {
-    // Simulate real-time keyword suggestions
     const suggestions = [
-      `${seedKeyword} guide`,
-      `${seedKeyword} tutorial`,
-      `${seedKeyword} tips`,
-      `${seedKeyword} 2024`,
-      `${seedKeyword} benefits`,
-      `${seedKeyword} examples`
+      `${seedKeyword} ${T.mockSuffixGuide}`,
+      `${seedKeyword} ${T.mockSuffixHowTo}`,
+      `${seedKeyword} ${T.mockSuffixTips}`,
+      `${seedKeyword} ${T.mockSuffixYear}`,
+      `${seedKeyword} ${T.mockSuffixBenefits}`,
+      `${seedKeyword} ${T.mockSuffixExamples}`
     ];
     setAutoSuggestions(suggestions);
   };
@@ -50,8 +102,8 @@ const SmartKeywordResearch = () => {
   const researchKeywords = async () => {
     if (!seedKeyword.trim()) {
       toast({
-        title: language === 'th' ? "กรุณาใส่คำสำคัญ" : "Please enter a keyword",
-        description: language === 'th' ? "ใส่คำสำคัญหลักเพื่อเริ่มการวิจัย" : "Enter a seed keyword to start research",
+        title: T.toastKeywordRequiredTitle,
+        description: T.toastKeywordRequiredDesc,
         variant: "destructive"
       });
       return;
@@ -59,34 +111,33 @@ const SmartKeywordResearch = () => {
 
     setIsResearching(true);
     
-    // Enhanced AI keyword research with better algorithms
     setTimeout(() => {
       const mockKeywords: Keyword[] = [
         { keyword: `${seedKeyword}`, volume: Math.floor(Math.random() * 10000 + 1000), difficulty: Math.floor(Math.random() * 60 + 20), trend: 'up', cpc: Math.random() * 3 + 0.5 },
-        { keyword: `${seedKeyword} ${language === 'th' ? 'คู่มือ' : 'guide'}`, volume: Math.floor(Math.random() * 5000 + 500), difficulty: Math.floor(Math.random() * 50 + 15), trend: 'up', cpc: Math.random() * 2 + 0.3 },
-        { keyword: `${seedKeyword} ${language === 'th' ? 'วิธีทำ' : 'how to'}`, volume: Math.floor(Math.random() * 3000 + 300), difficulty: Math.floor(Math.random() * 40 + 10), trend: 'stable', cpc: Math.random() * 1.5 + 0.2 },
-        { keyword: `${seedKeyword} ${language === 'th' ? 'ปี 2024' : '2024'}`, volume: Math.floor(Math.random() * 2500 + 250), difficulty: Math.floor(Math.random() * 45 + 20), trend: 'up', cpc: Math.random() * 2.5 + 0.4 },
-        { keyword: `${seedKeyword} ${language === 'th' ? 'เทคนิค' : 'tips'}`, volume: Math.floor(Math.random() * 2000 + 200), difficulty: Math.floor(Math.random() * 35 + 15), trend: 'up', cpc: Math.random() * 1.8 + 0.3 },
-        { keyword: `${seedKeyword} ${language === 'th' ? 'ข้อดี' : 'benefits'}`, volume: Math.floor(Math.random() * 1800 + 180), difficulty: Math.floor(Math.random() * 30 + 10), trend: 'stable', cpc: Math.random() * 1.2 + 0.2 },
-        { keyword: `${seedKeyword} ${language === 'th' ? 'ตัวอย่าง' : 'examples'}`, volume: Math.floor(Math.random() * 1500 + 150), difficulty: Math.floor(Math.random() * 25 + 5), trend: 'up', cpc: Math.random() * 1.0 + 0.1 },
-        { keyword: `${seedKeyword} ${language === 'th' ? 'เครื่องมือ' : 'tools'}`, volume: Math.floor(Math.random() * 1200 + 120), difficulty: Math.floor(Math.random() * 40 + 20), trend: 'stable', cpc: Math.random() * 2.0 + 0.5 }
+        { keyword: `${seedKeyword} ${T.mockSuffixGuide}`, volume: Math.floor(Math.random() * 5000 + 500), difficulty: Math.floor(Math.random() * 50 + 15), trend: 'up', cpc: Math.random() * 2 + 0.3 },
+        { keyword: `${seedKeyword} ${T.mockSuffixHowTo}`, volume: Math.floor(Math.random() * 3000 + 300), difficulty: Math.floor(Math.random() * 40 + 10), trend: 'stable', cpc: Math.random() * 1.5 + 0.2 },
+        { keyword: `${seedKeyword} ${T.mockSuffixYear}`, volume: Math.floor(Math.random() * 2500 + 250), difficulty: Math.floor(Math.random() * 45 + 20), trend: 'up', cpc: Math.random() * 2.5 + 0.4 },
+        { keyword: `${seedKeyword} ${T.mockSuffixTips}`, volume: Math.floor(Math.random() * 2000 + 200), difficulty: Math.floor(Math.random() * 35 + 15), trend: 'up', cpc: Math.random() * 1.8 + 0.3 },
+        { keyword: `${seedKeyword} ${T.mockSuffixBenefits}`, volume: Math.floor(Math.random() * 1800 + 180), difficulty: Math.floor(Math.random() * 30 + 10), trend: 'stable', cpc: Math.random() * 1.2 + 0.2 },
+        { keyword: `${seedKeyword} ${T.mockSuffixExamples}`, volume: Math.floor(Math.random() * 1500 + 150), difficulty: Math.floor(Math.random() * 25 + 5), trend: 'up', cpc: Math.random() * 1.0 + 0.1 },
+        { keyword: `${seedKeyword} ${T.mockSuffixTools}`, volume: Math.floor(Math.random() * 1200 + 120), difficulty: Math.floor(Math.random() * 40 + 20), trend: 'stable', cpc: Math.random() * 2.0 + 0.5 }
       ];
 
       const mockLongTail = [
-        `${language === 'th' ? 'วิธีเลือก' : 'how to choose the best'} ${seedKeyword} ${language === 'th' ? 'ที่ดีที่สุด' : 'for beginners'}`,
-        `${seedKeyword} ${language === 'th' ? 'สำหรับมือใหม่ 2024' : 'beginner guide 2024'}`,
-        `${language === 'th' ? 'ข้อดีข้อเสียของ' : 'pros and cons of'} ${seedKeyword}`,
-        `${seedKeyword} ${language === 'th' ? 'vs คู่แข่ง เปรียบเทียบ' : 'vs competitors comparison'}`,
-        `${language === 'th' ? 'ปัญหาที่พบบ่อยกับ' : 'common mistakes with'} ${seedKeyword}`,
-        `${language === 'th' ? 'แนวโน้มของ' : 'future trends of'} ${seedKeyword} ${language === 'th' ? 'ในปี 2024' : 'in 2024'}`
+        `${T.mockLongTailPrefix1} ${seedKeyword} ${T.mockLongTailSuffix1}`,
+        `${seedKeyword} ${T.mockLongTailSuffix2}`,
+        `${T.mockLongTailPrefix3} ${seedKeyword}`,
+        `${seedKeyword} ${T.mockLongTailInfix4}`,
+        `${T.mockLongTailPrefix5} ${seedKeyword}`,
+        `${T.mockLongTailPrefix6} ${seedKeyword} ${T.mockLongTailSuffix6}`
       ];
 
       const mockContentIdeas = [
-        `${language === 'th' ? 'คู่มือสมบูรณ์สำหรับ' : 'Complete guide to'} ${seedKeyword}`,
-        `${language === 'th' ? '10 เทคนิคการใช้' : '10 advanced techniques for'} ${seedKeyword}`,
-        `${seedKeyword} ${language === 'th' ? 'vs คู่แข่ง: การเปรียบเทียบแบบละเอียด' : 'vs alternatives: detailed comparison'}`,
-        `${language === 'th' ? 'ข้อผิดพลาดที่ควรหลีกเลี่ยงเมื่อใช้' : 'Common pitfalls to avoid with'} ${seedKeyword}`,
-        `${language === 'th' ? 'อนาคตของ' : 'Future of'} ${seedKeyword} ${language === 'th' ? 'ในปี 2024-2025' : 'in 2024-2025'}`
+        `${T.mockIdeaPrefix1} ${seedKeyword}`,
+        `${T.mockIdeaPrefix2} ${seedKeyword}`,
+        `${seedKeyword} ${T.mockIdeaInfix3}`,
+        `${T.mockIdeaPrefix4} ${seedKeyword}`,
+        `${T.mockIdeaPrefix5} ${seedKeyword} ${T.mockIdeaSuffix5}`
       ];
 
       setKeywords(mockKeywords);
@@ -95,8 +146,8 @@ const SmartKeywordResearch = () => {
       setIsResearching(false);
       
       toast({
-        title: language === 'th' ? "วิจัยคำสำคัญเสร็จสิ้น!" : "Smart Keyword Research Complete!",
-        description: language === 'th' ? `พบคำสำคัญ ${mockKeywords.length} คำ พร้อมข้อมูลเชิงลึก` : `Found ${mockKeywords.length} keywords with deep insights`
+        title: T.toastResearchCompleteTitle,
+        description: T.toastResearchCompleteDesc.replace("{count}", mockKeywords.length.toString())
       });
     }, 2500);
   };
@@ -108,9 +159,9 @@ const SmartKeywordResearch = () => {
   };
 
   const getDifficultyText = (difficulty: number) => {
-    if (difficulty < 30) return language === 'th' ? 'ง่าย' : 'Easy';
-    if (difficulty < 60) return language === 'th' ? 'ปานกลาง' : 'Medium';
-    return language === 'th' ? 'ยาก' : 'Hard';
+    if (difficulty < 30) return T.difficultyEasy;
+    if (difficulty < 60) return T.difficultyMedium;
+    return T.difficultyHard;
   };
 
   const getTrendIcon = (trend: string) => {
@@ -120,7 +171,7 @@ const SmartKeywordResearch = () => {
       case 'down':
         return <TrendingUp className="h-4 w-4 text-red-500 rotate-180" />;
       default:
-        return <div className="h-4 w-4 bg-gray-400 rounded-full" />;
+        return <div className="h-4 w-4 bg-gray-400 rounded-full" />; // Represents stable
     }
   };
 
@@ -131,32 +182,14 @@ const SmartKeywordResearch = () => {
           <div>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5" />
-              {language === 'th' ? 'วิจัยคำสำคัญอัจฉริยะ' : 'Intelligent Keyword Research'}
+              {T.cardTitle}
               <Sparkles className="h-4 w-4 text-purple-500" />
             </CardTitle>
             <CardDescription>
-              {language === 'th' 
-                ? 'AI วิเคราะห์และแนะนำคำสำคัญอัตโนมัติ - ลดการกรอกข้อมูลด้วยมือ'
-                : 'AI analyzes and suggests keywords automatically - minimal manual input required'
-              }
+             {T.cardDescription}
             </CardDescription>
           </div>
-          <div className="flex gap-2">
-            <Button
-              variant={language === 'en' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setLanguage('en')}
-            >
-              EN
-            </Button>
-            <Button
-              variant={language === 'th' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setLanguage('th')}
-            >
-              TH
-            </Button>
-          </div>
+         {/* Removed local language switcher */}
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -165,25 +198,24 @@ const SmartKeywordResearch = () => {
             <Input
               value={seedKeyword}
               onChange={(e) => setSeedKeyword(e.target.value)}
-              placeholder={language === 'th' ? 'ใส่คำสำคัญหลัก เช่น "การตลาดออนไลน์"' : 'Enter seed keyword e.g. "digital marketing"'}
+              placeholder={T.inputPlaceholder}
               className="flex-1"
             />
             <Button onClick={researchKeywords} disabled={isResearching}>
               <Search className="h-4 w-4 mr-2" />
               {isResearching 
-                ? (language === 'th' ? 'กำลังวิจัย...' : 'Researching...') 
-                : (language === 'th' ? 'วิจัยอัจฉริยะ' : 'Smart Research')
+                ? T.researchingButton
+                : T.researchButton
               }
             </Button>
           </div>
           
-          {/* Auto-suggestions as user types */}
           {autoSuggestions.length > 0 && (
             <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
               <div className="flex items-center gap-2 mb-2">
                 <Brain className="h-4 w-4 text-blue-600" />
                 <span className="text-xs font-medium text-blue-700">
-                  {language === 'th' ? 'คำแนะนำอัตโนมัติ' : 'Auto Suggestions'}
+                  {T.autoSuggestionsLabel}
                 </span>
               </div>
               <div className="flex flex-wrap gap-1">
@@ -206,13 +238,13 @@ const SmartKeywordResearch = () => {
           <Tabs defaultValue="keywords" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="keywords">
-                {language === 'th' ? 'คำสำคัญหลัก' : 'Main Keywords'}
+                {T.tabMainKeywords}
               </TabsTrigger>
               <TabsTrigger value="longtail">
-                {language === 'th' ? 'คำสำคัญยาว' : 'Long-tail Keywords'}
+                {T.tabLongTail}
               </TabsTrigger>
               <TabsTrigger value="content">
-                {language === 'th' ? 'ไอเดียเนื้อหา' : 'Content Ideas'}
+                {T.tabContentIdeas}
               </TabsTrigger>
             </TabsList>
 
@@ -231,16 +263,16 @@ const SmartKeywordResearch = () => {
                     </div>
                     <div className="grid grid-cols-3 gap-4 text-sm">
                       <div>
-                        <span className="text-gray-500">{language === 'th' ? 'ปริมาณการค้นหา:' : 'Search Volume:'}</span>
-                        <div className="font-medium">{keyword.volume.toLocaleString()}/month</div>
+                        <span className="text-gray-500">{T.searchVolumeLabel}</span>
+                        <div className="font-medium">{keyword.volume.toLocaleString()}{T.perMonthSuffix}</div>
                       </div>
                       <div>
-                        <span className="text-gray-500">{language === 'th' ? 'ความยาก:' : 'Difficulty:'}</span>
+                        <span className="text-gray-500">{T.difficultyLabel}</span>
                         <div className="font-medium">{keyword.difficulty}/100</div>
                       </div>
                       <div>
-                        <span className="text-gray-500">CPC:</span>
-                        <div className="font-medium">${keyword.cpc}</div>
+                        <span className="text-gray-500">{T.cpcLabel}</span>
+                        <div className="font-medium">${keyword.cpc.toFixed(2)}</div>
                       </div>
                     </div>
                   </Card>
@@ -255,7 +287,7 @@ const SmartKeywordResearch = () => {
                     <div className="flex items-center justify-between">
                       <span className="font-medium">{keyword}</span>
                       <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                        {language === 'th' ? 'แนะนำ' : 'Recommended'}
+                        {T.badgeRecommended}
                       </Badge>
                     </div>
                   </Card>
@@ -272,10 +304,7 @@ const SmartKeywordResearch = () => {
                       <div>
                         <span className="font-medium">{idea}</span>
                         <p className="text-sm text-gray-600 mt-1">
-                          {language === 'th' 
-                            ? 'เนื้อหาที่แนะนำจาก AI สำหรับเพิ่ม organic traffic'
-                            : 'AI-recommended content to boost organic traffic'
-                          }
+                          {T.contentIdeaDesc}
                         </p>
                       </div>
                     </div>

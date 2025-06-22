@@ -38,6 +38,7 @@ interface AutoGenerationSettingsProps {
   onToggleAutoGeneration: () => void;
   onGenerateAutoContent: () => void;
 }
+import { useLanguage } from '@/contexts/LanguageContext'; // Import useLanguage
 
 const AutoGenerationSettings = ({
   autoGenEnabled,
@@ -65,15 +66,89 @@ const AutoGenerationSettings = ({
   onToggleAutoGeneration,
   onGenerateAutoContent
 }: AutoGenerationSettingsProps) => {
+  const { language } = useLanguage();
+
+  const t = (enText: string, thText: string): string => {
+    return language === 'th' ? thText : enText;
+  };
+
+  const T = {
+    cardTitle: t("Auto Blog Generation", "สร้างบล็อกอัตโนมัติ"),
+    cardDescription: t("Set up automatic blog post generation with customizable frequency and topics", "ตั้งค่าการสร้างบล็อกโพสต์อัตโนมัติพร้อมความถี่และหัวข้อที่ปรับแต่งได้"),
+    autoGenStatusLabel: t("Auto-Generation", "การสร้างอัตโนมัติ"),
+    statusActive: t("Active", "ทำงานอยู่"),
+    statusInactive: t("Inactive", "ไม่ทำงาน"),
+    nextRunLabel: t("Next generation:", "การสร้างครั้งถัดไป:"),
+    enableAutoGenLabel: t("Enable to start automatic blog generation", "เปิดใช้งานเพื่อเริ่มการสร้างบล็อกอัตโนมัติ"),
+    frequencyLabel: t("Generation Frequency", "ความถี่ในการสร้าง"),
+    daily: t("Daily", "รายวัน"),
+    weekly: t("Weekly", "รายสัปดาห์"),
+    timeLabel: t("Generation Time", "เวลาในการสร้าง"),
+    dayOfWeekLabel: t("Day of Week", "วันในสัปดาห์"),
+    monday: t("Monday", "วันจันทร์"),
+    tuesday: t("Tuesday", "วันอังคาร"),
+    wednesday: t("Wednesday", "วันพุธ"),
+    thursday: t("Thursday", "วันพฤหัสบดี"),
+    friday: t("Friday", "วันศุกร์"),
+    saturday: t("Saturday", "วันเสาร์"),
+    sunday: t("Sunday", "วันอาทิตย์"),
+    topicPoolLabel: t("Topic Pool (comma-separated)", "ชุดหัวข้อ (คั่นด้วยจุลภาค)"),
+    topicPoolPlaceholder: t("Digital Marketing, SEO Strategies, Content Creation, Social Media Marketing, Email Marketing...", "การตลาดดิจิทัล, กลยุทธ์ SEO, การสร้างเนื้อหา, การตลาดโซเชียลมีเดีย, การตลาดผ่านอีเมล..."),
+    topicPoolHelper: t("Random topics will be selected from this list for auto-generation", "ระบบจะสุ่มเลือกหัวข้อจากรายการนี้เพื่อสร้างอัตโนมัติ"),
+    defaultKeywordsLabel: t("Default Keywords", "คีย์เวิร์ดเริ่มต้น"),
+    defaultKeywordsPlaceholder: t("SEO, marketing, business, digital...", "SEO, การตลาด, ธุรกิจ, ดิจิทัล..."),
+    smartAutoGenLabel: t("Smart Auto-Generation", "การสร้างอัตโนมัติอัจฉริยะ"),
+    autoContentTypeLabel: t("Auto Content Type", "ประเภทเนื้อหาอัตโนมัติ"),
+    selectTypePlaceholder: t("Select type", "เลือกประเภท"),
+    blogPosts: t("Blog Posts", "บทความบล็อก"),
+    howToGuides: t("How-To Guides", "คู่มือวิธีทำ"),
+    listArticles: t("List Articles", "บทความแบบรายการ"),
+    comparisons: t("Comparisons", "บทความเปรียบเทียบ"),
+    autoWritingStyleLabel: t("Auto Writing Style", "สไตล์การเขียนอัตโนมัติ"),
+    selectStylePlaceholder: t("Select style", "เลือกสไตล์"),
+    styleProfessional: t("Professional", "เป็นทางการ"),
+    styleConversational: t("Conversational", "เชิงสนทนา"),
+    styleAuthoritative: t("Authoritative", "น่าเชื่อถือ"),
+    styleCasual: t("Casual", "เป็นกันเอง"),
+    targetAudienceLabel: t("Target Audience", "กลุ่มเป้าหมาย"),
+    selectAudiencePlaceholder: t("Select audience", "เลือกกลุ่มเป้าหมาย"),
+    audienceGeneral: t("General Public", "บุคคลทั่วไป"),
+    audienceBeginners: t("Beginners", "ผู้เริ่มต้น"),
+    audienceProfessionals: t("Professionals", "ผู้ประกอบวิชาชีพ"),
+    audienceExperts: t("Industry Experts", "ผู้เชี่ยวชาญในอุตสาหกรรม"),
+    industryFocusLabel: t("Industry Focus", "อุตสาหกรรมที่มุ่งเน้น"),
+    selectIndustryPlaceholder: t("Select industry", "เลือกอุตสาหกรรม"),
+    industryGeneral: t("General Business", "ธุรกิจทั่วไป"),
+    industryTech: t("Technology", "เทคโนโลยี"),
+    industryMarketing: t("Marketing", "การตลาด"),
+    industryFinance: t("Finance", "การเงิน"),
+    industryHealthcare: t("Healthcare", "การดูแลสุขภาพ"),
+    industryEducation: t("Education", "การศึกษา"),
+    smartFeaturesLabel: t("Smart Features", "คุณสมบัติอัจฉริยะ"),
+    badgeTrendAnalysis: t("Trend Analysis", "การวิเคราะห์เทรนด์"),
+    badgeSEOOOptimization: t("SEO Optimization", "การปรับแต่ง SEO"),
+    badgeSmartKeywords: t("Smart Keywords", "คีย์เวิร์ดอัจฉริยะ"),
+    badgeQualityScoring: t("Quality Scoring", "การให้คะแนนคุณภาพ"),
+    trendingTopicsLabel: t("Trending Topic Suggestions", "คำแนะนำหัวข้อที่กำลังนิยม"),
+    clickToAddTopics: t("Click to add trending topics to your pool", "คลิกเพื่อเพิ่มหัวข้อที่กำลังนิยมไปยังชุดหัวข้อของคุณ"),
+    aiContentSuggestionsLabel: t("AI Content Suggestions", "คำแนะนำเนื้อหาจาก AI"),
+    testButton: t("Test Smart Auto-Generation Now", "ทดสอบการสร้างอัตโนมัติอัจฉริยะทันที"),
+    statusActiveBadge: t("Active", "ทำงานอยู่"),
+    statusInactiveBadge: t("Inactive", "ไม่ทำงาน"),
+    dailyScheduleBadge: t("Daily Schedule", "กำหนดการรายวัน"),
+    weeklyScheduleBadge: t("Weekly Schedule", "กำหนดการรายสัปดาห์"),
+    topicsCountBadge: t("{count} Topics", "{count} หัวข้อ"),
+  };
+
   return (
     <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Calendar className="h-5 w-5 text-blue-600" />
-          Auto Blog Generation
+          {T.cardTitle}
         </CardTitle>
         <CardDescription>
-          Set up automatic blog post generation with customizable frequency and topics
+          {T.cardDescription}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -87,13 +162,13 @@ const AutoGenerationSettings = ({
                 <Pause className="h-4 w-4 text-gray-400" />
               )}
               <Label className="text-base font-medium">
-                Auto-Generation {autoGenEnabled ? 'Active' : 'Inactive'}
+                {T.autoGenStatusLabel} {autoGenEnabled ? T.statusActive : T.statusInactive}
               </Label>
             </div>
             <p className="text-sm text-gray-600">
               {autoGenEnabled 
-                ? `Next generation: ${nextScheduledRun?.toLocaleDateString()} at ${nextScheduledRun?.toLocaleTimeString()}`
-                : 'Enable to start automatic blog generation'
+                ? `${T.nextRunLabel} ${nextScheduledRun?.toLocaleDateString()} at ${nextScheduledRun?.toLocaleTimeString()}`
+                : T.enableAutoGenLabel
               }
             </p>
           </div>
@@ -106,20 +181,20 @@ const AutoGenerationSettings = ({
         {/* Frequency Settings */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label>Generation Frequency</Label>
+            <Label>{T.frequencyLabel}</Label>
             <Select value={autoGenFrequency} onValueChange={setAutoGenFrequency}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="daily">Daily</SelectItem>
-                <SelectItem value="weekly">Weekly</SelectItem>
+                <SelectItem value="daily">{T.daily}</SelectItem>
+                <SelectItem value="weekly">{T.weekly}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <Label>Generation Time</Label>
+            <Label>{T.timeLabel}</Label>
             <Input
               type="time"
               value={autoGenTime}
@@ -131,19 +206,19 @@ const AutoGenerationSettings = ({
         {/* Weekly Day Selection */}
         {autoGenFrequency === 'weekly' && (
           <div className="space-y-2">
-            <Label>Day of Week</Label>
+            <Label>{T.dayOfWeekLabel}</Label>
             <Select value={autoGenDay} onValueChange={setAutoGenDay}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="monday">Monday</SelectItem>
-                <SelectItem value="tuesday">Tuesday</SelectItem>
-                <SelectItem value="wednesday">Wednesday</SelectItem>
-                <SelectItem value="thursday">Thursday</SelectItem>
-                <SelectItem value="friday">Friday</SelectItem>
-                <SelectItem value="saturday">Saturday</SelectItem>
-                <SelectItem value="sunday">Sunday</SelectItem>
+                <SelectItem value="monday">{T.monday}</SelectItem>
+                <SelectItem value="tuesday">{T.tuesday}</SelectItem>
+                <SelectItem value="wednesday">{T.wednesday}</SelectItem>
+                <SelectItem value="thursday">{T.thursday}</SelectItem>
+                <SelectItem value="friday">{T.friday}</SelectItem>
+                <SelectItem value="saturday">{T.saturday}</SelectItem>
+                <SelectItem value="sunday">{T.sunday}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -154,24 +229,24 @@ const AutoGenerationSettings = ({
         {/* Content Settings */}
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="autoTopics">Topic Pool (comma-separated)</Label>
+            <Label htmlFor="autoTopics">{T.topicPoolLabel}</Label>
             <Textarea
               id="autoTopics"
-              placeholder="Digital Marketing, SEO Strategies, Content Creation, Social Media Marketing, Email Marketing..."
+              placeholder={T.topicPoolPlaceholder}
               value={autoGenTopics}
               onChange={(e) => setAutoGenTopics(e.target.value)}
               rows={3}
             />
             <p className="text-xs text-gray-500">
-              Random topics will be selected from this list for auto-generation
+              {T.topicPoolHelper}
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="autoKeywords">Default Keywords</Label>
+            <Label htmlFor="autoKeywords">{T.defaultKeywordsLabel}</Label>
             <Input
               id="autoKeywords"
-              placeholder="SEO, marketing, business, digital..."
+              placeholder={T.defaultKeywordsPlaceholder}
               value={autoGenKeywords}
               onChange={(e) => setAutoGenKeywords(e.target.value)}
             />
@@ -184,91 +259,91 @@ const AutoGenerationSettings = ({
         <div className="space-y-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border">
           <div className="flex items-center gap-2 mb-3">
             <Brain className="h-5 w-5 text-indigo-600" />
-            <Label className="text-base font-semibold">Smart Auto-Generation</Label>
+            <Label className="text-base font-semibold">{T.smartAutoGenLabel}</Label>
           </div>
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Auto Content Type</Label>
+              <Label>{T.autoContentTypeLabel}</Label>
               <Select value={contentType} onValueChange={setContentType}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
+                  <SelectValue placeholder={T.selectTypePlaceholder} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="blog">Blog Posts</SelectItem>
-                  <SelectItem value="how-to">How-To Guides</SelectItem>
-                  <SelectItem value="listicle">List Articles</SelectItem>
-                  <SelectItem value="comparison">Comparisons</SelectItem>
+                  <SelectItem value="blog">{T.blogPosts}</SelectItem>
+                  <SelectItem value="how-to">{T.howToGuides}</SelectItem>
+                  <SelectItem value="listicle">{T.listArticles}</SelectItem>
+                  <SelectItem value="comparison">{T.comparisons}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label>Auto Writing Style</Label>
+              <Label>{T.autoWritingStyleLabel}</Label>
               <Select value={writingStyle} onValueChange={setWritingStyle}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select style" />
+                  <SelectValue placeholder={T.selectStylePlaceholder} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="professional">Professional</SelectItem>
-                  <SelectItem value="conversational">Conversational</SelectItem>
-                  <SelectItem value="authoritative">Authoritative</SelectItem>
-                  <SelectItem value="casual">Casual</SelectItem>
+                  <SelectItem value="professional">{T.styleProfessional}</SelectItem>
+                  <SelectItem value="conversational">{T.styleConversational}</SelectItem>
+                  <SelectItem value="authoritative">{T.styleAuthoritative}</SelectItem>
+                  <SelectItem value="casual">{T.styleCasual}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label>Target Audience</Label>
+              <Label>{T.targetAudienceLabel}</Label>
               <Select value={targetAudience} onValueChange={setTargetAudience}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select audience" />
+                  <SelectValue placeholder={T.selectAudiencePlaceholder} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="general">General Public</SelectItem>
-                  <SelectItem value="beginners">Beginners</SelectItem>
-                  <SelectItem value="professionals">Professionals</SelectItem>
-                  <SelectItem value="experts">Industry Experts</SelectItem>
+                  <SelectItem value="general">{T.audienceGeneral}</SelectItem>
+                  <SelectItem value="beginners">{T.audienceBeginners}</SelectItem>
+                  <SelectItem value="professionals">{T.audienceProfessionals}</SelectItem>
+                  <SelectItem value="experts">{T.audienceExperts}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label>Industry Focus</Label>
+              <Label>{T.industryFocusLabel}</Label>
               <Select value={industryFocus} onValueChange={setIndustryFocus}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select industry" />
+                  <SelectValue placeholder={T.selectIndustryPlaceholder} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="general">General Business</SelectItem>
-                  <SelectItem value="technology">Technology</SelectItem>
-                  <SelectItem value="marketing">Marketing</SelectItem>
-                  <SelectItem value="finance">Finance</SelectItem>
-                  <SelectItem value="healthcare">Healthcare</SelectItem>
-                  <SelectItem value="education">Education</SelectItem>
+                  <SelectItem value="general">{T.industryGeneral}</SelectItem>
+                  <SelectItem value="technology">{T.industryTech}</SelectItem>
+                  <SelectItem value="marketing">{T.industryMarketing}</SelectItem>
+                  <SelectItem value="finance">{T.industryFinance}</SelectItem>
+                  <SelectItem value="healthcare">{T.industryHealthcare}</SelectItem>
+                  <SelectItem value="education">{T.industryEducation}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label>Smart Features</Label>
+            <Label>{T.smartFeaturesLabel}</Label>
             <div className="flex flex-wrap gap-2">
               <Badge variant="secondary" className="bg-green-100 text-green-700">
                 <TrendingUp className="h-3 w-3 mr-1" />
-                Trend Analysis
+                {T.badgeTrendAnalysis}
               </Badge>
               <Badge variant="secondary" className="bg-blue-100 text-blue-700">
                 <Target className="h-3 w-3 mr-1" />
-                SEO Optimization
+                {T.badgeSEOOOptimization}
               </Badge>
               <Badge variant="secondary" className="bg-purple-100 text-purple-700">
                 <Brain className="h-3 w-3 mr-1" />
-                Smart Keywords
+                {T.badgeSmartKeywords}
               </Badge>
               <Badge variant="secondary" className="bg-orange-100 text-orange-700">
                 <Award className="h-3 w-3 mr-1" />
-                Quality Scoring
+                {T.badgeQualityScoring}
               </Badge>
             </div>
           </div>
@@ -279,7 +354,7 @@ const AutoGenerationSettings = ({
           <div className="space-y-3 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-orange-600" />
-              <Label className="text-sm font-semibold">Trending Topic Suggestions</Label>
+              <Label className="text-sm font-semibold">{T.trendingTopicsLabel}</Label>
             </div>
             <div className="flex flex-wrap gap-2">
               {trendingTopics.map((topic, index) => (
@@ -296,7 +371,7 @@ const AutoGenerationSettings = ({
                 </Badge>
               ))}
             </div>
-            <p className="text-xs text-gray-500">Click to add trending topics to your pool</p>
+            <p className="text-xs text-gray-500">{T.clickToAddTopics}</p>
           </div>
         )}
 
@@ -305,7 +380,7 @@ const AutoGenerationSettings = ({
           <div className="space-y-3 p-4 bg-gradient-to-r from-green-50 to-teal-50 rounded-lg border">
             <div className="flex items-center gap-2">
               <Lightbulb className="h-4 w-4 text-green-600" />
-              <Label className="text-sm font-semibold">AI Content Suggestions</Label>
+              <Label className="text-sm font-semibold">{T.aiContentSuggestionsLabel}</Label>
             </div>
             <div className="space-y-2">
               {contentSuggestions.slice(0, 3).map((suggestion, index) => (
@@ -326,20 +401,20 @@ const AutoGenerationSettings = ({
             disabled={!autoGenTopics.trim()}
           >
             <Settings className="h-4 w-4 mr-2" />
-            Test Smart Auto-Generation Now
+            {T.testButton}
           </Button>
         </div>
 
         {/* Status Badges */}
         <div className="flex flex-wrap gap-2">
           <Badge variant={autoGenEnabled ? "default" : "secondary"} className="bg-blue-100 text-blue-700">
-            {autoGenEnabled ? "Active" : "Inactive"}
+            {autoGenEnabled ? T.statusActiveBadge : T.statusInactiveBadge}
           </Badge>
           <Badge variant="secondary" className="bg-green-100 text-green-700">
-            {autoGenFrequency === 'daily' ? 'Daily' : 'Weekly'} Schedule
+            {autoGenFrequency === 'daily' ? T.dailyScheduleBadge : T.weeklyScheduleBadge}
           </Badge>
           <Badge variant="secondary" className="bg-purple-100 text-purple-700">
-            {autoGenTopics.split(',').filter(t => t.trim()).length} Topics
+            {T.topicsCountBadge.replace("{count}", autoGenTopics.split(',').filter(t => t.trim()).length.toString())}
           </Badge>
         </div>
       </CardContent>

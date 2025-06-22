@@ -26,11 +26,27 @@ const SEOChatbot: React.FC = () => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
+  const t = (enText: string, thText: string): string => {
+    return language === 'th' ? thText : enText;
+  };
+
+  const T = {
+    cardTitle: t("SEO Assistant Chatbot", "ผู้ช่วย SEO แชทบอท"),
+    typingIndicator: t("Typing", "กำลังพิมพ์"),
+    inputPlaceholder: t("Ask about SEO...", "ถามเกี่ยวกับ SEO..."),
+    sendButtonSr: t("Send", "ส่ง"),
+    defaultError: t("Sorry, I encountered an error. Please try again.", "ขออภัย เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง"),
+    apiKeyErrorMsg: t("API Key is invalid or missing. Please configure it in Settings.", "คีย์ API ไม่ถูกต้องหรือขาดหายไป กรุณาตั้งค่าในส่วนการตั้งค่า"),
+    toastTitleError: t("Chatbot Error", "ข้อผิดพลาดแชทบอท"),
+    systemInstructionEn: "You are an expert SEO assistant. Provide helpful, concise, and accurate advice on SEO topics. If you don't know an answer, say so. Keep responses relatively short and easy to read in a chat interface.",
+    systemInstructionTh: "You are an expert SEO assistant. Please respond in Thai. Provide helpful, concise, and accurate advice on SEO topics. If you don't know an answer, say so. Keep responses relatively short and easy to read in a chat interface."
+  };
+
   const getSystemInstruction = (): string => {
     if (language === 'th') {
-      return "You are an expert SEO assistant. Please respond in Thai. Provide helpful, concise, and accurate advice on SEO topics. If you don't know an answer, say so. Keep responses relatively short and easy to read in a chat interface.";
+      return T.systemInstructionTh;
     }
-    return "You are an expert SEO assistant. Provide helpful, concise, and accurate advice on SEO topics. If you don't know an answer, say so. Keep responses relatively short and easy to read in a chat interface.";
+    return T.systemInstructionEn;
   };
 
   const formatChatHistory = (msgs: Message[]): ChatHistoryMessage[] => {
@@ -80,10 +96,10 @@ const SEOChatbot: React.FC = () => {
       setMessages(prevMessages => [...prevMessages, newBotMessage]);
     } catch (error: any) {
       console.error("Error getting chatbot response:", error);
-      let errorText = "Sorry, I encountered an error. Please try again.";
+      let errorText = T.defaultError;
       if (error.isApiKeyInvalid) {
-        errorText = "API Key is invalid or missing. Please configure it in Settings.";
-        setApiKeyError(errorText); // Show persistent error in UI
+        errorText = T.apiKeyErrorMsg;
+        setApiKeyError(errorText);
       } else if (error.message) {
         errorText = error.message;
       }
@@ -95,7 +111,7 @@ const SEOChatbot: React.FC = () => {
       };
       setMessages(prevMessages => [...prevMessages, errorBotMessage]);
       toast({
-        title: "Chatbot Error",
+        title: T.toastTitleError,
         description: errorText,
         variant: "destructive",
       });
@@ -125,7 +141,7 @@ const SEOChatbot: React.FC = () => {
       <CardHeader className="border-b">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Bot className="h-6 w-6 text-blue-600" />
-          SEO Assistant Chatbot
+          {T.cardTitle}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex-grow p-0 overflow-hidden">
@@ -169,7 +185,7 @@ const SEOChatbot: React.FC = () => {
                 </Avatar>
                 <div className="max-w-[70%] p-3 rounded-lg shadow bg-slate-100 text-slate-800 rounded-bl-none">
                   <p className="text-sm flex items-center">
-                    <span className="animate-pulse">Typing</span>
+                    <span className="animate-pulse">{T.typingIndicator}</span>
                     <span className="animate-pulse delay-150">.</span>
                     <span className="animate-pulse delay-300">.</span>
                     <span className="animate-pulse delay-450">.</span>
@@ -184,7 +200,7 @@ const SEOChatbot: React.FC = () => {
         <div className="flex w-full items-center gap-2">
           <Input
             type="text"
-            placeholder="Ask about SEO..."
+            placeholder={T.inputPlaceholder}
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
             onKeyPress={handleKeyPress}
@@ -193,7 +209,7 @@ const SEOChatbot: React.FC = () => {
           />
           <Button onClick={handleSendMessage} disabled={isLoading || userInput.trim() === ''}>
             <SendHorizonal className="h-4 w-4" />
-            <span className="sr-only">Send</span>
+            <span className="sr-only">{T.sendButtonSr}</span>
           </Button>
         </div>
         {apiKeyError && (

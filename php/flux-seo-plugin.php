@@ -44,7 +44,9 @@ function flux_seo_app_enqueue_scripts() {
         'flux-seo-app-script',
         'fluxSeoAppData',
         array(
-
+            'rest_url' => esc_url_raw( rest_url() ), // Ensure this is the base REST URL
+            'nonce'    => wp_create_nonce( 'wp_rest' ),
+            'proxy_endpoint' => esc_url_raw( rest_url( 'flux-seo/v1/gemini-proxy' ) ), // Specific proxy endpoint
         )
     );
 
@@ -134,6 +136,15 @@ function flux_seo_app_admin_menu() {
         80                                   // Position
     );
 
+    // Add a submenu page for settings.
+    add_submenu_page(
+        'flux-seo-app',                      // Parent slug
+        __( 'Flux SEO Settings', 'flux-seo-app' ), // Page title
+        __( 'Settings', 'flux-seo-app' ),    // Menu title
+        'manage_options',                    // Capability
+        'flux-seo-app-settings',             // Menu slug
+        'flux_seo_app_settings_page_content' // Callback function
+    );
 }
 add_action( 'admin_menu', 'flux_seo_app_admin_menu' );
 
@@ -185,7 +196,50 @@ function flux_seo_app_admin_page_content() {
 }
 
 /**
+ * Display the settings page content.
+ */
+function flux_seo_app_settings_page_content() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        return;
+    }
 
+    // Check if the form has been submitted
+    if ( isset( $_POST['flux_seo_api_key_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['flux_seo_api_key_nonce'] ) ), 'flux_seo_save_api_key' ) ) {
+        if ( isset( $_POST['flux_seo_gemini_api_key'] ) ) {
+            $api_key = sanitize_text_field( wp_unslash( $_POST['flux_seo_gemini_api_key'] ) );
+            update_option( 'flux_seo_gemini_api_key', $api_key );
+            echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Settings saved.', 'flux-seo-app' ) . '</p></div>';
+        }
+    }
+
+    $current_api_key = get_option( 'flux_seo_gemini_api_key', '' );
+    ?>
+    <div class="wrap">
+        <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
+        <form method="post" action="">
+            <?php wp_nonce_field( 'flux_seo_save_api_key', 'flux_seo_api_key_nonce' ); ?>
+            <table class="form-table">
+                <tr valign="top">
+                    <th scope="row">
+                        <label for="flux_seo_gemini_api_key"><?php esc_html_e( 'Gemini API Key', 'flux-seo-app' ); ?></label>
+                    </th>
+                    <td>
+                        <input type="text" id="flux_seo_gemini_api_key" name="flux_seo_gemini_api_key" value="<?php echo esc_attr( $current_api_key ); ?>" class="regular-text" />
+                        <p class="description">
+                            <?php esc_html_e( 'Enter your Gemini API key. This key is required for all AI-powered features.', 'flux-seo-app' ); ?>
+                            <a href="https://aistudio.google.com/app/apikey" target="_blank"><?php esc_html_e( 'Get your API key from Google AI Studio.', 'flux-seo-app'); ?></a>
+                        </p>
+                    </td>
+                </tr>
+            </table>
+            <?php submit_button( __( 'Save API Key', 'flux-seo-app' ) ); ?>
+        </form>
+    </div>
+    <?php
+}
+
+
+/**
  * Activation hook.
  */
 function flux_seo_app_activate() {
@@ -251,3 +305,150 @@ if ( function_exists( 'register_uninstall_hook' ) ) {
 // return new WP_REST_Response( 'Settings saved.', 200 );
 // }
 
+
+/**
+ * Register REST API endpoint for Gemini Proxy.
+ */
+add_action( 'rest_api_init', 'flux_seo_register_gemini_proxy_endpoint' );
+
+function flux_seo_register_gemini_proxy_endpoint() {
+    register_rest_route(
+        'flux-seo/v1', // Namespace
+        '/gemini-proxy',   // Route
+        array(
+            'methods'             => WP_REST_Server::CREATABLE, // Corresponds to POST
+            'callback'            => 'flux_seo_handle_gemini_proxy_request',
+            'permission_callback' => function () {
+                // Only allow users who can manage options (administrators)
+                // Or any logged-in user if you want broader access for specific features.
+                // For now, let's restrict to admins.
+                return current_user_can( 'manage_options' );
+            },
+            'args' => array( // Define expected arguments from the request body
+                'model' => array(
+                    'required' => true,
+                    'type' => 'string',
+                    'description' => 'The Gemini model to use (e.g., gemini-pro).',
+                ),
+                'prompt' => array(
+                    'required' => false,
+                    'type' => 'string',
+                    'description' => 'The prompt for content generation.',
+                ),
+                'contents' => array( // For chat or multi-turn
+                    'required' => false,
+                    'type' => 'array',
+                    'description' => 'Contents for chat or multi-turn conversation.',
+                ),
+                'generationConfig' => array(
+                    'required' => false,
+                    'type' => 'object',
+                    'description' => 'Configuration for content generation.',
+                ),
+                // Add other parameters your geminiService might send
+            ),
+        )
+    );
+}
+
+/**
+ * Handle the Gemini proxy request.
+ *
+ * @param WP_REST_Request $request The incoming REST API request.
+ * @return WP_REST_Response|WP_Error The REST API response or an error.
+ */
+function flux_seo_handle_gemini_proxy_request( WP_REST_Request $request ) {
+    $api_key = get_option( 'flux_seo_gemini_api_key', '' );
+
+    if ( empty( $api_key ) ) {
+        return new WP_Error(
+            'missing_api_key',
+            __( 'Gemini API key is not configured in Flux SEO settings.', 'flux-seo-app' ),
+            array( 'status' => 400 ) // Bad Request
+        );
+    }
+
+    $params = $request->get_json_params();
+    $model = isset( $params['model'] ) ? sanitize_text_field( $params['model'] ) : null;
+
+    // Determine the correct Gemini API URL based on the task (generateContent vs. countTokens vs. chat)
+    // This logic needs to mirror what geminiService.ts does.
+    // For now, assuming a generic generateContent style endpoint.
+    // Example: "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent"
+    // The model name is part of the URL path for some Gemini API calls.
+
+    $gemini_api_url = '';
+    $request_body = array();
+
+    // Simplified example: assuming all calls are for generateContent or chat (which uses generateContent)
+    if ( strpos($model, 'gemini-') === 0 ) { // Basic check
+        $gemini_api_url = "https://generativelanguage.googleapis.com/v1beta/models/" . $model . ":generateContent?key=" . $api_key;
+
+        // Construct the body based on expected parameters from geminiService.ts
+        if (isset($params['contents'])) { // For chat-like or multi-part requests
+            $request_body['contents'] = $params['contents']; // Needs sanitization if complex
+        } elseif (isset($params['prompt'])) { // Simpler prompt-based generation
+             $request_body['contents'] = array(array('parts' => array(array('text' => $params['prompt']))));
+        }
+
+        if (isset($params['generationConfig'])) {
+            $request_body['generationConfig'] = $params['generationConfig']; // Needs sanitization
+        }
+
+    } else {
+         return new WP_Error(
+            'invalid_model_for_proxy',
+            __( 'The specified model is not supported by this proxy or is invalid.', 'flux-seo-app' ),
+            array( 'status' => 400 )
+        );
+    }
+
+
+    if ( empty( $request_body ) ) {
+        return new WP_Error(
+            'missing_payload',
+            __( 'Missing required payload (e.g., prompt or contents).', 'flux-seo-app' ),
+            array( 'status' => 400 )
+        );
+    }
+
+    $args = array(
+        'method'  => 'POST',
+        'headers' => array(
+            'Content-Type' => 'application/json',
+        ),
+        'body'    => wp_json_encode( $request_body ),
+        'timeout' => 60, // Increase timeout for potentially long AI responses
+    );
+
+    $response = wp_remote_post( $gemini_api_url, $args );
+
+    if ( is_wp_error( $response ) ) {
+        return new WP_Error(
+            'gemini_api_request_failed',
+            $response->get_error_message(),
+            array( 'status' => 500 ) // Internal Server Error
+        );
+    }
+
+    $response_code = wp_remote_retrieve_response_code( $response );
+    $response_body = wp_remote_retrieve_body( $response );
+    $decoded_body = json_decode( $response_body, true );
+
+    if ( $response_code >= 200 && $response_code < 300 ) {
+        return new WP_REST_Response( $decoded_body, $response_code );
+    } else {
+        // Try to return a more specific error from Gemini if available
+        $error_message = __( 'An unknown error occurred with the Gemini API.', 'flux-seo-app' );
+        if ( isset( $decoded_body['error']['message'] ) ) {
+            $error_message = $decoded_body['error']['message'];
+        }
+        return new WP_Error(
+            'gemini_api_error',
+            $error_message,
+            array( 'status' => $response_code, 'details' => $decoded_body )
+        );
+    }
+}
+
+?>

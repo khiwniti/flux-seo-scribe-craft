@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { FileText, Image, Copy, Download } from 'lucide-react';
 import ContentQualityAnalysis from './ContentQualityAnalysis';
+import { useLanguage } from '@/contexts/LanguageContext'; // Import useLanguage
 
 interface ContentInsights {
   estimatedReadTime?: number;
@@ -48,16 +49,34 @@ const GeneratedContentDisplay = ({
   onCopyToClipboard,
   onDownloadImage
 }: GeneratedContentDisplayProps) => {
+  const { language } = useLanguage();
+
+  const t = (enText: string, thText: string): string => {
+    return language === 'th' ? thText : enText;
+  };
+
+  const T = {
+    generatedContentTitle: t("Generated Content", "เนื้อหาที่สร้างขึ้น"),
+    generatedContentDesc: t("SEO-optimized blog post ready for publication", "บทความบล็อกที่ปรับให้เหมาะกับ SEO พร้อมสำหรับการเผยแพร่"),
+    copyButton: t("Copy", "คัดลอก"),
+    wordsLabel: t("Words", "คำ"),
+    headersLabel: t("Headers", "หัวข้อ"),
+    minReadLabel: t("Min Read", "นาทีในการอ่าน"),
+    contextualImagesTitle: t("Contextual Images", "ภาพประกอบตามบริบท"),
+    contextualImagesDesc: t("AI-generated images optimized for your content", "ภาพที่สร้างโดย AI ปรับให้เหมาะกับเนื้อหาของคุณ"),
+    downloadButton: t("Download", "ดาวน์โหลด"),
+  };
+
   return (
     <div className="grid gap-6 md:grid-cols-2">
       <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-green-600" />
-            Generated Content
+            {T.generatedContentTitle}
           </CardTitle>
           <CardDescription>
-            SEO-optimized blog post ready for publication
+            {T.generatedContentDesc}
           </CardDescription>
           <div className="flex gap-2 mt-2">
             <Button 
@@ -67,7 +86,7 @@ const GeneratedContentDisplay = ({
               className="flex items-center gap-1"
             >
               <Copy className="h-3 w-3" />
-              Copy
+              {T.copyButton}
             </Button>
           </div>
         </CardHeader>
@@ -84,19 +103,19 @@ const GeneratedContentDisplay = ({
               <div className="text-lg font-bold text-green-600">
                 {generatedContent.split(' ').length}
               </div>
-              <div className="text-sm text-gray-600">Words</div>
+              <div className="text-sm text-gray-600">{T.wordsLabel}</div>
             </div>
             <div className="text-center">
               <div className="text-lg font-bold text-blue-600">
                 {generatedContent.split('\n').filter(line => line.trim().startsWith('#')).length}
               </div>
-              <div className="text-sm text-gray-600">Headers</div>
+              <div className="text-sm text-gray-600">{T.headersLabel}</div>
             </div>
             <div className="text-center">
               <div className="text-lg font-bold text-purple-600">
                 {Math.ceil(generatedContent.split(' ').length / 200)}
               </div>
-              <div className="text-sm text-gray-600">Min Read</div>
+              <div className="text-sm text-gray-600">{T.minReadLabel}</div>
             </div>
           </div>
 
@@ -115,10 +134,10 @@ const GeneratedContentDisplay = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Image className="h-5 w-5 text-pink-600" />
-            Contextual Images
+            {T.contextualImagesTitle}
           </CardTitle>
           <CardDescription>
-            AI-generated images optimized for your content
+            {T.contextualImagesDesc}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -140,7 +159,7 @@ const GeneratedContentDisplay = ({
                     className="bg-white/90 hover:bg-white"
                   >
                     <Download className="h-4 w-4 mr-1" />
-                    Download
+                    {T.downloadButton}
                   </Button>
                 </div>
                 <p className="text-xs text-gray-500 mt-2 line-clamp-2">
