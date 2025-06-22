@@ -16,6 +16,8 @@ export interface ContentInsights {
   suggestedImages?: number;
   seoComplexity?: string;
   competitiveLevel?: string;
+  languageOptimization?: string;
+  professionalGrade?: string;
 }
 
 export interface AutoGenHistoryEntry {
@@ -23,6 +25,8 @@ export interface AutoGenHistoryEntry {
   topic: string;
   date: Date;
   status: string;
+  contentPreview: string;
   wordCount: number;
   seoScore: number;
+  language: string;
 }

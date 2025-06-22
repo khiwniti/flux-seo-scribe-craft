@@ -1,26 +1,23 @@
-import { useState, useEffect } from 'react';
-import { GeneratedImage, ContentInsights } from '../types';
+
+import { useState } from 'react';
 import { useFormStates } from './useFormStates';
 import { useAutoGeneration } from './useAutoGeneration';
 import { useContentIntelligence } from './useContentIntelligence';
+import { useContentAnalysis } from './useContentAnalysis';
+import { useImageGeneration } from './useImageGeneration';
+import { useTopicAnalysis } from './useTopicAnalysis';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageAwareContentGenerator } from '../LanguageAwareContentGenerator';
-import { 
-  generateIntroduction, 
-  generateKeyPoints, 
-  generateSEOContent, 
-  generateConclusion 
-} from '../utils/contentGenerator';
 
 export const useContentGeneration = () => {
   const formStates = useFormStates();
   const autoGenStates = useAutoGeneration();
   const intelligenceStates = useContentIntelligence(formStates.topic);
+  const contentAnalysis = useContentAnalysis();
+  const imageGeneration = useImageGeneration();
   const { language } = useLanguage();
   
-  // Generated content
   const [generatedContent, setGeneratedContent] = useState('');
-  const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -29,94 +26,19 @@ export const useContentGeneration = () => {
   const [blogSuggestions, setBlogSuggestions] = useState<any[]>([]);
   const [selectedAnalyticsSuggestion, setSelectedAnalyticsSuggestion] = useState<any>(null);
 
-  // Auto-fill based on topic with enhanced AI analysis
-  useEffect(() => {
-    if (formStates.topic && formStates.topic.length > 10) {
-      setTimeout(async () => {
-        try {
-          // Create language-specific analysis prompt
-          const analysisPrompt = language === 'th' 
-            ? `วิเคราะห์หัวข้อนี้สำหรับการสร้างเนื้อหา: "${formStates.topic}" ให้ข้อมูลในรูปแบบ JSON:
-{
-  "keywords": ["คำสำคัญ1", "คำสำคัญ2", "คำสำคัญ3", "คำสำคัญ4", "คำสำคัญ5"],
-  "tone": "เป็นทางการ/สบายๆ/มีอำนาจ/เสมือนการสนทนา",
-  "audience": "กลุ่มเป้าหมายที่เฉพาะเจาะจง",
-  "contentType": "ประเภทเนื้อหาที่แนะนำ",
-  "industry": "การจำแนกอุตสาหกรรม"
-}`
-            : `Analyze this topic for content creation: "${formStates.topic}". Provide:
-{
-  "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"],
-  "tone": "professional/casual/authoritative/conversational",
-  "audience": "specific target audience",
-  "contentType": "recommended content type",
-  "industry": "industry classification"
-}`;
-
-          const aiAnalysis = await LanguageAwareContentGenerator.generateContent({
-            topic: analysisPrompt,
-            keywords: '',
-            tone: 'professional',
-            wordCount: 'short',
-            contentType: 'analysis',
-            writingStyle: 'analytical',
-            targetAudience: 'content creators',
-            industryFocus: 'content marketing',
-            language
-          });
-
-          try {
-            const parsedAnalysis = JSON.parse(aiAnalysis);
-
-            if (!formStates.keywords && parsedAnalysis.keywords) {
-              formStates.setKeywords(Array.isArray(parsedAnalysis.keywords) ? 
-                parsedAnalysis.keywords.join(', ') : parsedAnalysis.keywords);
-            }
-            
-            if (!formStates.tone && parsedAnalysis.tone) {
-              formStates.setTone(parsedAnalysis.tone);
-            }
-            
-            if (!formStates.targetAudience && parsedAnalysis.audience) {
-              formStates.setTargetAudience(parsedAnalysis.audience);
-            }
-            
-            if (!formStates.contentType && parsedAnalysis.contentType) {
-              formStates.setContentType(parsedAnalysis.contentType);
-            }
-
-            if (!formStates.industryFocus && parsedAnalysis.industry) {
-              formStates.setIndustryFocus(parsedAnalysis.industry);
-            }
-          } catch (parseError) {
-            console.log('JSON parsing failed, using fallback methods');
-            // Use existing fallback logic
-            if (!formStates.keywords) {
-              const autoKeywords = intelligenceStates.extractKeywordsFromTopic(formStates.topic);
-              formStates.setKeywords(autoKeywords.join(', '));
-            }
-            
-            if (!formStates.tone) {
-              const detectedTone = intelligenceStates.detectToneFromTopic(formStates.topic);
-              formStates.setTone(detectedTone);
-            }
-          }
-        } catch (error) {
-          console.log('AI analysis failed, using fallback methods');
-          // Fallback to existing logic
-          if (!formStates.keywords) {
-            const autoKeywords = intelligenceStates.extractKeywordsFromTopic(formStates.topic);
-            formStates.setKeywords(autoKeywords.join(', '));
-          }
-          
-          if (!formStates.tone) {
-            const detectedTone = intelligenceStates.detectToneFromTopic(formStates.topic);
-            formStates.setTone(detectedTone);
-          }
-        }
-      }, 1000);
-    }
-  }, [formStates.topic, language]);
+  // Topic analysis hook
+  useTopicAnalysis({
+    topic: formStates.topic,
+    setKeywords: formStates.setKeywords,
+    setTone: formStates.setTone,
+    setTargetAudience: formStates.setTargetAudience,
+    setContentType: formStates.setContentType,
+    setIndustryFocus: formStates.setIndustryFocus,
+    keywords: formStates.keywords,
+    tone: formStates.tone,
+    extractKeywordsFromTopic: intelligenceStates.extractKeywordsFromTopic,
+    detectToneFromTopic: intelligenceStates.detectToneFromTopic
+  });
 
   const generateContent = async () => {
     setIsGenerating(true);
@@ -127,7 +49,6 @@ export const useContentGeneration = () => {
         throw new Error(language === 'th' ? "กรุณาระบุหัวข้อเพื่อสร้างเนื้อหา" : "Topic is required to generate content.");
       }
 
-      // Use the professional language-aware content generator
       const content = await LanguageAwareContentGenerator.generateContent({
         topic: formStates.topic,
         keywords: formStates.keywords,
@@ -142,62 +63,13 @@ export const useContentGeneration = () => {
       
       setGeneratedContent(content);
       
-      // Generate professional quality scores based on content analysis
-      const contentLength = content.split(' ').length;
-      const hasSubheadings = (content.match(/#{1,6}\s/g) || []).length;
-      const keywordDensity = formStates.keywords ? 
-        (content.toLowerCase().split(formStates.keywords.toLowerCase()).length - 1) / contentLength * 100 : 0;
+      // Analyze content quality
+      contentAnalysis.analyzeContent(content, formStates.keywords, language);
       
-      // More sophisticated quality scoring
-      intelligenceStates.setContentQuality(Math.min(100, Math.max(70, 
-        contentLength > 800 ? 85 + (hasSubheadings * 3) + (keywordDensity > 1 && keywordDensity < 4 ? 10 : 0) : 70
-      )));
-      
-      intelligenceStates.setSeoScore(Math.min(100, Math.max(60, 
-        75 + (keywordDensity > 1 && keywordDensity < 3 ? 20 : 0) + (hasSubheadings * 2) + (contentLength > 1000 ? 5 : 0)
-      )));
-      
-      intelligenceStates.setReadabilityScore(Math.min(100, Math.max(75, 
-        80 + (hasSubheadings * 2) + (contentLength > 500 && contentLength < 2000 ? 10 : 0)
-      )));
-      
-      // Extract smart keywords from generated content
+      // Extract keywords and generate images
       const smartKeywords = intelligenceStates.extractKeywordsFromTopic(content);
-      intelligenceStates.setSmartKeywords(smartKeywords);
-      
-      // Generate professional content insights
-      intelligenceStates.setContentInsights({
-        estimatedReadTime: Math.ceil(contentLength / (language === 'th' ? 150 : 200)), // Thai reading speed is typically slower
-        targetKeywordDensity: `${keywordDensity.toFixed(1)}%`,
-        recommendedHeadings: hasSubheadings,
-        suggestedImages: Math.ceil(contentLength / 300),
-        seoComplexity: keywordDensity > 3 ? 'High' : keywordDensity > 1.5 ? 'Medium' : 'Low',
-        competitiveLevel: contentLength > 1500 ? 'High' : contentLength > 800 ? 'Medium' : 'Low',
-        languageOptimization: language === 'th' ? 'Thai-optimized' : 'English-optimized',
-        professionalGrade: contentLength > 1000 && hasSubheadings >= 3 ? 'Publication Ready' : 'Good Quality'
-      });
-
-      // Generate professional-grade images (remove placeholder URLs)
-      setGeneratedImages([
-        { 
-          id: 1, 
-          url: `https://images.unsplash.com/800x600/?${encodeURIComponent(`${formStates.topic} professional illustration`)}`, 
-          alt: `${formStates.topic} ${language === 'th' ? 'ภาพประกอb' : 'main illustration'}`, 
-          prompt: `Professional high-quality illustration for ${formStates.topic}, ${formStates.tone} style, ${language === 'th' ? 'Thai context' : 'international context'}`, 
-          enhanced: true, 
-          quality: 'high', 
-          seoOptimized: true 
-        },
-        { 
-          id: 2, 
-          url: `https://images.unsplash.com/800x600/?${encodeURIComponent(`${formStates.topic} infographic data visualization`)}`, 
-          alt: `${formStates.topic} ${language === 'th' ? 'อินโฟกราฟิก' : 'infographic'}`, 
-          prompt: `Professional infographic showing key concepts of ${formStates.topic}, data visualization style`, 
-          enhanced: true, 
-          quality: 'high', 
-          seoOptimized: true 
-        }
-      ]);
+      contentAnalysis.setSmartKeywords(smartKeywords);
+      imageGeneration.generateImages(formStates.topic, formStates.tone, language);
       
     } catch (err: any) {
       console.error("Error generating content:", err);
@@ -267,22 +139,13 @@ export const useContentGeneration = () => {
     navigator.clipboard.writeText(content);
   };
 
-  const downloadImage = (imageUrl: string, fileName: string) => {
-    const link = document.createElement('a');
-    link.href = imageUrl;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   return {
     // Form states
     ...formStates,
     
     // Generated content
     generatedContent,
-    generatedImages,
+    generatedImages: imageGeneration.generatedImages,
     isGenerating,
     error,
     setError,
@@ -292,6 +155,13 @@ export const useContentGeneration = () => {
     
     // Intelligence states
     ...intelligenceStates,
+    
+    // Content analysis states
+    contentQuality: contentAnalysis.contentQuality,
+    seoScore: contentAnalysis.seoScore,
+    readabilityScore: contentAnalysis.readabilityScore,
+    smartKeywords: contentAnalysis.smartKeywords,
+    contentInsights: contentAnalysis.contentInsights,
     
     // Analytics-based states
     analyticsData,
@@ -305,6 +175,6 @@ export const useContentGeneration = () => {
     generateContent,
     generateAutoContent,
     copyToClipboard,
-    downloadImage
+    downloadImage: imageGeneration.downloadImage
   };
 };
