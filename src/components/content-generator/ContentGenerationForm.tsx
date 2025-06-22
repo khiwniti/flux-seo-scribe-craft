@@ -2,12 +2,12 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Wand2, Brain, CheckCircle, Eye, Target, TrendingUp, Zap } from 'lucide-react';
+import { Wand2, Brain } from 'lucide-react';
+import BasicFormFields from './BasicFormFields';
+import EnhancedAISettings from './EnhancedAISettings';
+import AIFeaturesBadges from './AIFeaturesBadges';
+import ErrorDisplay from './ErrorDisplay';
 
 interface ContentGenerationFormProps {
   topic: string;
@@ -29,8 +29,8 @@ interface ContentGenerationFormProps {
   contentTemplate: string;
   setContentTemplate: (value: string) => void;
   isGenerating: boolean;
-  onGenerate: () => Promise<void>; // Changed to Promise
-  error?: string | null; // Added error prop
+  onGenerate: () => Promise<void>;
+  error?: string | null;
 }
 
 const ContentGenerationForm = ({
@@ -152,223 +152,7 @@ const ContentGenerationForm = ({
       </CardHeader>
       <CardContent className="space-y-4">
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="topic">{T.topicLabel}</Label>
-            <Input
-              id="topic"
-              placeholder={T.topicPlaceholder}
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              disabled={isGenerating}
-              required
-            />
-            {topic && (
-              <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
-                {T.topicHelper}
-              </div>
-            )}
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="keywords">{T.keywordsLabel}</Label>
-            <Input
-              id="keywords"
-              placeholder={T.keywordsPlaceholder}
-              value={keywords}
-              onChange={(e) => setKeywords(e.target.value)}
-              disabled={isGenerating}
-            />
-            {!keywords && topic && (
-              <div className="text-xs text-green-600">
-                {T.keywordsHelper}
-              </div>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>{T.toneLabel}</Label>
-              <Select value={tone} onValueChange={setTone} disabled={isGenerating}>
-                <SelectTrigger>
-                  <SelectValue placeholder={T.tonePlaceholder} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="professional">{T.toneProfessional}</SelectItem>
-                  <SelectItem value="casual">{T.toneCasual}</SelectItem>
-                  <SelectItem value="authoritative">{T.toneAuthoritative}</SelectItem>
-                  <SelectItem value="conversational">{T.toneConversational}</SelectItem>
-                </SelectContent>
-              </Select>
-              {!tone && (
-                <div className="text-xs text-purple-600">
-                  {T.toneHelper}
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label>{T.wordCountLabel}</Label>
-              <Select value={wordCount} onValueChange={setWordCount} disabled={isGenerating}>
-                <SelectTrigger>
-                  <SelectValue placeholder={T.wordCountPlaceholder} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="short">{T.wordCountShort}</SelectItem>
-                  <SelectItem value="medium">{T.wordCountMedium}</SelectItem>
-                  <SelectItem value="long">{T.wordCountLong}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <Separator />
-
-        <div className="space-y-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border">
-          <div className="flex items-center gap-2 mb-3">
-            <Brain className="h-5 w-5 text-blue-600" />
-            <Label className="text-base font-semibold">{T.enhancedAISettingsLabel}</Label>
-            <Badge className="bg-purple-100 text-purple-700">{T.autoEnhancedBadge}</Badge>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>{T.contentTypeLabel}</Label>
-              <Select value={contentType} onValueChange={setContentType} disabled={isGenerating}>
-                <SelectTrigger>
-                  <SelectValue placeholder={T.contentTypePlaceholder} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="blog">{T.contentTypeBlog}</SelectItem>
-                  <SelectItem value="how-to">{T.contentTypeHowTo}</SelectItem>
-                  <SelectItem value="listicle">{T.contentTypeListicle}</SelectItem>
-                  <SelectItem value="comparison">{T.contentTypeComparison}</SelectItem>
-                  <SelectItem value="case-study">{T.contentTypeCaseStudy}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>{T.writingStyleLabel}</Label>
-              <Select value={writingStyle} onValueChange={setWritingStyle} disabled={isGenerating}>
-                <SelectTrigger>
-                  <SelectValue placeholder={T.writingStylePlaceholder} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="professional">{T.writingStyleProfessional}</SelectItem>
-                  <SelectItem value="conversational">{T.writingStyleConversational}</SelectItem>
-                  <SelectItem value="authoritative">{T.writingStyleAuthoritative}</SelectItem>
-                  <SelectItem value="casual">{T.writingStyleCasual}</SelectItem>
-                  <SelectItem value="technical">{T.writingStyleTechnical}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>{T.targetAudienceLabel}</Label>
-              <Select value={targetAudience} onValueChange={setTargetAudience} disabled={isGenerating}>
-                <SelectTrigger>
-                  <SelectValue placeholder={T.targetAudiencePlaceholder} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="general">{T.targetAudienceGeneral}</SelectItem>
-                  <SelectItem value="beginners">{T.targetAudienceBeginners}</SelectItem>
-                  <SelectItem value="professionals">{T.targetAudienceProfessionals}</SelectItem>
-                  <SelectItem value="experts">{T.targetAudienceExperts}</SelectItem>
-                  <SelectItem value="executives">{T.targetAudienceExecutives}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>{T.industryFocusLabel}</Label>
-              <Select value={industryFocus} onValueChange={setIndustryFocus} disabled={isGenerating}>
-                <SelectTrigger>
-                  <SelectValue placeholder={T.industryFocusPlaceholder} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="general">{T.industryFocusGeneral}</SelectItem>
-                  <SelectItem value="technology">{T.industryFocusTech}</SelectItem>
-                  <SelectItem value="marketing">{T.industryFocusMarketing}</SelectItem>
-                  <SelectItem value="finance">{T.industryFocusFinance}</SelectItem>
-                  <SelectItem value="healthcare">{T.industryFocusHealthcare}</SelectItem>
-                  <SelectItem value="education">{T.industryFocusEducation}</SelectItem>
-                  <SelectItem value="ecommerce">{T.industryFocusEcommerce}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>{T.contentTemplateLabel}</Label>
-            <Select value={contentTemplate} onValueChange={setContentTemplate} disabled={isGenerating}>
-              <SelectTrigger>
-                <SelectValue placeholder={T.contentTemplatePlaceholder} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="standard">{T.contentTemplateStandard}</SelectItem>
-                <SelectItem value="how-to">{T.contentTemplateHowTo}</SelectItem>
-                <SelectItem value="listicle">{T.contentTemplateListArticle}</SelectItem>
-                <SelectItem value="comparison">{T.contentTemplateComparisonGuide}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label>{T.aiPoweredFeaturesLabel}</Label>
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="secondary" className="bg-green-100 text-green-700">
-              <CheckCircle className="h-3 w-3 mr-1" />
-              {T.badgeAutoSEO}
-            </Badge>
-            <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-              <Eye className="h-3 w-3 mr-1" />
-              {T.badgeSmartImage}
-            </Badge>
-            <Badge variant="secondary" className="bg-purple-100 text-purple-700">
-              <Brain className="h-3 w-3 mr-1" />
-              {T.badgeKeywordDetection}
-            </Badge>
-            <Badge variant="secondary" className="bg-orange-100 text-orange-700">
-              <Target className="h-3 w-3 mr-1" />
-              {T.badgeQualityAnalysis}
-            </Badge>
-            <Badge variant="secondary" className="bg-pink-100 text-pink-700">
-              <TrendingUp className="h-3 w-3 mr-1" />
-              {T.badgeTrendIntegration}
-            </Badge>
-            <Badge variant="secondary" className="bg-indigo-100 text-indigo-700">
-              <Zap className="h-3 w-3 mr-1" />
-              {T.badgeOneClickPublish}
-            </Badge>
-          </div>
-        </div>
-
-        {/* Error Display */}
-        {error && (
-            <div className="mt-4 p-3 text-sm bg-red-100 border border-red-300 text-red-700 rounded-md flex items-center gap-2">
-              <AlertTriangleIcon className="h-5 w-5 flex-shrink-0" />
-              {error}
-            </div>
-        )}
-
-        <Button 
-          type="submit"
-          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3"
-          disabled={isGenerating}
-        >
-          {isGenerating ? (
-            <div className="flex items-center gap-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              {T.buttonGenerating}
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Brain className="h-4 w-4" />
-              {T.buttonGenerate}
-            </div>
-          )}
-        </Button>
         </form>
       </CardContent>
     </Card>
