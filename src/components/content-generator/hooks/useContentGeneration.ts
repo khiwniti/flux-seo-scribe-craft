@@ -4,6 +4,7 @@ import { GeneratedImage, ContentInsights } from '../types';
 import { useFormStates } from './useFormStates';
 import { useAutoGeneration } from './useAutoGeneration';
 import { useContentIntelligence } from './useContentIntelligence';
+import { generateBlogContent } from '../../../lib/geminiService';
 import { 
   generateIntroduction, 
   generateKeyPoints, 
@@ -20,36 +21,63 @@ export const useContentGeneration = () => {
   const [generatedContent, setGeneratedContent] = useState('');
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [error, setError] = useState<string | null>(null); // Added error state
+  const [error, setError] = useState<string | null>(null);
   
   // Analytics-based states
   const [analyticsData, setAnalyticsData] = useState<any>(null);
   const [blogSuggestions, setBlogSuggestions] = useState<any[]>([]);
   const [selectedAnalyticsSuggestion, setSelectedAnalyticsSuggestion] = useState<any>(null);
 
-  // Auto-fill based on topic
+  // Auto-fill based on topic with enhanced AI analysis
   useEffect(() => {
     if (formStates.topic && formStates.topic.length > 10) {
-      // Simulate AI-powered field enhancement
-      setTimeout(() => {
-        if (!formStates.keywords) {
-          const autoKeywords = intelligenceStates.extractKeywordsFromTopic(formStates.topic);
-          formStates.setKeywords(autoKeywords.join(', '));
-        }
-        
-        if (!formStates.tone) {
-          const detectedTone = intelligenceStates.detectToneFromTopic(formStates.topic);
-          formStates.setTone(detectedTone);
-        }
-        
-        if (!formStates.targetAudience) {
-          const detectedAudience = intelligenceStates.detectAudienceFromTopic(formStates.topic);
-          formStates.setTargetAudience(detectedAudience);
-        }
-        
-        if (!formStates.contentType) {
-          const detectedType = intelligenceStates.detectContentTypeFromTopic(formStates.topic);
-          formStates.setContentType(detectedType);
+      setTimeout(async () => {
+        try {
+          // Use AI to analyze topic and suggest improvements
+          const analysisPrompt = `Analyze this topic for content creation: "${formStates.topic}". Provide:
+1. 5 relevant keywords
+2. Appropriate tone (professional/casual/authoritative/conversational)
+3. Target audience
+4. Content type suggestion
+5. Industry classification
+
+Format as JSON with keys: keywords, tone, audience, contentType, industry`;
+
+          const aiAnalysis = await generateBlogContent(analysisPrompt);
+          const parsedAnalysis = JSON.parse(aiAnalysis);
+
+          if (!formStates.keywords && parsedAnalysis.keywords) {
+            formStates.setKeywords(Array.isArray(parsedAnalysis.keywords) ? 
+              parsedAnalysis.keywords.join(', ') : parsedAnalysis.keywords);
+          }
+          
+          if (!formStates.tone && parsedAnalysis.tone) {
+            formStates.setTone(parsedAnalysis.tone);
+          }
+          
+          if (!formStates.targetAudience && parsedAnalysis.audience) {
+            formStates.setTargetAudience(parsedAnalysis.audience);
+          }
+          
+          if (!formStates.contentType && parsedAnalysis.contentType) {
+            formStates.setContentType(parsedAnalysis.contentType);
+          }
+
+          if (!formStates.industryFocus && parsedAnalysis.industry) {
+            formStates.setIndustryFocus(parsedAnalysis.industry);
+          }
+        } catch (error) {
+          console.log('AI analysis failed, using fallback methods');
+          // Fallback to existing logic
+          if (!formStates.keywords) {
+            const autoKeywords = intelligenceStates.extractKeywordsFromTopic(formStates.topic);
+            formStates.setKeywords(autoKeywords.join(', '));
+          }
+          
+          if (!formStates.tone) {
+            const detectedTone = intelligenceStates.detectToneFromTopic(formStates.topic);
+            formStates.setTone(detectedTone);
+          }
         }
       }, 1000);
     }
@@ -57,56 +85,90 @@ export const useContentGeneration = () => {
 
   const generateContent = async () => {
     setIsGenerating(true);
-    setError(null); // Clear previous errors
+    setError(null);
     
     try {
-      // Simulate AI content generation with analytics enhancement
-      // In a real scenario, this would involve API calls to generateBlogContent from geminiService
-      // For now, we'll keep the setTimeout to simulate async behavior.
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate network delay
-
       if (!formStates.topic) {
         throw new Error("Topic is required to generate content.");
       }
 
-      // This part remains largely simulated as per original logic
-      // Replace with actual call to generateBlogContent(prompt) if integrating fully
-      const prompt = `Topic: ${formStates.topic}, Keywords: ${formStates.keywords}, Tone: ${formStates.tone}, Word Count: ${formStates.wordCount}, Content Type: ${formStates.contentType}`;
-      // const actualContentFromAI = await generateBlogContent(prompt); // Example of actual call
+      // Create comprehensive AI prompt
+      const prompt = `Create a comprehensive ${formStates.contentType || 'blog post'} about "${formStates.topic}".
 
-      // Simulated content generation:
-      const content = `# ${formStates.topic}
-## Introduction
-${generateIntroduction(formStates.topic)}
-## Key Points
-${generateKeyPoints(formStates.topic)}
-## SEO-Optimized Content
-${generateSEOContent(formStates.topic)}
-## Conclusion
-${generateConclusion(formStates.topic)}
----
-**Content Quality Score**: ${Math.floor(Math.random() * 20 + 80)}%
-**SEO Score**: ${Math.floor(Math.random() * 15 + 85)}%
-**Readability Score**: ${Math.floor(Math.random() * 10 + 90)}%`;
+Requirements:
+- Word count: approximately ${formStates.wordCount} words
+- Tone: ${formStates.tone}
+- Target audience: ${formStates.targetAudience}
+- Keywords to include: ${formStates.keywords}
+- Industry focus: ${formStates.industryFocus}
+- Writing style: ${formStates.writingStyle}
+
+Structure the content with:
+1. Engaging headline
+2. Introduction that hooks the reader
+3. Main body with subheadings
+4. Key points and actionable insights
+5. SEO-optimized content
+6. Compelling conclusion with call-to-action
+
+Make it engaging, informative, and optimized for search engines.`;
+
+      const content = await generateBlogContent(prompt);
       
-      setGeneratedContent(content); // Use actualContentFromAI if making real calls
-      intelligenceStates.setContentQuality(Math.floor(Math.random() * 20 + 80));
-      intelligenceStates.setSeoScore(Math.floor(Math.random() * 15 + 85));
-      intelligenceStates.setReadabilityScore(Math.floor(Math.random() * 10 + 90));
-      intelligenceStates.setSmartKeywords(intelligenceStates.extractKeywordsFromTopic(formStates.topic));
+      setGeneratedContent(content);
       
+      // Generate quality scores based on content analysis
+      const contentLength = content.split(' ').length;
+      const hasSubheadings = (content.match(/#{1,6}\s/g) || []).length;
+      const keywordDensity = formStates.keywords ? 
+        (content.toLowerCase().split(formStates.keywords.toLowerCase()).length - 1) / contentLength * 100 : 0;
+      
+      intelligenceStates.setContentQuality(Math.min(100, Math.max(60, 
+        contentLength > 500 ? 80 + (hasSubheadings * 5) : 60
+      )));
+      
+      intelligenceStates.setSeoScore(Math.min(100, Math.max(50, 
+        70 + (keywordDensity > 1 && keywordDensity < 5 ? 20 : 0) + (hasSubheadings * 3)
+      )));
+      
+      intelligenceStates.setReadabilityScore(Math.min(100, Math.max(70, 
+        85 + (hasSubheadings * 2)
+      )));
+      
+      // Extract smart keywords from generated content
+      const smartKeywords = intelligenceStates.extractKeywordsFromTopic(content);
+      intelligenceStates.setSmartKeywords(smartKeywords);
+      
+      // Generate content insights
       intelligenceStates.setContentInsights({
-        estimatedReadTime: Math.ceil(content.split(' ').length / 200),
-        targetKeywordDensity: '2.5%',
-        recommendedHeadings: content.split('\n').filter(line => line.trim().startsWith('#')).length,
-        suggestedImages: 3,
-        seoComplexity: 'Medium',
-        competitiveLevel: 'Moderate'
+        estimatedReadTime: Math.ceil(contentLength / 200),
+        targetKeywordDensity: `${keywordDensity.toFixed(1)}%`,
+        recommendedHeadings: hasSubheadings,
+        suggestedImages: Math.ceil(contentLength / 400),
+        seoComplexity: keywordDensity > 3 ? 'High' : keywordDensity > 1.5 ? 'Medium' : 'Low',
+        competitiveLevel: contentLength > 1500 ? 'High' : contentLength > 800 ? 'Medium' : 'Low'
       });
 
+      // Generate relevant images
       setGeneratedImages([
-        { id: 1, url: '/placeholder.svg', alt: `${formStates.topic} illustration`, prompt: `Professional illustration for ${formStates.topic}`, enhanced: true, quality: 'high', seoOptimized: true },
-        { id: 2, url: '/placeholder.svg', alt: `${formStates.topic} infographic`, prompt: `Infographic showing key concepts of ${formStates.topic}`, enhanced: true, quality: 'high', seoOptimized: true }
+        { 
+          id: 1, 
+          url: '/placeholder.svg', 
+          alt: `${formStates.topic} main illustration`, 
+          prompt: `Professional high-quality illustration for ${formStates.topic}, ${formStates.tone} style`, 
+          enhanced: true, 
+          quality: 'high', 
+          seoOptimized: true 
+        },
+        { 
+          id: 2, 
+          url: '/placeholder.svg', 
+          alt: `${formStates.topic} infographic`, 
+          prompt: `Detailed infographic showing key concepts of ${formStates.topic}`, 
+          enhanced: true, 
+          quality: 'high', 
+          seoOptimized: true 
+        }
       ]);
       
     } catch (err: any) {
@@ -115,7 +177,7 @@ ${generateConclusion(formStates.topic)}
         ? "API Key is invalid or missing. Please configure it in Settings."
         : err.message || "An unknown error occurred during content generation.";
       setError(errorMessage);
-      setGeneratedContent(''); // Clear any partial content
+      setGeneratedContent('');
     } finally {
       setIsGenerating(false);
     }
@@ -123,42 +185,43 @@ ${generateConclusion(formStates.topic)}
 
   const generateAutoContent = async () => {
     if (!autoGenStates.autoGenTopics.trim()) {
-        setError("Auto-generation topics cannot be empty."); // Provide error feedback
+        setError("Auto-generation topics cannot be empty.");
         return;
     }
     setIsGenerating(true);
-    setError(null); // Clear previous errors
+    setError(null);
     
     const topics = autoGenStates.autoGenTopics.split(',').map(t => t.trim());
     const randomTopic = topics[Math.floor(Math.random() * topics.length)];
     
-    // Temporarily set form topic for generation logic if it relies on it
     const originalTopic = formStates.topic;
     formStates.setTopic(randomTopic);
 
     try {
-      // Simulate delay and AI call for auto-generation
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      // const promptForAuto = `Generate content for topic: ${randomTopic}`;
-      // const autoGeneratedText = await generateBlogContent(promptForAuto); // Example actual call
+      const autoPrompt = `Create an engaging ${formStates.contentType || 'blog post'} about "${randomTopic}".
+      
+Make it informative, well-structured, and SEO-optimized. Include:
+- Compelling headline
+- Introduction
+- 3-4 main sections with subheadings  
+- Actionable insights
+- Conclusion with call-to-action
 
-      // Using existing simulation logic for now
-      const content = `# ${randomTopic} (Auto-Generated)
-## Introduction
-${generateIntroduction(randomTopic)}
-## Conclusion
-${generateConclusion(randomTopic)}`;
-      // setGeneratedContent(autoGeneratedText); // If using actual call
+Word count: approximately ${formStates.wordCount || 1500} words.
+Tone: ${formStates.tone || 'professional'}`;
 
+      const content = await generateBlogContent(autoPrompt);
+      
       const newEntry = {
         id: Date.now(),
         topic: randomTopic,
         date: new Date(),
         status: 'completed',
-        contentPreview: content.substring(0, 100) + "...", // Store a preview
-        wordCount: Math.floor(Math.random() * 1000 + 1500),
+        contentPreview: content.substring(0, 100) + "...",
+        wordCount: content.split(' ').length,
         seoScore: Math.floor(Math.random() * 20 + 80)
       };
+      
       autoGenStates.setAutoGenHistory(prev => [newEntry, ...prev.slice(0, 9)]);
 
     } catch (err: any) {
@@ -168,7 +231,7 @@ ${generateConclusion(randomTopic)}`;
         : err.message || "An unknown error occurred during auto-generation.";
       setError(errorMessage);
     } finally {
-      formStates.setTopic(originalTopic); // Restore original topic if it was changed
+      formStates.setTopic(originalTopic);
       setIsGenerating(false);
     }
   };
@@ -194,8 +257,8 @@ ${generateConclusion(randomTopic)}`;
     generatedContent,
     generatedImages,
     isGenerating,
-    error, // Expose error state
-    setError, // Expose setError to allow clearing error from component if needed
+    error,
+    setError,
     
     // Auto-generation states
     ...autoGenStates,
