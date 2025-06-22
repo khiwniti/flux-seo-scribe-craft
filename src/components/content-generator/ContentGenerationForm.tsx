@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Wand2, Brain, CheckCircle, Eye, Target, TrendingUp, Zap } from 'lucide-react';
+import { Wand2, Brain, CheckCircle, Eye, Target, TrendingUp, Zap, AlertTriangle } from 'lucide-react';
 
 interface ContentGenerationFormProps {
   topic: string;
@@ -272,7 +271,7 @@ const ContentGenerationForm = ({
         {/* Error Display */}
         {error && (
             <div className="mt-4 p-3 text-sm bg-red-100 border border-red-300 text-red-700 rounded-md flex items-center gap-2">
-              <AlertTriangleIcon className="h-5 w-5 flex-shrink-0" /> {/* Use imported AlertTriangleIcon */}
+              <AlertTriangle className="h-5 w-5 flex-shrink-0" />
               {error}
             </div>
         )}
