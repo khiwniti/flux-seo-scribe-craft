@@ -1,73 +1,40 @@
-# Welcome to your Lovable project
+# Flux SEO Scribe Craft - Minimal Version
 
-## Project info
+This is a minimal version of the Flux SEO Scribe Craft plugin, specifically designed for WordPress Playground compatibility.
 
-**URL**: https://lovable.dev/projects/e6e95c6d-5133-4d62-a6c7-dd6207865f1b
+## Installation
 
-## How can I edit this code?
+1. Upload the plugin files to the `/wp-content/plugins/` directory
+2. Activate the plugin through the 'Plugins' menu in WordPress
+3. Access the plugin via the 'Flux SEO' menu in your admin dashboard
 
-There are several ways of editing your application.
+## Features
 
-**Use Lovable**
+- Content Analysis
+- SEO Optimization
+- Blog Generation
+- Analytics Dashboard
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/e6e95c6d-5133-4d62-a6c7-dd6207865f1b) and start prompting.
+## WordPress Playground Instructions
 
-Changes made via Lovable will be committed automatically to this repo.
+This minimal version is optimized for WordPress Playground testing. To install:
 
-**Use your preferred IDE**
+1. Go to WordPress Playground
+2. Navigate to Plugins > Add New > Plugin Editor
+3. Create a new plugin file named `flux-seo-minimal.php`
+4. Copy and paste the code from this repository
+5. Create a file named `flux-seo-style.css` with the CSS code
+6. Activate the plugin
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Full Version
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+The full version includes:
+- AI-powered content generation with Google Gemini
+- Advanced SEO analysis
+- Comprehensive analytics dashboard
+- Multi-language support (English/Thai)
+- Complete WordPress integration
 
-Follow these steps:
+## Support
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/e6e95c6d-5133-4d62-a6c7-dd6207865f1b) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+For support or more information, please visit the [GitHub repository](https://github.com/khiwniti/flux-seo-scribe-craft).
