@@ -23,16 +23,26 @@
    - Find "Flux SEO Scribe Craft"
    - Click "Activate"
 
-### Method 2: Using Plugin Upload (If Available)
+### Method 2: Using Minimal Version (Recommended for Playground)
 
-1. **Download the Plugin**
-   - Download `flux-seo-scribe-craft-wordpress-plugin.zip` from this repository
+For better compatibility with WordPress Playground's limitations:
 
-2. **Upload to WordPress Playground**
-   - In WordPress Playground, go to **Plugins → Add New → Upload Plugin**
-   - Choose the downloaded zip file
-   - Click "Install Now"
-   - Click "Activate Plugin"
+1. **Create a Minimal Plugin File**
+   - In WordPress Playground, go to **Plugins → Plugin Editor**
+   - Click "Select plugin to edit" and choose "Create New"
+   - Name your plugin "Flux SEO Minimal"
+   - Copy the content of `flux-seo-minimal.php` into the editor
+   - Click "Update File"
+
+2. **Add CSS File**
+   - Create a new file named `flux-seo-style.css`
+   - Copy the content from the provided CSS file
+   - Click "Update File"
+
+3. **Activate the Plugin**
+   - Go to **Plugins → Installed Plugins**
+   - Find "Flux SEO Minimal"
+   - Click "Activate"
 
 ## Testing the Plugin
 
@@ -54,7 +64,7 @@
 
 ### 4. Test Shortcode
 - Create a new page or post
-- Add the shortcode: `[flux_seo_scribe_craft]`
+- Add the shortcode: `[flux_seo_scribe_craft]` or `[flux_seo]` (for minimal version)
 - Preview the page to see the SEO tools embedded
 
 ## Troubleshooting
@@ -74,11 +84,14 @@
    - WordPress Playground has limited storage
    - Large plugins may encounter issues
 
-### Minimal Version for Playground
+### Using the Minimal Version
 
-If you encounter issues with the full plugin, try the minimal version:
-- Use `flux-seo-minimal.php` instead
-- This version has fewer dependencies and is optimized for Playground
+If you encounter issues with the full plugin, the minimal version (`flux-seo-minimal.php`) is specifically designed for WordPress Playground:
+- Smaller file size
+- Fewer dependencies
+- Simpler functionality
+- No external API calls
+- Optimized for Playground's limitations
 
 ## Expected Results
 

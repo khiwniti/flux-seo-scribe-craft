@@ -90,6 +90,15 @@
     border-radius: 16px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.flux-seo-title-section {
+    flex: 1;
+    text-align: left;
 }
 
 .flux-seo-header h1 {
@@ -104,6 +113,34 @@
 .flux-seo-header p {
     font-size: 1.2em;
     color: #64748b;
+}
+
+/* Language Switcher */
+.flux-seo-language-switcher {
+    display: flex;
+    gap: 5px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 5px;
+}
+
+.flux-seo-lang-btn {
+    padding: 8px 16px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.flux-seo-lang-btn.active {
+    background: #3b82f6;
+    color: white;
+}
+
+.flux-seo-lang-btn:hover:not(.active) {
+    background: #e9ecef;
 }
 
 /* Navigation */
@@ -167,6 +204,25 @@
     text-align: center;
 }
 
+/* Form Styles */
+.flux-seo-form-group {
+    margin-bottom: 15px;
+}
+
+.flux-seo-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #1e40af;
+}
+
+.flux-seo-form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
 /* Input Section */
 .flux-seo-input-section {
     margin-bottom: 30px;
@@ -209,6 +265,29 @@
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+.flux-seo-select {
+    width: 100%;
+    padding: 15px 20px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 16px;
+    margin-bottom: 15px;
+    transition: border-color 0.3s ease;
+    font-family: inherit;
+    background-color: white;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 16px;
+}
+
+.flux-seo-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
 /* Buttons */
 .flux-seo-button {
     padding: 15px 30px;
@@ -221,12 +300,22 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    background: #f8fafc;
+    color: #1e40af;
+    border: 2px solid #e2e8f0;
+}
+
+.flux-seo-button:hover:not(:disabled) {
+    background: #f1f5f9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .flux-seo-button.primary {
     background: linear-gradient(135deg, #3b82f6, #1e40af);
     color: white;
     box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    border: none;
 }
 
 .flux-seo-button.primary:hover:not(:disabled) {
@@ -238,6 +327,13 @@
     opacity: 0.6;
     cursor: not-allowed;
     transform: none !important;
+}
+
+.flux-seo-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: flex-end;
 }
 
 /* Results Section */
@@ -510,6 +606,13 @@
     
     .flux-seo-header {
         padding: 20px 15px;
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .flux-seo-title-section {
+        text-align: center;
+        margin-bottom: 15px;
     }
     
     .flux-seo-header h1 {

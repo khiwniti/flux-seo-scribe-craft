@@ -17,8 +17,6 @@ A comprehensive WordPress plugin that brings the full power of Flux SEO Scribe C
 - **Keyword Research** - Advanced keyword analysis and suggestions
 - **Meta Tags Manager** - Automated meta tag optimization
 - **Schema Markup Generator** - Structured data generation
-- **Technical SEO Audit** - Complete technical SEO analysis
-- **AI SEO Chatbot** - Interactive SEO assistant
 
 ### WordPress Integration
 - **Admin Dashboard** - Full-featured admin interface
@@ -66,13 +64,7 @@ Embed anywhere on your site:
 **Shortcode Parameters:**
 - `height` - Container height (default: 800px)
 - `width` - Container width (default: 100%)
-- `tab` - Default tab to show (analyzer, generator, analytics, etc.)
-
-## 🎯 Available Tabs
-
-1. **Content Analyzer** - Analyze existing content for SEO optimization
-2. **Content Generator** - Generate AI-powered content with customizable parameters
-3. **Analytics** - View SEO performance metrics and insights
+- `tab` - Default tab to show (analyzer, generator, analytics)
 
 ## 🔧 Technical Details
 
@@ -97,9 +89,6 @@ flux-seo-scribe-craft/
 - `POST /wp-json/flux-seo/v1/gemini-proxy` - Gemini AI proxy
 - `POST /wp-json/flux-seo/v1/analyze-content` - Content analysis
 - `POST /wp-json/flux-seo/v1/save-content` - Save generated content
-
-### Database Tables
-- `wp_flux_seo_analytics` - SEO analysis results and metrics
 
 ## 🌍 Language Support
 
@@ -131,7 +120,6 @@ Track your SEO performance with:
 - SEO score tracking
 - Keyword performance metrics
 - Content generation analytics
-- Usage statistics
 
 ## 🚀 Performance
 

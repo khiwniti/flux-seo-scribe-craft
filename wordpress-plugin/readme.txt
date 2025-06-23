@@ -21,6 +21,7 @@ Flux SEO Scribe Craft is a comprehensive WordPress plugin that provides professi
 * **Advanced Analytics** - Track and monitor your SEO performance with comprehensive reporting.
 * **WordPress Integration** - Seamlessly integrates with your WordPress admin dashboard.
 * **Shortcode Support** - Embed SEO tools anywhere with simple shortcodes.
+* **Multi-language Support** - Full support for both English and Thai languages.
 
 = Who Is This For? =
 
@@ -55,6 +56,10 @@ Yes, all interfaces are fully responsive and work well on mobile devices.
 
 Simply add `[flux_seo_scribe_craft]` to any page or post. You can customize the dimensions with parameters like `[flux_seo_scribe_craft height="600px" width="90%"]`.
 
+= Does the plugin support languages other than English? =
+
+Yes, the plugin fully supports both English and Thai languages with a built-in language switcher.
+
 == Screenshots ==
 
 1. Main dashboard with SEO analysis tools
@@ -70,7 +75,7 @@ Simply add `[flux_seo_scribe_craft]` to any page or post. You can customize the 
 * Added Gemini AI integration for content generation
 * Improved SEO analysis algorithms
 * Enhanced user interface with modern design
-* Added multi-language support
+* Added multi-language support (English/Thai)
 * Optimized performance and responsiveness
 
 = 1.0.0 =
