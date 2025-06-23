@@ -1,4 +1,3 @@
-
 # Flux SEO Scribe Craft WordPress Plugin
 
 ## Complete AI-Powered SEO Optimization Suite
@@ -74,11 +73,6 @@ Embed anywhere on your site:
 1. **Content Analyzer** - Analyze existing content for SEO optimization
 2. **Content Generator** - Generate AI-powered content with customizable parameters
 3. **Analytics** - View SEO performance metrics and insights
-4. **Keywords** - Research and manage target keywords
-5. **Meta Tags** - Optimize meta descriptions and titles
-6. **Schema** - Generate structured data markup
-7. **Technical** - Perform technical SEO audits
-8. **Chatbot** - Interactive AI SEO assistant
 
 ## 🔧 Technical Details
 
@@ -92,11 +86,11 @@ Embed anywhere on your site:
 ```
 flux-seo-scribe-craft/
 ├── flux-seo-scribe-craft.php    # Main plugin file
-├── assets/
-│   ├── flux-seo-complete-app.js # Complete React application
-│   └── flux-seo-styles.css      # All styling
-├── README.md                     # This documentation
-└── languages/                    # Translation files
+├── flux-seo-react-loader.js     # React loader script
+├── flux-seo-wordpress-app.js    # Main React application
+├── flux-seo-scribe-craft.css    # Application styles
+├── wordpress-overrides.css      # WordPress-specific styles
+└── README.md                    # Documentation
 ```
 
 ### REST API Endpoints
@@ -141,7 +135,7 @@ Track your SEO performance with:
 
 ## 🚀 Performance
 
-- Optimized React application (766KB minified)
+- Optimized React application
 - Lazy loading for better performance
 - CDN fallback for React libraries
 - Efficient database queries
@@ -180,10 +174,6 @@ This plugin is licensed under GPL v2 or later.
 ## 🔄 Updates
 
 The plugin includes automatic update notifications. Always backup your site before updating.
-
-## 🤝 Contributing
-
-For bug reports, feature requests, or contributions, please contact the development team.
 
 ---
 

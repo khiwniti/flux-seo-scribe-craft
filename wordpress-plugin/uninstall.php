@@ -1,4 +1,3 @@
-
 <?php
 /**
  * Uninstall script for Flux SEO Scribe Craft Plugin
@@ -17,7 +16,6 @@ function flux_seo_remove_tables() {
     
     // List of tables to remove
     $tables = array(
-        $wpdb->prefix . 'flux_seo_generation_history',
         $wpdb->prefix . 'flux_seo_analytics'
     );
     
@@ -33,7 +31,6 @@ function flux_seo_remove_options() {
     // List of options to remove
     $options = array(
         'flux_seo_version',
-        'flux_seo_settings',
         'flux_seo_gemini_api_key',
         'flux_seo_installed',
         'flux_seo_installation_date'
@@ -49,7 +46,7 @@ function flux_seo_remove_options() {
  */
 function flux_seo_remove_files() {
     $upload_dir = wp_upload_dir();
-    $flux_seo_dir = $upload_dir['basedir'] . '/flux-seo-scribe-craft';
+    $flux_seo_dir = $upload_dir['basedir'] . '/flux-seo';
     
     if (file_exists($flux_seo_dir)) {
         flux_seo_recursive_delete($flux_seo_dir);

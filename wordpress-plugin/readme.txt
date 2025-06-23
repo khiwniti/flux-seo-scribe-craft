@@ -4,7 +4,7 @@ Tags: seo, content, ai, optimization, analytics
 Requires at least: 5.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 2.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,7 +41,7 @@ Flux SEO Scribe Craft is a comprehensive WordPress plugin that provides professi
 
 = Does this plugin require an API key? =
 
-Yes, for AI-powered features like content generation, you'll need to enter an API key in the settings page.
+Yes, for AI-powered features like content generation, you'll need to enter a Gemini API key in the settings page.
 
 = Can I use this plugin with any WordPress theme? =
 
@@ -65,10 +65,18 @@ Simply add `[flux_seo_scribe_craft]` to any page or post. You can customize the 
 
 == Changelog ==
 
+= 2.0.0 =
+* Complete rewrite with React integration
+* Added Gemini AI integration for content generation
+* Improved SEO analysis algorithms
+* Enhanced user interface with modern design
+* Added multi-language support
+* Optimized performance and responsiveness
+
 = 1.0.0 =
 * Initial release
 
 == Upgrade Notice ==
 
-= 1.0.0 =
-Initial release of Flux SEO Scribe Craft plugin.
+= 2.0.0 =
+Major update with React integration, Gemini AI support, and completely redesigned interface.

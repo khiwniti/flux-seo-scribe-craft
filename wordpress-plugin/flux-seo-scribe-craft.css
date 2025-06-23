@@ -1,6 +1,5 @@
-
 /* Flux SEO Scribe Craft - WordPress Plugin Styles */
-/* Version: 1.0.0 */
+/* Version: 2.0.0 */
 
 /* Reset and base styles */
 .flux-seo-app-container,
@@ -364,11 +363,36 @@
     overflow-y: auto;
 }
 
-.flux-seo-content-preview h2 {
+.flux-seo-content-preview h1 {
+    font-size: 1.8em;
+    margin: 0.8em 0 0.5em 0;
     color: #1e40af;
-    margin: 20px 0 15px 0;
-    border-bottom: 2px solid #e2e8f0;
-    padding-bottom: 10px;
+}
+
+.flux-seo-content-preview h2 {
+    font-size: 1.5em;
+    margin: 0.8em 0 0.5em 0;
+    color: #1e40af;
+    text-align: left;
+}
+
+.flux-seo-content-preview h3 {
+    font-size: 1.2em;
+    margin: 0.8em 0 0.5em 0;
+    color: #1e40af;
+    text-align: left;
+}
+
+.flux-seo-content-preview p {
+    margin-bottom: 1em;
+}
+
+.flux-seo-content-preview strong {
+    font-weight: bold;
+}
+
+.flux-seo-content-preview em {
+    font-style: italic;
 }
 
 /* Analytics */
@@ -544,16 +568,6 @@
     }
 }
 
-/* WordPress Admin Compatibility */
-.wp-admin .flux-seo-app-container {
-    margin: -20px -20px -10px -2px;
-}
-
-.wp-admin .flux-seo-dashboard {
-    padding: 0;
-    min-height: calc(100vh - 32px);
-}
-
 /* Scrollbar Styling */
 .flux-seo-content-preview::-webkit-scrollbar {
     width: 8px;
@@ -587,40 +601,6 @@
     to {
         opacity: 1;
         transform: translateY(0);
-    }
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-    .flux-seo-app-container {
-        background: #ffffff;
-    }
-    
-    .flux-seo-tab.active {
-        background: #000000;
-        color: #ffffff;
-    }
-    
-    .flux-seo-button.primary {
-        background: #000000;
-        color: #ffffff;
-    }
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-    .flux-seo-loading-spinner {
-        animation: none;
-    }
-    
-    .flux-seo-button,
-    .flux-seo-tab {
-        transition: none;
-    }
-    
-    .flux-seo-results,
-    .flux-seo-generated-content {
-        animation: none;
     }
 }
 

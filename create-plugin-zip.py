@@ -14,8 +14,8 @@ def create_plugin_zip():
     
     # Plugin information
     plugin_name = "flux-seo-scribe-craft"
-    plugin_version = "1.0.0"
-    zip_filename = f"{plugin_name}.zip"
+    plugin_version = "2.0.0"
+    zip_filename = f"{plugin_name}-wordpress-plugin.zip"
     
     # Source directory (wordpress-plugin folder)
     source_dir = "wordpress-plugin"
@@ -28,9 +28,10 @@ def create_plugin_zip():
     # Required files list
     required_files = [
         "flux-seo-scribe-craft.php",
-        "readme.txt",
-        "assets/css/admin.css",
-        "assets/js/admin.js"
+        "flux-seo-scribe-craft.css", 
+        "flux-seo-wordpress-app.js",
+        "wordpress-overrides.css",
+        "README.md"
     ]
     
     # Check for required files
@@ -58,21 +59,90 @@ def create_plugin_zip():
                     archive_name = os.path.join(plugin_name, os.path.relpath(file_path, source_dir))
                     zipf.write(file_path, archive_name)
                     print(f"✅ Added: {archive_name}")
+            
+            # Add plugin info file
+            plugin_info = f"""=== Flux SEO Scribe Craft ===
+Contributors: fluxseo
+Tags: seo, content, ai, optimization, analytics
+Requires at least: 5.0
+Tested up to: 6.4
+Requires PHP: 7.4
+Stable tag: {plugin_version}
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+
+Professional SEO optimization suite with integrated content generation and advanced analytics.
+
+== Description ==
+
+Flux SEO Scribe Craft is a comprehensive WordPress plugin that embeds a powerful React-based SEO optimization suite directly into your WordPress dashboard. 
+
+Features:
+* Content Analyzer with real-time SEO scoring
+* AI-powered blog and content generator
+* Advanced analytics and performance tracking
+* WordPress admin integration
+* Shortcode support for frontend embedding
+* Responsive design for all devices
+
+== Installation ==
+
+1. Upload the plugin files to `/wp-content/plugins/flux-seo-scribe-craft/`
+2. Activate the plugin through the 'Plugins' screen in WordPress
+3. Navigate to 'SEO Scribe Craft' in your WordPress admin menu
+4. Use [flux_seo_scribe_craft] shortcode to embed on pages/posts
+
+== Frequently Asked Questions ==
+
+= Does this plugin work with all themes? =
+Yes, the plugin is designed to work with any WordPress theme.
+
+= Is the plugin mobile-friendly? =
+Yes, the interface is fully responsive and optimized for mobile devices.
+
+== Screenshots ==
+
+1. Main dashboard with SEO analysis tools
+2. Content analyzer interface
+3. Blog generator with AI-powered content creation
+4. Advanced analytics dashboard
+
+== Changelog ==
+
+= {plugin_version} =
+* Initial release
+* Content analyzer functionality
+* Blog and image generator
+* Advanced analytics dashboard
+* WordPress admin integration
+* Shortcode support
+
+== Upgrade Notice ==
+
+= {plugin_version} =
+Initial release of Flux SEO Scribe Craft plugin.
+
+Created on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+"""
+            
+            zipf.writestr(f"{plugin_name}/readme.txt", plugin_info)
+            print(f"✅ Added: {plugin_name}/readme.txt")
         
         # Get file size
         file_size = os.path.getsize(zip_filename)
-        file_size_kb = file_size / 1024
+        file_size_mb = file_size / (1024 * 1024)
         
         print(f"\n🎉 SUCCESS! WordPress plugin ZIP created successfully!")
         print(f"📦 File: {zip_filename}")
-        print(f"📏 Size: {file_size_kb:.2f} KB ({file_size:,} bytes)")
-        print(f"🗂️ Plugin folder: {plugin_name}/")
+        print(f"📏 Size: {file_size_mb:.2f} MB ({file_size:,} bytes)")
+        print(f"🗂️  Plugin folder: {plugin_name}/")
         
         print(f"\n📋 Installation Instructions:")
         print(f"1. Go to WordPress Admin > Plugins > Add New > Upload Plugin")
         print(f"2. Choose {zip_filename} and click 'Install Now'")
         print(f"3. Click 'Activate Plugin'")
-        print(f"4. Navigate to 'Flux SEO' in WordPress admin menu")
+        print(f"4. Navigate to 'SEO Scribe Craft' in WordPress admin menu")
+        print(f"5. Use [flux_seo_scribe_craft] shortcode on pages/posts")
         
         return True
         

@@ -13,11 +13,11 @@
         const reactAvailable = typeof window.React !== 'undefined';
         const reactDOMAvailable = typeof window.ReactDOM !== 'undefined';
         
-        console.log('🔍 React availability check:', {
-            React: reactAvailable,
-            ReactDOM: reactDOMAvailable,
-            windowReact: !!window.React,
-            windowReactDOM: !!window.ReactDOM
+        console.log('🔍 Current environment check:', {
+            React: typeof React,
+            ReactDOM: typeof ReactDOM,
+            windowReact: typeof window.React,
+            windowReactDOM: typeof window.ReactDOM
         });
         
         return reactAvailable && reactDOMAvailable;
@@ -45,79 +45,105 @@
     
     // Show error if React is not available
     function showReactError() {
-        const rootElement = document.getElementById('root');
-        if (rootElement) {
-            rootElement.innerHTML = `
-                <div style="padding: 20px; border: 2px solid #dc3545; border-radius: 8px; background: #f8d7da; color: #721c24; margin: 20px;">
-                    <h3>⚠️ React Loading Error</h3>
-                    <p>React and ReactDOM libraries could not be loaded.</p>
-                    <p><strong>Possible solutions:</strong></p>
-                    <ul>
-                        <li>Check your internet connection</li>
-                        <li>Verify CDN accessibility</li>
-                        <li>Check browser console for network errors</li>
-                        <li>Try refreshing the page</li>
-                    </ul>
-                    <p><strong>Technical details:</strong></p>
-                    <ul>
-                        <li>React available: ${typeof window.React !== 'undefined'}</li>
-                        <li>ReactDOM available: ${typeof window.ReactDOM !== 'undefined'}</li>
-                    </ul>
-                    <button onclick="location.reload()" style="margin-top: 10px; padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                        Refresh Page
-                    </button>
-                </div>
-            `;
-        }
+        const rootElements = document.querySelectorAll('#flux-seo-admin-dashboard, [id^="flux-seo-container-"]');
+        rootElements.forEach(rootElement => {
+            if (rootElement) {
+                rootElement.innerHTML = `
+                    <div style="padding: 20px; border: 2px solid #dc3545; border-radius: 8px; background: #f8d7da; color: #721c24; margin: 20px;">
+                        <h3>⚠️ React Loading Error</h3>
+                        <p>React and ReactDOM libraries could not be loaded.</p>
+                        <p><strong>Possible solutions:</strong></p>
+                        <ul>
+                            <li>Check your internet connection</li>
+                            <li>Verify CDN accessibility</li>
+                            <li>Check browser console for network errors</li>
+                            <li>Try refreshing the page</li>
+                        </ul>
+                        <p><strong>Technical details:</strong></p>
+                        <ul>
+                            <li>React available: ${typeof window.React !== 'undefined'}</li>
+                            <li>ReactDOM available: ${typeof window.ReactDOM !== 'undefined'}</li>
+                        </ul>
+                        <button onclick="location.reload()" style="margin-top: 10px; padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            Refresh Page
+                        </button>
+                    </div>
+                `;
+            }
+        });
     }
     
     // Initialize the app once React is available
     function initializeFluxSEOApp() {
         console.log('🚀 Initializing FluxSEO App with React...');
         
-        // Load the main app script
-        const script = document.createElement('script');
-        script.src = fluxSeoAjax.pluginUrl + 'flux-seo-wordpress-app.js';
-        script.onload = function() {
-            console.log('✅ FluxSEO App script loaded successfully');
-            
-            // Wait a bit for the app to initialize
-            setTimeout(() => {
-                if (typeof window.FluxSEOApp !== 'undefined') {
-                    console.log('🎉 FluxSEOApp is ready!');
+        // Check for service workers and disable them to prevent conflicts
+        if ('serviceWorker' in navigator) {
+            console.log('🔧 FluxSEO: Checking for service workers to disable...');
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                if (registrations.length > 0) {
+                    console.log('🚫 FluxSEO: Found', registrations.length, 'service worker(s), unregistering...');
+                    for(let registration of registrations) {
+                        registration.unregister();
+                    }
                 } else {
-                    console.warn('⚠️ FluxSEOApp not found after script load');
+                    console.log('✅ FluxSEO: No service workers found to unregister');
                 }
-            }, 500);
-        };
-        script.onerror = function() {
-            console.error('❌ Failed to load FluxSEO App script');
-            showAppLoadError();
-        };
+            });
+        }
         
-        document.head.appendChild(script);
+        // Wait for the app to be ready
+        if (typeof window.FluxSEOApp !== 'undefined' && typeof window.FluxSEOApp.init === 'function') {
+            console.log('🎉 FluxSEOApp is ready!');
+        } else {
+            console.log('⏳ FluxSEOApp not yet available, waiting...');
+            waitForFluxSEOApp();
+        }
     }
     
-    // Show error if app script fails to load
+    // Wait for FluxSEOApp to become available
+    function waitForFluxSEOApp() {
+        let attempts = 0;
+        const maxAttempts = 30;
+        
+        const checkInterval = setInterval(() => {
+            attempts++;
+            
+            if (typeof window.FluxSEOApp !== 'undefined' && typeof window.FluxSEOApp.init === 'function') {
+                console.log('🎉 FluxSEOApp is ready!');
+                clearInterval(checkInterval);
+            } else if (attempts >= maxAttempts) {
+                console.error('❌ FluxSEOApp not found after maximum attempts');
+                clearInterval(checkInterval);
+                showAppLoadError();
+            } else {
+                console.log(`⏳ Flux SEO: FluxSEOApp not yet available, retrying... (${attempts}/${maxAttempts})`);
+            }
+        }, 500);
+    }
+    
+    // Show error if app fails to load
     function showAppLoadError() {
-        const rootElement = document.getElementById('root');
-        if (rootElement) {
-            rootElement.innerHTML = `
-                <div style="padding: 20px; border: 2px solid #dc3545; border-radius: 8px; background: #f8d7da; color: #721c24; margin: 20px;">
-                    <h3>⚠️ App Loading Error</h3>
-                    <p>The FluxSEO application script could not be loaded.</p>
-                    <p><strong>Possible causes:</strong></p>
-                    <ul>
-                        <li>Plugin files are missing or corrupted</li>
-                        <li>Server permissions issue</li>
-                        <li>JavaScript syntax error in the app</li>
-                    </ul>
-                    <button onclick="location.reload()" style="margin-top: 10px; padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                        Refresh Page
-                    </button>
-                </div>
-            `;
-        }
+        const rootElements = document.querySelectorAll('#flux-seo-admin-dashboard, [id^="flux-seo-container-"]');
+        rootElements.forEach(rootElement => {
+            if (rootElement) {
+                rootElement.innerHTML = `
+                    <div style="padding: 20px; border: 2px solid #dc3545; border-radius: 8px; background: #f8d7da; color: #721c24; margin: 20px;">
+                        <h3>⚠️ Loading Issue</h3>
+                        <p>The SEO application is taking longer than expected to load.</p>
+                        <p><strong>Possible causes:</strong></p>
+                        <ul>
+                            <li>JavaScript files not loading correctly</li>
+                            <li>Network connectivity issues</li>
+                            <li>Plugin conflicts</li>
+                        </ul>
+                        <button onclick="location.reload()" style="margin-top: 10px; padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            Refresh Page
+                        </button>
+                    </div>
+                `;
+            }
+        });
     }
     
     // Start the loading process
