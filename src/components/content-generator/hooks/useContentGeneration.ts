@@ -1,19 +1,23 @@
 
 import { useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useToast } from '@/hooks/use-toast';
 import { useFormStates } from './useFormStates';
 import { useAutoGeneration } from './useAutoGeneration';
 import { useContentIntelligence } from './useContentIntelligence';
-
+import { useContentAnalysis } from './useContentAnalysis';
+import { useImageGeneration } from './useImageGeneration';
+import { useTopicAnalysis } from './useTopicAnalysis';
+import { LanguageAwareContentGenerator } from '../LanguageAwareContentGenerator';
 
 export const useContentGeneration = () => {
-  const { language } = useLanguage(); // Consume language context
-  const { toast } = useToast(); // Get toast function
+  const { language } = useLanguage();
+  const { toast } = useToast();
   const formStates = useFormStates();
   const autoGenStates = useAutoGeneration();
   const intelligenceStates = useContentIntelligence(formStates.topic);
   const contentAnalysis = useContentAnalysis();
   const imageGeneration = useImageGeneration();
-  const { language } = useLanguage();
   
   const [generatedContent, setGeneratedContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -21,6 +25,8 @@ export const useContentGeneration = () => {
   
   // Analytics-based states
   const [analyticsData, setAnalyticsData] = useState<any>(null);
+  const [blogSuggestions, setBlogSuggestions] = useState<any[]>([]);
+  const [selectedAnalyticsSuggestion, setSelectedAnalyticsSuggestion] = useState<any>(null);
 
   const t = (enText: string, thText: string): string => {
     return language === 'th' ? thText : enText;
@@ -36,12 +42,9 @@ export const useContentGeneration = () => {
     autoGenerationFailedTitle: t("Auto-generation Failed", "การสร้างอัตโนมัติล้มเหลว"),
     autoGenerationErrorTitle: t("Auto-generation Error", "ข้อผิดพลาดการสร้างอัตโนมัติ"),
     autoGenerationErrorDesc: t("Topics and keywords must be set for auto-generation.", "ต้องตั้งค่าหัวข้อและคีย์เวิร์ดสำหรับการสร้างอัตโนมัติ"),
-    // API key error message is already handled by components that call this hook if error.isApiKeyInvalid
     apiKeyErrorForToast: t("API Key is invalid or missing. Please configure it in Settings.", "คีย์ API ไม่ถูกต้องหรือขาดหายไป กรุณาตั้งค่าในส่วนการตั้งค่า"),
     defaultErrorForToast: t("An unknown error occurred.", "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ"),
   };
-  const [blogSuggestions, setBlogSuggestions] = useState<any[]>([]);
-  const [selectedAnalyticsSuggestion, setSelectedAnalyticsSuggestion] = useState<any>(null);
 
   // Topic analysis hook
   useTopicAnalysis({
@@ -79,13 +82,20 @@ export const useContentGeneration = () => {
       });
       
       setGeneratedContent(content);
-      
-
+      toast({
+        title: T_Toasts.contentGeneratedTitle,
+        description: T_Toasts.contentGeneratedDesc,
+      });
       
     } catch (err: any) {
       console.error("Error generating content:", err);
-      const errorMessage = err.isApiKeyInvalid
-
+      const errorMessage = err.isApiKeyInvalid ? T_Toasts.apiKeyErrorForToast : (err.message || T_Toasts.defaultErrorForToast);
+      setError(errorMessage);
+      toast({
+        title: T_Toasts.generationFailedTitle,
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setIsGenerating(false);
     }
@@ -93,8 +103,12 @@ export const useContentGeneration = () => {
 
   const generateAutoContent = async () => {
     if (!autoGenStates.autoGenTopics.trim()) {
-
-        return;
+      toast({
+        title: T_Toasts.autoGenerationErrorTitle,
+        description: T_Toasts.autoGenerationErrorDesc,
+        variant: "destructive",
+      });
+      return;
     }
     setIsGenerating(true);
     setError(null);
@@ -137,8 +151,7 @@ export const useContentGeneration = () => {
 
     } catch (err: any) {
       console.error("Error during auto-generation:", err);
-      const errorMessage = err.isApiKeyInvalid
-
+      const errorMessage = err.isApiKeyInvalid ? T_Toasts.apiKeyErrorForToast : (err.message || T_Toasts.defaultErrorForToast);
       setError(errorMessage);
       toast({
         title: T_Toasts.autoGenerationFailedTitle,
