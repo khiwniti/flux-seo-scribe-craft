@@ -1,14 +1,17 @@
 
 <?php
 /**
- * Plugin Name: Flux SEO Scribe Craft
+ * Plugin Name: Flux SEO Scribe Craft - Complete Edition
  * Plugin URI: https://github.com/khiwniti/flux-seo-scribe-craft
- * Description: Professional SEO optimization suite with integrated content generation and advanced analytics. Embed the complete SEO Scribe Craft application in your WordPress site.
- * Version: 1.0.0
+ * Description: Complete AI-powered SEO optimization suite with content generation, analytics, and manual intelligence features. Professional WordPress integration with multi-language support.
+ * Version: 4.0.0
  * Author: Flux SEO Team
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: flux-seo-scribe-craft
+ * Requires at least: 5.0
+ * Tested up to: 6.4
+ * Requires PHP: 7.4
  */
 
 // Prevent direct access
@@ -19,7 +22,7 @@ if (!defined('ABSPATH')) {
 // Define plugin constants
 define('FLUX_SEO_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('FLUX_SEO_PLUGIN_PATH', plugin_dir_path(__FILE__));
-define('FLUX_SEO_PLUGIN_VERSION', '1.0.0');
+define('FLUX_SEO_PLUGIN_VERSION', '4.0.0');
 
 class FluxSEOScribeCraft {
     
@@ -35,16 +38,58 @@ class FluxSEOScribeCraft {
         add_action('wp_ajax_nopriv_flux_seo_proxy', array($this, 'ajax_proxy_handler'));
 
         // Settings page hooks
-        add_action('admin_init', array($this, 'flux_seo_register_settings'));
-        add_action('admin_menu', array($this, 'flux_seo_add_settings_page'));
+        add_action('admin_init', array($this, 'register_settings'));
+        add_action('admin_menu', array($this, 'add_settings_page'));
 
         // Add admin body class for our plugin page
         add_filter('admin_body_class', array($this, 'add_admin_body_class'));
+        
+        // Create database tables
+        register_activation_hook(__FILE__, array($this, 'create_database_tables'));
     }
     
     public function init() {
-        // Plugin initialization
         load_plugin_textdomain('flux-seo-scribe-craft', false, dirname(plugin_basename(__FILE__)) . '/languages');
+    }
+    
+    public function create_database_tables() {
+        global $wpdb;
+        
+        $charset_collate = $wpdb->get_charset_collate();
+        
+        // Content generation history table
+        $table_name = $wpdb->prefix . 'flux_seo_generation_history';
+        $sql = "CREATE TABLE $table_name (
+            id mediumint(9) NOT NULL AUTO_INCREMENT,
+            topic varchar(255) NOT NULL,
+            content longtext NOT NULL,
+            language varchar(10) NOT NULL,
+            word_count int NOT NULL,
+            seo_score int NOT NULL,
+            keywords text,
+            meta_description text,
+            generated_date datetime DEFAULT CURRENT_TIMESTAMP,
+            status varchar(50) DEFAULT 'completed',
+            PRIMARY KEY (id)
+        ) $charset_collate;";
+        
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        dbDelta($sql);
+        
+        // Analytics data table
+        $analytics_table = $wpdb->prefix . 'flux_seo_analytics';
+        $sql_analytics = "CREATE TABLE $analytics_table (
+            id mediumint(9) NOT NULL AUTO_INCREMENT,
+            post_id bigint(20),
+            analysis_data longtext,
+            seo_score int,
+            readability_score int,
+            keyword_density varchar(10),
+            analyzed_date datetime DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id)
+        ) $charset_collate;";
+        
+        dbDelta($sql_analytics);
     }
     
     public function enqueue_admin_scripts($hook) {
@@ -64,46 +109,80 @@ class FluxSEOScribeCraft {
     }
     
     private function enqueue_app_assets() {
-        // Enqueue CSS
-        wp_enqueue_style(
-            'flux-seo-scribe-craft-css',
-            FLUX_SEO_PLUGIN_URL . 'flux-seo-scribe-craft.css',
-            array(),
-            FLUX_SEO_PLUGIN_VERSION
-        );
-        
-        // Enqueue WordPress admin specific styles
-        if (is_admin()) {
-            wp_enqueue_style(
-                'flux-seo-admin-styles',
-                FLUX_SEO_PLUGIN_URL . 'wordpress-overrides.css',
-                array('flux-seo-scribe-craft-css'),
-                FLUX_SEO_PLUGIN_VERSION
-            );
-        }
-        
-        // Enqueue JavaScript
+        // Load React components first
         wp_enqueue_script(
-            'flux-seo-wordpress-app-js',
-            FLUX_SEO_PLUGIN_URL . 'flux-seo-wordpress-app.js',
-            array('wp-element', 'jquery'),
+            'flux-seo-components',
+            FLUX_SEO_PLUGIN_URL . 'assets/components/LanguageContext.js',
+            array(),
             FLUX_SEO_PLUGIN_VERSION,
             true
         );
         
+        wp_enqueue_script(
+            'flux-seo-content-form',
+            FLUX_SEO_PLUGIN_URL . 'assets/components/ContentGenerationForm.js',
+            array('flux-seo-components'),
+            FLUX_SEO_PLUGIN_VERSION,
+            true
+        );
+        
+        wp_enqueue_script(
+            'flux-seo-analyzer',
+            FLUX_SEO_PLUGIN_URL . 'assets/components/ContentAnalyzer.js',
+            array('flux-seo-components'),
+            FLUX_SEO_PLUGIN_VERSION,
+            true
+        );
+        
+        wp_enqueue_script(
+            'flux-seo-analytics',
+            FLUX_SEO_PLUGIN_URL . 'assets/components/AnalyticsOverview.js',
+            array('flux-seo-components'),
+            FLUX_SEO_PLUGIN_VERSION,
+            true
+        );
+        
+        // Main application
+        wp_enqueue_script(
+            'flux-seo-complete-app',
+            FLUX_SEO_PLUGIN_URL . 'assets/flux-seo-complete-app.js',
+            array('flux-seo-content-form', 'flux-seo-analyzer', 'flux-seo-analytics'),
+            FLUX_SEO_PLUGIN_VERSION,
+            true
+        );
+        
+        // Enhanced styles
+        wp_enqueue_style(
+            'flux-seo-enhanced-styles',
+            FLUX_SEO_PLUGIN_URL . 'assets/flux-seo-styles.css',
+            array(),
+            FLUX_SEO_PLUGIN_VERSION
+        );
+        
+        // WordPress admin specific styles
+        if (is_admin()) {
+            wp_enqueue_style(
+                'flux-seo-admin-styles',
+                FLUX_SEO_PLUGIN_URL . 'wordpress-overrides.css',
+                array('flux-seo-enhanced-styles'),
+                FLUX_SEO_PLUGIN_VERSION
+            );
+        }
+        
         // Localize script with data
-        wp_localize_script('flux-seo-wordpress-app-js', 'fluxSeoData', array(
+        wp_localize_script('flux-seo-complete-app', 'fluxSeoData', array(
             'ajaxurl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('flux_seo_nonce'),
             'pluginUrl' => FLUX_SEO_PLUGIN_URL,
             'isAdmin' => is_admin(),
             'currentUser' => wp_get_current_user()->display_name,
+            'language' => get_locale() === 'th_TH' ? 'th' : 'en',
+            'geminiApiKey' => get_option('flux_seo_gemini_api_key', ''),
             'capabilities' => array(
                 'manage_options' => current_user_can('manage_options'),
                 'edit_posts' => current_user_can('edit_posts'),
                 'publish_posts' => current_user_can('publish_posts')
-            ),
-            'strings' => $this->get_localized_strings()
+            )
         ));
     }
     
@@ -166,7 +245,7 @@ class FluxSEOScribeCraft {
                 <div class="flux-seo-loading-content">
                     <div class="flux-seo-loading-spinner"></div>
                     <h3>🚀 Loading Flux SEO Scribe Craft</h3>
-                    <p>Initializing professional SEO optimization suite...</p>
+                    <p>Initializing complete SEO optimization suite...</p>
                 </div>
             </div>
         </div>
@@ -181,7 +260,6 @@ class FluxSEOScribeCraft {
             } else {
                 console.log('⏳ Waiting for FluxSEOApp to load...');
                 
-                // Wait for the app to be available
                 let attempts = 0;
                 const maxAttempts = 50;
                 const checkInterval = setInterval(() => {
@@ -210,7 +288,6 @@ class FluxSEOScribeCraft {
             wp_die('Security check failed');
         }
         
-        // Handle AJAX requests from the React app
         $action = isset($_POST['flux_action']) ? sanitize_text_field($_POST['flux_action']) : null;
         $data = isset($_POST['data']) ? stripslashes_deep($_POST['data']) : null;
 
@@ -230,17 +307,28 @@ class FluxSEOScribeCraft {
     
     private function handle_content_analysis($data_json) {
         $data = json_decode($data_json, true);
+        $content = isset($data['content']) ? $data['content'] : '';
+        $language = isset($data['language']) ? $data['language'] : 'en';
         
-        // Mock content analysis
+        // Enhanced analysis
+        $word_count = str_word_count($content);
+        $sentence_count = preg_match_all('/[.!?]+/', $content);
+        $avg_sentence_length = $sentence_count > 0 ? $word_count / $sentence_count : 0;
+        
+        // Calculate scores
+        $seo_score = min(100, max(0, 60 + ($word_count > 300 ? 15 : 0) + ($word_count > 1000 ? 15 : 0)));
+        $readability = max(0, min(100, 100 - ($avg_sentence_length * 2)));
+        
         $analysis = array(
-            'seo_score' => rand(60, 95),
-            'readability' => rand(70, 90),
-            'keyword_density' => rand(2, 8) . '%',
+            'seo_score' => $seo_score,
+            'readability' => round($readability),
+            'keyword_density' => '2.5%',
+            'word_count' => $word_count,
             'suggestions' => array(
-                'Add more internal links',
-                'Optimize meta description',
-                'Include more relevant keywords',
-                'Improve heading structure'
+                $language === 'th' ? 'เพิ่มหัวข้อย่อยเพื่อโครงสร้างที่ดีขึ้น' : 'Add subheadings for better structure',
+                $language === 'th' ? 'เพิ่มลิงก์ภายในไปยังเนื้อหาที่เกี่ยวข้อง' : 'Add internal links to related content',
+                $language === 'th' ? 'ปรับปรุง meta description' : 'Optimize meta description',
+                $language === 'th' ? 'เพิ่มคีย์เวิร์ดที่เกี่ยวข้อง' : 'Include more relevant keywords'
             )
         );
         
@@ -249,77 +337,172 @@ class FluxSEOScribeCraft {
     
     private function handle_content_generation($data_json) {
         $data = json_decode($data_json, true);
+        $api_key = get_option('flux_seo_gemini_api_key', '');
         
-        // Mock content generation
-        $generated_content = array(
-            'title' => 'SEO Optimized Article: ' . (isset($data['topic']) ? sanitize_text_field($data['topic']) : 'N/A'),
-            'content' => 'This is a generated article about ' . (isset($data['topic']) ? sanitize_text_field($data['topic']) : 'N/A') . '. Lorem ipsum dolor sit amet, consectetur adipiscing elit...',
-            'meta_description' => 'Learn about ' . (isset($data['topic']) ? sanitize_text_field($data['topic']) : 'N/A') . ' with our comprehensive guide.',
-            'keywords' => array('seo', 'optimization', (isset($data['topic']) ? sanitize_text_field($data['topic']) : 'N/A'))
+        if (empty($api_key)) {
+            wp_send_json_error('Gemini API key not configured. Please set it in WordPress admin.');
+            return;
+        }
+        
+        $topic = isset($data['topic']) ? sanitize_text_field($data['topic']) : '';
+        $language = isset($data['language']) ? sanitize_text_field($data['language']) : 'en';
+        $keywords = isset($data['keywords']) ? sanitize_text_field($data['keywords']) : '';
+        $tone = isset($data['tone']) ? sanitize_text_field($data['tone']) : 'professional';
+        $word_count = isset($data['wordCount']) ? sanitize_text_field($data['wordCount']) : 'medium';
+        
+        $generated_content = $this->call_gemini_ai($topic, $language, $keywords, $tone, $word_count);
+        
+        if ($generated_content) {
+            // Save to history
+            $this->save_generation_history($topic, $generated_content, $language, $keywords);
+            
+            wp_send_json_success(array(
+                'title' => 'AI Generated: ' . $topic,
+                'content' => $generated_content,
+                'meta_description' => 'AI-generated content about ' . $topic . ' with professional insights and actionable tips.',
+                'keywords' => array_filter(explode(',', $keywords))
+            ));
+        } else {
+            wp_send_json_error('Failed to generate content. Please check your API key and try again.');
+        }
+    }
+    
+    private function call_gemini_ai($topic, $language, $keywords, $tone, $word_count) {
+        $api_key = get_option('flux_seo_gemini_api_key', '');
+        $api_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
+        
+        $word_count_map = array(
+            'short' => '500-800',
+            'medium' => '1000-1500',
+            'long' => '2000-3000'
         );
         
-        wp_send_json_success($generated_content);
-    }
+        $target_words = $word_count_map[$word_count] ?? '1000-1500';
+        
+        $language_instruction = $language === 'th' 
+            ? 'สร้างเนื้อหาเป็นภาษาไทยด้วยไวยากรณ์ที่ถูกต้อง'
+            : 'Create content in native English with proper grammar';
+        
+        $keyword_instruction = !empty($keywords) ? "Target keywords: $keywords" : '';
+        
+        $prompt = "$language_instruction
 
-    public function flux_seo_register_settings() {
-        register_setting(
-            'flux_seo_api_settings_group',
-            'flux_seo_gemini_api_key',
+Create comprehensive content about \"$topic\" with these specifications:
+
+- Language: " . ($language === 'th' ? 'Thai' : 'English') . "
+- Word count: $target_words words
+- Tone: $tone
+- $keyword_instruction
+
+Structure:
+1. Engaging introduction
+2. Main content with H2/H3 headings
+3. Actionable insights
+4. Strong conclusion
+
+Make it SEO-optimized and valuable for readers.";
+
+        $body = array(
+            'contents' => array(
+                array(
+                    'parts' => array(
+                        array('text' => $prompt)
+                    )
+                )
+            ),
+            'generationConfig' => array(
+                'maxOutputTokens' => 4096,
+                'temperature' => 0.8
+            )
+        );
+        
+        $response = wp_remote_post($api_url . '?key=' . $api_key, array(
+            'headers' => array(
+                'Content-Type' => 'application/json',
+            ),
+            'body' => json_encode($body),
+            'timeout' => 90
+        ));
+        
+        if (is_wp_error($response)) {
+            error_log('Gemini AI API Error: ' . $response->get_error_message());
+            return false;
+        }
+        
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body, true);
+        
+        if (isset($data['candidates'][0]['content']['parts'][0]['text'])) {
+            return $data['candidates'][0]['content']['parts'][0]['text'];
+        }
+        
+        return false;
+    }
+    
+    private function save_generation_history($topic, $content, $language, $keywords) {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'flux_seo_generation_history';
+        $word_count = str_word_count($content);
+        
+        $wpdb->insert(
+            $table_name,
             array(
-                'type' => 'string',
-                'sanitize_callback' => 'sanitize_text_field',
-                'default' => ''
+                'topic' => $topic,
+                'content' => $content,
+                'language' => $language,
+                'word_count' => $word_count,
+                'seo_score' => 85, // Default score
+                'keywords' => $keywords,
+                'meta_description' => substr($content, 0, 160),
+                'generated_date' => current_time('mysql')
             )
         );
     }
 
-    public function flux_seo_add_settings_page() {
+    public function register_settings() {
+        register_setting('flux_seo_settings', 'flux_seo_gemini_api_key');
+    }
+
+    public function add_settings_page() {
         add_options_page(
-            'Flux SEO API Key',
-            'Flux SEO API Key',
+            'Flux SEO Settings',
+            'Flux SEO API',
             'manage_options',
-            'flux-seo-api-key-settings',
-            array($this, 'flux_seo_render_settings_page')
+            'flux-seo-settings',
+            array($this, 'render_settings_page')
         );
     }
 
-    public function flux_seo_render_settings_page() {
+    public function render_settings_page() {
         ?>
         <div class="wrap">
-            <h1>Flux SEO Gemini API Key Configuration</h1>
+            <h1>Flux SEO Scribe Craft Settings</h1>
             <form method="post" action="options.php">
                 <?php
-                settings_fields('flux_seo_api_settings_group');
-                do_settings_sections('flux_seo_api_settings_group');
+                settings_fields('flux_seo_settings');
+                do_settings_sections('flux_seo_settings');
                 ?>
                 <table class="form-table">
                     <tr valign="top">
-                        <th scope="row"><label for="flux_seo_gemini_api_key_field">Gemini API Key</label></th>
+                        <th scope="row"><label for="flux_seo_gemini_api_key">Gemini AI API Key</label></th>
                         <td>
-                            <input type="text"
-                                   id="flux_seo_gemini_api_key_field"
+                            <input type="password"
+                                   id="flux_seo_gemini_api_key"
                                    name="flux_seo_gemini_api_key"
                                    value="<?php echo esc_attr(get_option('flux_seo_gemini_api_key')); ?>"
                                    class="regular-text"
                                    placeholder="Enter your Gemini API Key"/>
                             <p class="description">
-                                You can obtain your API key from Google AI Studio.
+                                Get your API key from <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a>.
                             </p>
                         </td>
                     </tr>
                 </table>
-                <?php submit_button('Save API Key'); ?>
+                <?php submit_button('Save Settings'); ?>
             </form>
         </div>
         <?php
-    }
-
-    private function get_localized_strings() {
-        return array(
-            'loading' => __('Loading...', 'flux-seo-scribe-craft'),
-            'error' => __('Error occurred', 'flux-seo-scribe-craft'),
-            'success' => __('Success!', 'flux-seo-scribe-craft'),
-        );
     }
 }
 
@@ -330,22 +513,10 @@ new FluxSEOScribeCraft();
 register_activation_hook(__FILE__, 'flux_seo_activate');
 function flux_seo_activate() {
     add_option('flux_seo_version', FLUX_SEO_PLUGIN_VERSION);
-    
-    if (file_exists(FLUX_SEO_PLUGIN_PATH . 'install.php')) {
-        include_once FLUX_SEO_PLUGIN_PATH . 'install.php';
-    }
 }
 
 // Deactivation hook
 register_deactivation_hook(__FILE__, 'flux_seo_deactivate');
 function flux_seo_deactivate() {
     delete_transient('flux_seo_cache');
-}
-
-// Uninstall hook
-register_uninstall_hook(__FILE__, 'flux_seo_uninstall');
-function flux_seo_uninstall() {
-    if (file_exists(FLUX_SEO_PLUGIN_PATH . 'uninstall.php')) {
-        include_once FLUX_SEO_PLUGIN_PATH . 'uninstall.php';
-    }
 }
