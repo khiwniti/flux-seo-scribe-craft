@@ -1,8 +1,10 @@
 
 import React from 'react';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface BasicFormFieldsProps {
   topic: string;
@@ -13,7 +15,6 @@ interface BasicFormFieldsProps {
   setTone: (value: string) => void;
   wordCount: string;
   setWordCount: (value: string) => void;
-  isGenerating: boolean;
 }
 
 const BasicFormFields = ({
@@ -24,80 +25,87 @@ const BasicFormFields = ({
   tone,
   setTone,
   wordCount,
-  setWordCount,
-  isGenerating
+  setWordCount
 }: BasicFormFieldsProps) => {
+  const { language } = useLanguage();
+
+  const t = (enText: string, thText: string): string => {
+    return language === 'th' ? thText : enText;
+  };
+
   return (
-    <>
+    <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="topic">Blog Topic *</Label>
+        <Label htmlFor="topic" className="text-sm font-medium">
+          {t("Blog Topic *", "หัวข้อบล็อก *")}
+        </Label>
         <Input
           id="topic"
-          placeholder="e.g., Digital Marketing Strategies for 2024"
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
-          disabled={isGenerating}
+          placeholder={t("e.g., Digital Marketing Strategies for 2024", "เช่น กลยุทธ์การตลาดดิจิทัลปี 2024")}
+          className="w-full"
           required
         />
-        {topic && (
-          <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
-            💡 AI will automatically suggest keywords, tone, and audience based on your topic
-          </div>
-        )}
+        <p className="text-xs text-muted-foreground">
+          {t("💡 AI will automatically suggest keywords, tone, and audience based on your topic", "💡 AI จะแนะนำคีย์เวิร์ด ลักษณะน้ำเสียง และกลุ่มเป้าหมายอัตโนมัติตามหัวข้อของคุณ")}
+        </p>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="keywords">Target Keywords</Label>
-        <Input
+        <Label htmlFor="keywords" className="text-sm font-medium">
+          {t("Target Keywords", "คีย์เวิร์ดเป้าหมาย")}
+        </Label>
+        <Textarea
           id="keywords"
-          placeholder="AI will auto-suggest keywords..."
           value={keywords}
           onChange={(e) => setKeywords(e.target.value)}
-          disabled={isGenerating}
+          placeholder={t("AI will auto-suggest keywords...", "AI จะแนะนำคีย์เวิร์ดอัตโนมัติ...")}
+          className="w-full min-h-[80px]"
         />
-        {!keywords && topic && (
-          <div className="text-xs text-green-600">
-            ✨ Keywords will be auto-generated from your topic
-          </div>
-        )}
+        <p className="text-xs text-muted-foreground">
+          {t("✨ Keywords will be auto-generated from your topic", "✨ คีย์เวิร์ดจะถูกสร้างอัตโนมัติจากหัวข้อของคุณ")}
+        </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Writing Tone</Label>
-          <Select value={tone} onValueChange={setTone} disabled={isGenerating}>
+          <Label htmlFor="tone" className="text-sm font-medium">
+            {t("Writing Tone", "ลักษณะการเขียน")}
+          </Label>
+          <Select value={tone} onValueChange={setTone}>
             <SelectTrigger>
-              <SelectValue placeholder="AI will auto-detect..." />
+              <SelectValue placeholder={t("AI will auto-detect...", "AI จะตรวจจับอัตโนมัติ...")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="professional">Professional</SelectItem>
-              <SelectItem value="casual">Casual</SelectItem>
-              <SelectItem value="authoritative">Authoritative</SelectItem>
-              <SelectItem value="conversational">Conversational</SelectItem>
+              <SelectItem value="professional">{t("Professional", "เป็นทางการ")}</SelectItem>
+              <SelectItem value="casual">{t("Casual", "เป็นกันเอง")}</SelectItem>
+              <SelectItem value="authoritative">{t("Authoritative", "น่าเชื่อถือ")}</SelectItem>
+              <SelectItem value="conversational">{t("Conversational", "เชิงสนทนา")}</SelectItem>
             </SelectContent>
           </Select>
-          {!tone && (
-            <div className="text-xs text-purple-600">
-              🎯 Tone auto-detected from content
-            </div>
-          )}
+          <p className="text-xs text-muted-foreground">
+            {t("🎯 Tone auto-detected from content", "🎯 ลักษณะน้ำเสียงตรวจจับอัตโนมัติจากเนื้อหา")}
+          </p>
         </div>
 
         <div className="space-y-2">
-          <Label>Word Count</Label>
-          <Select value={wordCount} onValueChange={setWordCount} disabled={isGenerating}>
+          <Label htmlFor="wordCount" className="text-sm font-medium">
+            {t("Word Count", "จำนวนคำ")}
+          </Label>
+          <Select value={wordCount} onValueChange={setWordCount}>
             <SelectTrigger>
-              <SelectValue placeholder="Select length" />
+              <SelectValue placeholder={t("Select length", "เลือกความยาว")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="short">Short (500-800 words)</SelectItem>
-              <SelectItem value="medium">Medium (800-1200 words)</SelectItem>
-              <SelectItem value="long">Long (1200-2000 words)</SelectItem>
+              <SelectItem value="short">{t("Short (500-800 words)", "สั้น (500-800 คำ)")}</SelectItem>
+              <SelectItem value="medium">{t("Medium (800-1200 words)", "ปานกลาง (800-1200 คำ)")}</SelectItem>
+              <SelectItem value="long">{t("Long (1200-2000 words)", "ยาว (1200-2000 คำ)")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

@@ -1,19 +1,27 @@
 
 import React from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ErrorDisplayProps {
-  error: string | null;
+  error: string;
 }
 
 const ErrorDisplay = ({ error }: ErrorDisplayProps) => {
-  if (!error) return null;
+  const { language } = useLanguage();
+
+  const t = (enText: string, thText: string): string => {
+    return language === 'th' ? thText : enText;
+  };
 
   return (
-    <div className="mt-4 p-3 text-sm bg-red-100 border border-red-300 text-red-700 rounded-md flex items-center gap-2">
-      <AlertTriangle className="h-5 w-5 flex-shrink-0" />
-      {error}
-    </div>
+    <Alert variant="destructive">
+      <AlertCircle className="h-4 w-4" />
+      <AlertDescription>
+        <strong>{t("Error:", "ข้อผิดพลาด:")}</strong> {error}
+      </AlertDescription>
+    </Alert>
   );
 };
 
