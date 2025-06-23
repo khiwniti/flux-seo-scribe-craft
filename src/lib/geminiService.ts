@@ -1,4 +1,3 @@
-
 // Modified to work in both WordPress and standalone React environments
 
 const DEFAULT_MODEL_NAME = "gemini-pro";
@@ -12,8 +11,8 @@ interface GeminiServiceError extends Error {
 // Check if we're in WordPress environment
 const isWordPressEnvironment = (): boolean => {
   return typeof window !== 'undefined' && 
-         window.fluxSeoAppData && 
-         window.fluxSeoAppData.proxy_endpoint;
+         !!window.fluxSeoAppData && 
+         !!window.fluxSeoAppData.proxy_endpoint;
 };
 
 // Access WordPress localized data (only in WordPress)
