@@ -1,301 +1,195 @@
 
-# 🚀 Flux SEO Scribe Craft - WordPress Plugin
+# Flux SEO Scribe Craft WordPress Plugin
 
-## 📋 Overview
+## Complete AI-Powered SEO Optimization Suite
 
-**Flux SEO Scribe Craft** is a comprehensive WordPress plugin that embeds a powerful React-based SEO optimization suite directly into your WordPress dashboard. This plugin provides professional-grade SEO tools, content analysis, and AI-powered content generation capabilities.
+A comprehensive WordPress plugin that brings the full power of Flux SEO Scribe Craft directly to your WordPress dashboard. This plugin includes all features from the original React application, fully integrated with WordPress.
 
-## ✨ Features
+## 🚀 Features
 
-### 🎯 Core Functionality
-- **Content Analyzer**: Real-time SEO analysis with scoring and suggestions
-- **Blog & Image Generator**: AI-powered content creation with SEO optimization
-- **Advanced Analytics**: Comprehensive performance tracking and insights
-- **WordPress Integration**: Seamless admin dashboard integration
-- **Shortcode Support**: Embed functionality anywhere on your site
+### Content Analysis & Generation
+- **AI Content Analyzer** - Real-time SEO analysis with scoring
+- **Smart Content Generator** - AI-powered content creation with Gemini AI
+- **Multi-language Support** - Full English and Thai language support
+- **Content Quality Metrics** - Readability, keyword density, and SEO scoring
 
-### 🛠️ Technical Features
-- **React-based Interface**: Modern, responsive user interface
-- **AJAX Integration**: Smooth, fast interactions without page reloads
-- **WordPress Standards**: Follows WordPress coding and security standards
-- **Multi-user Support**: User capability management
-- **Database Integration**: Automatic table creation and management
-- **Responsive Design**: Works perfectly on all devices
+### SEO Tools Suite
+- **Analytics Dashboard** - Comprehensive SEO performance tracking
+- **Keyword Research** - Advanced keyword analysis and suggestions
+- **Meta Tags Manager** - Automated meta tag optimization
+- **Schema Markup Generator** - Structured data generation
+- **Technical SEO Audit** - Complete technical SEO analysis
+- **AI SEO Chatbot** - Interactive SEO assistant
 
-## 🔧 Installation
+### WordPress Integration
+- **Admin Dashboard** - Full-featured admin interface
+- **Shortcode Support** - Embed tools anywhere with `[flux_seo_scribe_craft]`
+- **Content Saving** - Direct integration with WordPress posts
+- **REST API Endpoints** - Full API integration
+- **Database Integration** - Analytics and content storage
 
-### Method 1: WordPress Admin Upload
+## 📦 Installation
+
+### Method 1: Upload ZIP File
 1. Download the plugin ZIP file
-2. Go to **WordPress Admin > Plugins > Add New > Upload Plugin**
-3. Choose the ZIP file and click **Install Now**
-4. Click **Activate Plugin**
+2. Go to WordPress Admin → Plugins → Add New → Upload Plugin
+3. Choose the ZIP file and click "Install Now"
+4. Activate the plugin
 
 ### Method 2: Manual Installation
-1. Extract the plugin ZIP file
-2. Upload the entire `flux-seo-scribe-craft` folder to `/wp-content/plugins/`
-3. Activate the plugin through the **Plugins** menu in WordPress
-
-## 🎮 Usage
-
-### Admin Dashboard Access
-After activation, you'll find a new menu item in your WordPress admin:
-- Navigate to **SEO Scribe Craft** in the WordPress admin sidebar
-- Access the full-featured SEO suite with three main sections:
-  - **📊 Content Analyzer**
-  - **✍️ Blog & Image Generator** 
-  - **📈 Advanced Analytics**
-
-### Shortcode Integration
-Embed the SEO tools on any page or post using shortcodes:
-
-```html
-<!-- Basic embedding -->
-[flux_seo_scribe_craft]
-
-<!-- Custom dimensions -->
-[flux_seo_scribe_craft height="600px" width="90%"]
-```
-
-## 📊 Main Features
-
-### Content Analyzer
-- **SEO Scoring**: Comprehensive analysis of your content
-- **Readability Assessment**: Ensure your content is accessible
-- **Keyword Density Analysis**: Optimize keyword usage
-- **Improvement Suggestions**: Actionable recommendations
-- **Real-time Analysis**: Instant feedback as you type
-
-### Blog & Image Generator
-- **AI-Powered Content Creation**: Generate high-quality blog posts
-- **SEO-Optimized Output**: Automatically optimized for search engines  
-- **Meta Information**: Automatic title, description, and keyword generation
-- **Multiple Formats**: Support for various content types
-- **Customizable Parameters**: Control tone, length, and style
-
-### Advanced Analytics
-- **Performance Tracking**: Monitor your SEO improvements
-- **Keyword Analysis**: Track top-performing keywords
-- **Activity History**: View recent optimizations and changes
-- **Statistical Overview**: Comprehensive dashboard metrics
-- **Progress Monitoring**: Track improvements over time
-
-## 🔐 Security Features
-
-- **Nonce Verification**: All AJAX requests are secured with WordPress nonces
-- **Capability Checks**: User permissions are properly validated
-- **Data Sanitization**: All input data is sanitized and validated
-- **WordPress Standards**: Follows WordPress security best practices
-- **SQL Injection Protection**: All database queries are properly prepared
-
-## 🗃️ Database Management
-
-The plugin automatically creates and manages the following database tables:
-- `wp_flux_seo_analysis` - Stores SEO analysis results
-- `wp_flux_seo_generated_content` - Stores generated content
-- `wp_flux_seo_settings` - Plugin configuration settings
-
-### Automatic Cleanup
-- Complete removal of all data during uninstallation
-- Proper database table cleanup
-- WordPress option cleanup
-- Transient data removal
+1. Extract the plugin files
+2. Upload the `flux-seo-scribe-craft` folder to `/wp-content/plugins/`
+3. Activate the plugin through the WordPress admin
 
 ## ⚙️ Configuration
 
-### Plugin Settings
-Access plugin settings through:
-- **WordPress Admin > Settings > Flux SEO API Key**
-- Configure API keys for enhanced functionality
-- Manage user permissions and capabilities
+### API Key Setup
+1. Go to WordPress Admin → Flux SEO → Settings
+2. Enter your Gemini API key
+3. Get your API key from: https://aistudio.google.com/app/apikey
+4. Save settings
 
-### User Capabilities
-The plugin respects WordPress user roles:
-- **Administrator**: Full access to all features
-- **Editor**: Content generation and analysis
-- **Author**: Basic content analysis
-- **Contributor**: View-only access
+### Usage
 
-## 🎨 Customization
+#### Admin Dashboard
+Access the full SEO suite:
+```
+WordPress Admin →  Flux SEO
+```
 
-### Styling
-The plugin includes comprehensive CSS that can be customized:
-- Modern gradient backgrounds
-- Responsive design elements
-- WordPress admin theme compatibility
-- High contrast and accessibility support
+#### Shortcode Usage
+Embed anywhere on your site:
+```html
+[flux_seo_scribe_craft]
+[flux_seo_scribe_craft height="600px" width="100%" tab="generator"]
+```
 
-### WordPress Compatibility
-- **WordPress Version**: 5.0+
-- **PHP Version**: 7.4+
-- **Browser Support**: All modern browsers
-- **Theme Compatibility**: Works with any WordPress theme
+**Shortcode Parameters:**
+- `height` - Container height (default: 800px)
+- `width` - Container width (default: 100%)
+- `tab` - Default tab to show (analyzer, generator, analytics, etc.)
 
-## 🚀 Performance
+## 🎯 Available Tabs
 
-### Optimizations
-- **Lazy Loading**: Components load only when needed
-- **Efficient AJAX**: Minimal server requests
-- **Caching Support**: WordPress transient API integration
-- **Minified Assets**: Optimized CSS and JavaScript
-- **CDN Ready**: Assets can be served from CDN
+1. **Content Analyzer** - Analyze existing content for SEO optimization
+2. **Content Generator** - Generate AI-powered content with customizable parameters
+3. **Analytics** - View SEO performance metrics and insights
+4. **Keywords** - Research and manage target keywords
+5. **Meta Tags** - Optimize meta descriptions and titles
+6. **Schema** - Generate structured data markup
+7. **Technical** - Perform technical SEO audits
+8. **Chatbot** - Interactive AI SEO assistant
 
-### Resource Usage
-- **Memory Footprint**: Minimal memory usage
-- **Database Queries**: Optimized query performance
-- **File Size**: Compressed assets for fast loading
-- **Server Load**: Efficient PHP execution
+## 🔧 Technical Details
 
-## 🛠️ Development
+### System Requirements
+- WordPress 5.0+
+- PHP 7.4+
+- Modern browser with JavaScript enabled
+- Gemini API key for AI features
 
 ### File Structure
 ```
 flux-seo-scribe-craft/
-├── flux-seo-scribe-craft.php          # Main plugin file
-├── flux-seo-scribe-craft.css          # Plugin styles
-├── flux-seo-wordpress-app.js           # React application
-├── wordpress-overrides.css            # WordPress-specific styles
-├── install.php                        # Installation script
-├── uninstall.php                      # Cleanup script
-└── README.md                          # Documentation
+├── flux-seo-scribe-craft.php    # Main plugin file
+├── assets/
+│   ├── flux-seo-complete-app.js # Complete React application
+│   └── flux-seo-styles.css      # All styling
+├── README.md                     # This documentation
+└── languages/                    # Translation files
 ```
 
-### Hooks and Filters
-The plugin provides several hooks for customization:
-- `flux_seo_before_analysis` - Before content analysis
-- `flux_seo_after_generation` - After content generation
-- `flux_seo_settings_updated` - When settings are saved
+### REST API Endpoints
+- `POST /wp-json/flux-seo/v1/gemini-proxy` - Gemini AI proxy
+- `POST /wp-json/flux-seo/v1/analyze-content` - Content analysis
+- `POST /wp-json/flux-seo/v1/save-content` - Save generated content
 
-### AJAX Actions
-Available AJAX endpoints:
-- `wp_ajax_flux_seo_proxy` - Main AJAX handler
-- `flux_seo_analyze_content` - Content analysis
-- `flux_seo_generate_content` - Content generation
+### Database Tables
+- `wp_flux_seo_analytics` - SEO analysis results and metrics
 
-## 📱 Mobile Support
+## 🌍 Language Support
 
-### Responsive Design
-- **Mobile-First**: Optimized for mobile devices
-- **Touch-Friendly**: Large, accessible buttons and inputs
-- **Adaptive Layout**: Adjusts to any screen size
-- **Fast Loading**: Optimized for mobile networks
+The plugin supports both English and Thai languages with a built-in language switcher. All UI elements, messages, and content are fully translated.
 
-### iOS/Android Compatibility
-- **Viewport Optimization**: Proper mobile viewport settings
-- **Input Handling**: Prevents unwanted zoom on form focus
-- **Gesture Support**: Native touch gesture support
-- **Performance**: Optimized for mobile browsers
+## 🎨 Customization
 
-## 🔍 SEO Benefits
+### Styling
+The plugin includes comprehensive CSS that works with any WordPress theme. Styles are responsive and optimized for both frontend and admin use.
 
-### On-Page Optimization
-- **Meta Tag Management**: Automatic meta tag optimization
-- **Schema Markup**: Structured data generation
-- **Internal Linking**: Smart link suggestions
-- **Image Optimization**: Alt text and SEO recommendations
-- **Heading Structure**: H1-H6 optimization guidance
+### WordPress Admin Integration
+- Custom admin menu with full dashboard
+- Settings page for API configuration
+- Native WordPress styling compatibility
+- Responsive design for mobile admin
 
-### Content Enhancement
-- **Keyword Research**: AI-powered keyword suggestions
-- **Content Gap Analysis**: Identify missing content opportunities
-- **Competitor Analysis**: Understand competitive landscape
-- **Readability Optimization**: Improve content accessibility
-- **Content Quality Scores**: Measure and improve content quality
+## 🔒 Security Features
 
-## 🆘 Troubleshooting
+- WordPress nonce verification
+- Capability checks for user permissions
+- Input sanitization and validation
+- Secure API key storage
+- CSRF protection on all forms
+
+## 📊 Analytics & Reporting
+
+Track your SEO performance with:
+- Content analysis history
+- SEO score tracking
+- Keyword performance metrics
+- Content generation analytics
+- Usage statistics
+
+## 🚀 Performance
+
+- Optimized React application (766KB minified)
+- Lazy loading for better performance
+- CDN fallback for React libraries
+- Efficient database queries
+- Caching-friendly architecture
+
+## 🆘 Support & Troubleshooting
 
 ### Common Issues
 
-#### Plugin Not Loading
-1. Check if WordPress version is 5.0+
-2. Verify PHP version is 7.4+
-3. Ensure JavaScript is enabled in browser
-4. Check for plugin conflicts
+1. **API Key Errors**
+   - Ensure you have a valid Gemini API key
+   - Check the key is correctly entered in settings
+   - Verify API key has appropriate permissions
 
-#### AJAX Errors
-1. Verify nonce values are being passed correctly
-2. Check server error logs for PHP errors
-3. Ensure user has proper capabilities
-4. Verify WordPress AJAX URL is accessible
+2. **Loading Issues**
+   - Check browser console for JavaScript errors
+   - Ensure React libraries are loading correctly
+   - Verify WordPress jQuery is available
 
-#### Styling Issues
-1. Check for theme CSS conflicts
-2. Verify plugin CSS is loading properly
-3. Clear browser cache and WordPress cache
-4. Check for JavaScript console errors
+3. **Content Not Saving**
+   - Check user permissions for post creation
+   - Verify database connections
+   - Check for plugin conflicts
 
 ### Debug Mode
 Enable WordPress debug mode for detailed error information:
 ```php
 define('WP_DEBUG', true);
 define('WP_DEBUG_LOG', true);
-define('WP_DEBUG_DISPLAY', false);
 ```
 
-## 📞 Support
+## 📄 License
 
-### Getting Help
-- **Documentation**: Comprehensive guides included
-- **Error Logging**: Built-in error logging and reporting
-- **Debug Information**: Detailed system information available
-- **WordPress Standards**: Follows WordPress best practices
-
-### Bug Reports
-When reporting bugs, please include:
-- WordPress version
-- PHP version
-- Active theme and plugins
-- Error messages or console logs
-- Steps to reproduce the issue
+This plugin is licensed under GPL v2 or later.
 
 ## 🔄 Updates
 
-### Automatic Updates
-- **Version Check**: Automatic update notifications
-- **Backward Compatibility**: Maintains compatibility with older versions
-- **Database Migration**: Automatic database updates when needed
-- **Settings Preservation**: User settings maintained during updates
+The plugin includes automatic update notifications. Always backup your site before updating.
 
-### Manual Updates
-1. Deactivate the current plugin
-2. Upload the new version
-3. Activate the updated plugin
-4. Check for any database updates needed
+## 🤝 Contributing
 
-## 📜 License
+For bug reports, feature requests, or contributions, please contact the development team.
 
-This plugin is licensed under the GPL v2 or later.
+---
 
-```
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+**Version:** 2.0.0  
+**Tested up to:** WordPress 6.4  
+**Requires PHP:** 7.4+  
+**License:** GPL v2 or later  
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-```
-
-## 🎯 Roadmap
-
-### Upcoming Features
-- **Advanced AI Integration**: Enhanced content generation capabilities
-- **Multi-language Support**: Internationalization and localization
-- **API Integrations**: Connect with popular SEO tools
-- **Advanced Analytics**: More detailed performance metrics
-- **Team Collaboration**: Multi-user workflow features
-
-### Version History
-- **v1.0.0**: Initial release with core functionality
-- **v1.0.1**: Bug fixes and performance improvements (planned)
-- **v1.1.0**: Enhanced AI features (planned)
-- **v2.0.0**: Major feature expansion (planned)
-
-## 🏁 Conclusion
-
-Flux SEO Scribe Craft represents a powerful, modern approach to WordPress SEO optimization. By combining the flexibility of React with the stability of WordPress, it provides a professional-grade SEO suite that's both powerful and easy to use.
-
-Whether you're a content creator, SEO professional, or website owner, this plugin provides the tools you need to optimize your content, improve your search rankings, and grow your online presence.
-
-**Ready to transform your SEO workflow? Install Flux SEO Scribe Craft today!** 🚀
+Transform your WordPress SEO workflow with AI-powered content generation and comprehensive optimization tools!
