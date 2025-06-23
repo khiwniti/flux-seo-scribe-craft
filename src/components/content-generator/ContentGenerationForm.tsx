@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Wand2, Brain } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import BasicFormFields from './BasicFormFields';
 import EnhancedAISettings from './EnhancedAISettings';
 import AIFeaturesBadges from './AIFeaturesBadges';
@@ -56,7 +56,7 @@ const ContentGenerationForm = ({
   onGenerate,
   error,
 }: ContentGenerationFormProps) => {
-  const { language } = useLanguage(); // Import and use language context
+  const { language } = useLanguage();
 
   const t = (enText: string, thText: string): string => {
     return language === 'th' ? thText : enText;
