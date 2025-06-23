@@ -1,0 +1,92 @@
+/* Flux SEO Admin Styles */
+.flux-seo-dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.flux-seo-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.flux-seo-card h2 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.flux-seo-textarea {
+    width: 100%;
+    min-height: 150px;
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Settings page styles */
+.flux-seo-settings-section {
+    margin-bottom: 30px;
+}
+
+.flux-seo-settings-section h2 {
+    font-size: 1.3em;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #eee;
+}
+
+/* Dashboard widgets */
+.flux-seo-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.flux-seo-stat-card {
+    flex: 1;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-right: 15px;
+    text-align: center;
+}
+
+.flux-seo-stat-card:last-child {
+    margin-right: 0;
+}
+
+.flux-seo-stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #0073aa;
+    margin: 10px 0;
+}
+
+.flux-seo-stat-label {
+    color: #666;
+    font-size: 14px;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 782px) {
+    .flux-seo-dashboard {
+        grid-template-columns: 1fr;
+    }
+    
+    .flux-seo-stats {
+        flex-direction: column;
+    }
+    
+    .flux-seo-stat-card {
+        margin-right: 0;
+        margin-bottom: 15px;
+    }
+}
