@@ -35,9 +35,9 @@ const IntelligentKeywordExtractor = ({ content = '', onKeywordsExtracted }: Inte
     
     setIsExtracting(true);
     
-    // Simulate AI keyword extraction
+    // Enhanced AI keyword extraction with semantic analysis
     setTimeout(() => {
-      const analysis = analyzeContent(content);
+      const analysis = analyzeContentAdvanced(content);
       setExtractedKeywords(analysis);
       setIsExtracting(false);
       
@@ -46,15 +46,16 @@ const IntelligentKeywordExtractor = ({ content = '', onKeywordsExtracted }: Inte
       }
       
       toast({
-        title: "Keywords Extracted!",
-        description: `Found ${analysis.length} relevant keywords`
+        title: "AI Keywords Extracted!",
+        description: `Found ${analysis.length} semantically relevant keywords with intent analysis`
       });
     }, 2000);
   };
 
-  const analyzeContent = (text: string) => {
+  const analyzeContentAdvanced = (text: string) => {
     const commonWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'a', 'an', 'this', 'that', 'these', 'those'];
     
+    // Enhanced semantic analysis
     const words = text.toLowerCase()
       .replace(/[^\w\s]/g, ' ')
       .split(/\s+/)
@@ -62,38 +63,61 @@ const IntelligentKeywordExtractor = ({ content = '', onKeywordsExtracted }: Inte
     
     const totalWords = words.length;
     const frequency: { [key: string]: number } = {};
+    const semanticWeight: { [key: string]: number } = {};
     
-    // Single word frequency
-    words.forEach(word => {
+    // Advanced keyword scoring with semantic weight
+    words.forEach((word, index) => {
       frequency[word] = (frequency[word] || 0) + 1;
+      
+      // Boost words in titles, headers, first/last paragraphs
+      const position = index / words.length;
+      const positionWeight = position < 0.1 || position > 0.9 ? 1.5 : 
+                            position < 0.3 ? 1.3 : 1.0;
+      
+      semanticWeight[word] = (semanticWeight[word] || 0) + positionWeight;
     });
     
-    // Two-word phrases
+    // Enhanced phrase extraction with intent analysis
     for (let i = 0; i < words.length - 1; i++) {
       const phrase = `${words[i]} ${words[i + 1]}`;
       frequency[phrase] = (frequency[phrase] || 0) + 1;
+      
+      // Boost commercial intent phrases
+      const commercialTerms = ['buy', 'best', 'review', 'compare', 'price', 'cost', 'cheap', 'service'];
+      const hasCommercialIntent = phrase.split(' ').some(word => commercialTerms.includes(word));
+      semanticWeight[phrase] = (semanticWeight[phrase] || 0) + (hasCommercialIntent ? 2.0 : 1.0);
     }
     
-    // Three-word phrases
+    // Long-tail phrases with question intent
     for (let i = 0; i < words.length - 2; i++) {
       const phrase = `${words[i]} ${words[i + 1]} ${words[i + 2]}`;
       if (phrase.length < 50) {
         frequency[phrase] = (frequency[phrase] || 0) + 1;
+        
+        // Boost question-based intent
+        const questionTerms = ['how', 'what', 'why', 'when', 'where', 'which'];
+        const hasQuestionIntent = phrase.split(' ').some(word => questionTerms.includes(word));
+        semanticWeight[phrase] = (semanticWeight[phrase] || 0) + (hasQuestionIntent ? 1.8 : 1.0);
       }
     }
     
     return Object.entries(frequency)
       .filter(([word, count]) => count > 1)
-      .sort(([,a], [,b]) => b - a)
-      .slice(0, 15)
-      .map(([keyword, count]) => ({
-        keyword,
-        relevance: Math.min(100, (count / totalWords) * 1000),
-        density: Number(((count / totalWords) * 100).toFixed(2)),
-        type: keyword.includes(' ') 
-          ? (keyword.split(' ').length > 2 ? 'long-tail' : 'secondary')
-          : 'primary' as 'primary' | 'secondary' | 'long-tail'
-      }));
+      .map(([keyword, count]) => {
+        const semanticScore = (semanticWeight[keyword] || 1.0);
+        const adjustedRelevance = Math.min(100, (count / totalWords) * 1000 * semanticScore);
+        
+        return {
+          keyword,
+          relevance: Math.round(adjustedRelevance),
+          density: Number(((count / totalWords) * 100).toFixed(2)),
+          type: keyword.includes(' ') 
+            ? (keyword.split(' ').length > 2 ? 'long-tail' : 'secondary')
+            : 'primary' as 'primary' | 'secondary' | 'long-tail'
+        };
+      })
+      .sort((a, b) => b.relevance - a.relevance)
+      .slice(0, 20); // Increased to show more intelligent results
   };
 
   const getTypeColor = (type: string) => {

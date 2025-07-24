@@ -13,7 +13,10 @@ import SmartKeywordResearch from './SmartKeywordResearch';
 import SettingsTab from './SettingsTab';
 import SEOChatbot from './SEOChatbot';
 import LanguageSwitcher from './LanguageSwitcher';
-import { MessageCircle } from 'lucide-react';
+import AdvancedSEOIntelligence from './seo/AdvancedSEOIntelligence';
+import SEOAutomationEngine from './seo/SEOAutomationEngine';
+import IntelligentKeywordExtractor from './seo/IntelligentKeywordExtractor';
+import { MessageCircle, Bot, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext'; // Import useLanguage
 
 const SEODashboard = () => {
@@ -31,6 +34,8 @@ const SEODashboard = () => {
       badgeTechnicalSEO: "Technical SEO",
       badgeSchemaMarkup: "Schema Markup",
       badgeKeywordResearch: "Keyword Research",
+      badgeAIIntelligence: "AI Intelligence",
+      badgeAutomation: "24/7 Automation",
       badgeLangSupport: "Thai/English Support",
       tabAnalyzer: "Analyzer",
       tabGenerator: "Generator",
@@ -60,6 +65,8 @@ const SEODashboard = () => {
       badgeTechnicalSEO: "SEO เชิงเทคนิค",
       badgeSchemaMarkup: "Schema Markup", // Technical term
       badgeKeywordResearch: "วิจัยคีย์เวิร์ด",
+      badgeAIIntelligence: "ปัญญาประดิษฐ์",
+      badgeAutomation: "ระบบอัตโนมัติ 24/7",
       badgeLangSupport: "รองรับไทย/อังกฤษ", // Translated
       tabAnalyzer: "เครื่องมือวิเคราะห์",
       tabGenerator: "เครื่องมือสร้าง",
@@ -111,6 +118,8 @@ const SEODashboard = () => {
             <Badge variant="secondary" className="bg-orange-100 text-orange-700">{t.badgeTechnicalSEO}</Badge>
             <Badge variant="secondary" className="bg-indigo-100 text-indigo-700">{t.badgeSchemaMarkup}</Badge>
             <Badge variant="secondary" className="bg-pink-100 text-pink-700">{t.badgeKeywordResearch}</Badge>
+            <Badge variant="secondary" className="bg-cyan-100 text-cyan-700">{t.badgeAIIntelligence}</Badge>
+            <Badge variant="secondary" className="bg-violet-100 text-violet-700">{t.badgeAutomation}</Badge>
             <Badge variant="secondary" className="bg-teal-100 text-teal-700">{t.badgeLangSupport}</Badge>
           </div>
         </div>
@@ -118,7 +127,7 @@ const SEODashboard = () => {
         {/* Main Dashboard */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="mb-8 bg-white/70 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-white/20">
-            <TabsList className="grid w-full h-auto bg-transparent p-1 gap-1" style={{ gridTemplateColumns: 'repeat(9, 1fr)' }}>
+            <TabsList className="grid w-full h-auto bg-transparent p-1 gap-1" style={{ gridTemplateColumns: 'repeat(11, 1fr)' }}>
               <TabsTrigger 
                 value="analyzer" 
                 className="flex items-center justify-center gap-2 text-sm px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-md transition-all duration-200"
@@ -184,6 +193,22 @@ const SEODashboard = () => {
                 <span className="md:hidden">{t.mobileTabChatbot}</span>
               </TabsTrigger>
               <TabsTrigger
+                value="intelligence"
+                className="flex items-center justify-center gap-2 text-sm px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-md transition-all duration-200"
+              >
+                <Sparkles className="h-4 w-4" />
+                <span className="hidden md:inline">AI Intel</span>
+                <span className="md:hidden">AI</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="automation"
+                className="flex items-center justify-center gap-2 text-sm px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-md transition-all duration-200"
+              >
+                <Bot className="h-4 w-4" />
+                <span className="hidden md:inline">Auto</span>
+                <span className="md:hidden">Auto</span>
+              </TabsTrigger>
+              <TabsTrigger
                 value="settings"
                 className="flex items-center justify-center gap-2 text-sm px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-md transition-all duration-200"
               >
@@ -221,6 +246,14 @@ const SEODashboard = () => {
 
             <TabsContent value="technical" className="mt-0">
               <TechnicalSEOAudit />
+            </TabsContent>
+
+            <TabsContent value="intelligence" className="mt-0">
+              <AdvancedSEOIntelligence />
+            </TabsContent>
+
+            <TabsContent value="automation" className="mt-0">
+              <SEOAutomationEngine />
             </TabsContent>
 
             <TabsContent value="settings" className="mt-0">
